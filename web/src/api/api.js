@@ -44,6 +44,7 @@ export const authApi = {
   login:          (payload)              => api.post('/auth/login', payload),
   logout:         ()                     => api.post('/auth/logout'),
   completeOAuth2: (pendingToken, role)   => api.post('/auth/oauth2/complete', { pendingToken, role }),
+  me:             ()                     => api.get('/auth/me'),
 };
 
 export default api;

@@ -19,7 +19,7 @@ export default function AuthCallback() {
 
     if (token) {
       localStorage.setItem('medigo_token', token);
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true, state: { justLoggedIn: true } });
     } else if (pending) {
       // New user — redirect to role selection, keeping the pending token in the URL
       navigate(`/auth/select-role?pending=${encodeURIComponent(pending)}`, { replace: true });

@@ -34,7 +34,7 @@ export default function SelectRole() {
     try {
       const res = await authApi.completeOAuth2(pendingToken, role);
       localStorage.setItem('medigo_token', res.data.data?.token);
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true, state: { justLoggedIn: true } });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
         setApiError(err.response.data.error?.message ?? 'Something went wrong. Please try again.');

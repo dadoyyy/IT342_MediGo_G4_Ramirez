@@ -108,6 +108,21 @@ public class AuthService {
         return buildAuthResponse(saved, token);
     }
 
+    // ── Current user ─────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public UserDto getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email.toLowerCase())
+                .orElseThrow(InvalidCredentialsException::new);
+        return UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+
     // ── Private Helpers ───────────────────────────────────────────────────────
 
     private AuthResponse buildAuthResponse(User user, String token) {

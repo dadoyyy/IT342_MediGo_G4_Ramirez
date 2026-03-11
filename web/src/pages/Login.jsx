@@ -37,7 +37,7 @@ export default function Login() {
     try {
       const res = await authApi.login({ email: form.email.trim(), password: form.password });
       localStorage.setItem('medigo_token', res.data.data?.token);
-      navigate('/dashboard');
+      navigate('/dashboard', { state: { justLoggedIn: true } });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
         setApiError(err.response.data.error?.message ?? 'Login failed. Please try again.');

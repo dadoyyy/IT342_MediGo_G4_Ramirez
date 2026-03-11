@@ -81,4 +81,15 @@ public class AuthController {
         AuthResponse authResponse = authService.completeGoogleRegistration(email, name, role);
         return ApiResponse.ok(authResponse);
     }
+
+    /**
+     * Returns the currently authenticated user's profile.
+     * Requires a valid Bearer JWT.
+     */
+    @GetMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<UserDto> me(java.security.Principal principal) {
+        UserDto userDto = authService.getCurrentUser(principal.getName());
+        return ApiResponse.ok(userDto);
+    }
 }
