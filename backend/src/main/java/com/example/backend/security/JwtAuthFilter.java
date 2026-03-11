@@ -26,6 +26,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -41,6 +42,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String jwt = authHeader.substring(7);
+
+        if (tokenBlacklistService.isRevoked(jwt)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Token has been revoked\"}");
+            return;
+        }
 
         try {
             String email = jwtUtil.extractEmail(jwt);

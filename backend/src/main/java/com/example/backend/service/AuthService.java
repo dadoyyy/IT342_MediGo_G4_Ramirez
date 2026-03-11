@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 /**
  * Business logic for registration and login.
  */
@@ -60,6 +62,50 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail());
 
         return buildAuthResponse(user, token);
+    }
+
+    // ── OAuth2 (Google) ───────────────────────────────────────────────────────
+
+    /**
+     * Called after Google authentication.
+     * Returns the user's JWT if the account already exists,
+     * or empty if this is a brand-new user who must still choose a role.
+     */
+    @Transactional
+    public Optional<AuthResponse> loginWithGoogle(String email, String name) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email not provided by Google OAuth2");
+        }
+        return userRepository.findByEmail(email.toLowerCase())
+                .map(user -> {
+                    String token = jwtUtil.generateToken(user.getEmail());
+                    return buildAuthResponse(user, token);
+                });
+    }
+
+    /**
+     * Completes registration for a first-time Google user after they have
+     * chosen their role on the frontend.
+     */
+    @Transactional
+    public AuthResponse completeGoogleRegistration(String email, String name, String role) {
+        if (userRepository.existsByEmail(email.toLowerCase())) {
+            // Race condition edge case — user already exists, just log them in
+            User existing = userRepository.findByEmail(email.toLowerCase()).orElseThrow();
+            String token = jwtUtil.generateToken(existing.getEmail());
+            return buildAuthResponse(existing, token);
+        }
+
+        User user = User.builder()
+                .email(email.toLowerCase())
+                .passwordHash("")
+                .fullName(name != null && !name.isBlank() ? name : email)
+                .role(role.toUpperCase())
+                .build();
+
+        User saved = userRepository.save(user);
+        String token = jwtUtil.generateToken(saved.getEmail());
+        return buildAuthResponse(saved, token);
     }
 
     // ── Private Helpers ───────────────────────────────────────────────────────

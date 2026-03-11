@@ -40,8 +40,10 @@ api.interceptors.response.use(
 // ─── Auth endpoints ────────────────────────────────────────────────────────
 
 export const authApi = {
-  register: (payload) => api.post('/auth/register', payload),
-  login:    (payload) => api.post('/auth/login', payload),
+  register:       (payload)              => api.post('/auth/register', payload),
+  login:          (payload)              => api.post('/auth/login', payload),
+  logout:         ()                     => api.post('/auth/logout'),
+  completeOAuth2: (pendingToken, role)   => api.post('/auth/oauth2/complete', { pendingToken, role }),
 };
 
 export default api;

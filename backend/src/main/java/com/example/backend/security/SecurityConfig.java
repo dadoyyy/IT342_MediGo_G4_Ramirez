@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -31,6 +30,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
+    private final PasswordEncoder passwordEncoder;
+    private final CustomOAuth2AuthorizationRequestResolver authorizationRequestResolver;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,26 +40,25 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login",
+                                 "/api/v1/auth/logout", "/api/v1/auth/oauth2/complete").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(ep -> ep
+                                .authorizationRequestResolver(authorizationRequestResolver))
+                        .successHandler(oauth2LoginSuccessHandler))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        // BCrypt with cost factor 12 (minimum per design doc)
-        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
@@ -82,4 +83,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }

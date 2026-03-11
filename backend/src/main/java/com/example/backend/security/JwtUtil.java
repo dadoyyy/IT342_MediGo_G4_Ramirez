@@ -44,6 +44,37 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Short-lived (10 min) token issued to first-time Google users
+     * who must still choose their role before a real account is created.
+     */
+    public String generatePendingToken(String email, String name) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + 10 * 60 * 1000L);
+        return Jwts.builder()
+                .subject(email)
+                .claim("name", name)
+                .claim("type", "PENDING_OAUTH2")
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(signingKey)
+                .compact();
+    }
+
+    public boolean isPendingToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return "PENDING_OAUTH2".equals(claims.get("type", String.class))
+                    && !claims.getExpiration().before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String extractNameFromPending(String token) {
+        return parseClaims(token).get("name", String.class);
+    }
+
     // ── Token Parsing ────────────────────────────────────────────────────────
 
     public String extractEmail(String token) {
@@ -58,6 +89,10 @@ public class JwtUtil {
             log.warn("Invalid JWT: {}", e.getMessage());
             return false;
         }
+    }
+
+    public Date extractExpiry(String token) {
+        return parseClaims(token).getExpiration();
     }
 
     // ── Private Helpers ──────────────────────────────────────────────────────
