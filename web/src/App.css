@@ -1,9 +1,5 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+/* App-level styles are managed by Tailwind CSS. */
+/* Add component-specific overrides here if needed. */
 
 .logo {
   height: 6em;
