@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { authSession } from '../session/authSession';
+import { authEvents } from '../patterns/observer/authEventBus';
 
 // ─── Axios instance ────────────────────────────────────────────────────────
 
@@ -12,7 +14,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('medigo_token');
+    const token = authSession.getToken();
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -30,8 +32,9 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !error.config?.url?.includes('/auth/')
     ) {
-      localStorage.removeItem('medigo_token');
-      window.location.href = '/login';
+      authSession.clearSession();
+      authEvents.emit(authEvents.names.sessionExpired);
+      globalThis.location.href = '/login';
     }
     return Promise.reject(error);
   },

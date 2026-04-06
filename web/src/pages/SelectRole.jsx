@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/api';
 import axios from 'axios';
+import { authSession } from '../session/authSession';
+import { authResponseAdapter } from '../patterns/adapter/authResponseAdapter';
+import { authEvents } from '../patterns/observer/authEventBus';
 
 /**
  * Shown to first-time Google sign-in users so they can choose PATIENT or DOCTOR.
@@ -16,7 +19,7 @@ export default function SelectRole() {
   const [pendingToken, setPendingToken] = useState('');
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     const token  = params.get('pending');
     if (!token) {
       navigate('/login', { replace: true });
@@ -33,11 +36,13 @@ export default function SelectRole() {
     setLoading(true);
     try {
       const res = await authApi.completeOAuth2(pendingToken, role);
-      localStorage.setItem('medigo_token', res.data.data?.token);
+      const token = authResponseAdapter.extractToken(res);
+      authSession.setToken(token);
+      authEvents.emit(authEvents.names.login, { source: 'select-role' });
       navigate('/dashboard', { replace: true, state: { justLoggedIn: true } });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(err.response.data.error?.message ?? 'Something went wrong. Please try again.');
+        setApiError(authResponseAdapter.extractApiErrorMessage(err, 'Something went wrong. Please try again.'));
       } else {
         setApiError('Unable to connect to the server. Please try again.');
       }

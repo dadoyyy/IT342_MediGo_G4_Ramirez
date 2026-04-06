@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api/api';
 import axios from 'axios';
+import { authSession } from '../session/authSession';
+import { authResponseAdapter } from '../patterns/adapter/authResponseAdapter';
+import { authEvents } from '../patterns/observer/authEventBus';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,11 +39,13 @@ export default function Login() {
     setApiError('');
     try {
       const res = await authApi.login({ email: form.email.trim(), password: form.password });
-      localStorage.setItem('medigo_token', res.data.data?.token);
+      const token = authResponseAdapter.extractToken(res);
+      authSession.setToken(token);
+      authEvents.emit(authEvents.names.login, { source: 'login' });
       navigate('/dashboard', { state: { justLoggedIn: true } });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(err.response.data.error?.message ?? 'Login failed. Please try again.');
+        setApiError(authResponseAdapter.extractApiErrorMessage(err, 'Login failed. Please try again.'));
       } else {
         setApiError('Unable to connect to the server. Please try again.');
       }
@@ -128,7 +133,7 @@ export default function Login() {
           {/* Google OAuth button */}
           <button
             type="button"
-            onClick={() => { window.location.href = '/oauth2/authorization/google'; }}
+            onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
             className="w-full min-h-[46px] flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all"
           >
             <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">

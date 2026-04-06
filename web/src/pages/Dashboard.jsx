@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/api';
+import { authSession } from '../session/authSession';
+import { authEvents } from '../patterns/observer/authEventBus';
 
 /**
  * Placeholder dashboard shown after a successful login.
@@ -44,6 +46,14 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // React to global auth session expiration events.
+  useEffect(() => {
+    const unsubscribe = authEvents.subscribe(authEvents.names.sessionExpired, () => {
+      navigate('/login', { replace: true });
+    });
+    return unsubscribe;
+  }, [navigate]);
+
   async function confirmLogout() {
     setLoggingOut(true);
     try {
@@ -51,7 +61,8 @@ export default function Dashboard() {
     } catch {
       // Proceed regardless — token is cleared client-side
     } finally {
-      localStorage.removeItem('medigo_token');
+      authSession.clearSession();
+      authEvents.emit(authEvents.names.logout, { source: 'dashboard' });
       navigate('/login', { replace: true });
     }
   }
