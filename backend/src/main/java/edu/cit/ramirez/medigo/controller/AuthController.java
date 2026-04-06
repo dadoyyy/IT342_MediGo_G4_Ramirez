@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Public authentication endpoints.
  *
- * POST /api/v1/auth/register  – create new account
- * POST /api/v1/auth/login     – authenticate and receive JWT
+ * POST /api/v1/auth/register – create new account
+ * POST /api/v1/auth/login – authenticate and receive JWT
  */
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -65,18 +65,20 @@ public class AuthController {
 
     /**
      * Completes Google OAuth2 registration for first-time users.
-     * Verifies the short-lived pending token and creates the account with the chosen role.
+     * Verifies the short-lived pending token and creates the account with the
+     * chosen role.
      */
     @PostMapping("/oauth2/complete")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<AuthResponse> completeOAuth2Registration(
             @RequestBody CompleteOAuth2Request body) {
         if (!jwtUtil.isPendingToken(body.getPendingToken())) {
-            throw new IllegalArgumentException("Invalid or expired registration token. Please sign in with Google again.");
+            throw new IllegalArgumentException(
+                    "Invalid or expired registration token. Please sign in with Google again.");
         }
         String email = jwtUtil.extractEmail(body.getPendingToken());
-        String name  = jwtUtil.extractNameFromPending(body.getPendingToken());
-        String role  = userRoleStrategyResolver.resolveNormalizedRole(body.getRole());
+        String name = jwtUtil.extractNameFromPending(body.getPendingToken());
+        String role = userRoleStrategyResolver.resolveNormalizedRole(body.getRole());
         AuthResponse authResponse = authService.completeGoogleRegistration(email, name, role);
         return ApiResponse.ok(authResponse);
     }
