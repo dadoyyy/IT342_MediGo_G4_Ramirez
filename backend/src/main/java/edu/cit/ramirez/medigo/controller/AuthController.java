@@ -1,6 +1,7 @@
 package edu.cit.ramirez.medigo.controller;
 
 import edu.cit.ramirez.medigo.dto.*;
+import edu.cit.ramirez.medigo.patterns.strategy.UserRoleStrategyResolver;
 import edu.cit.ramirez.medigo.response.ApiResponse;
 import edu.cit.ramirez.medigo.security.TokenBlacklistService;
 import edu.cit.ramirez.medigo.security.JwtUtil;
@@ -25,6 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
+    private final UserRoleStrategyResolver userRoleStrategyResolver;
 
     /**
      * Register a new user (PATIENT or DOCTOR).
@@ -74,10 +76,7 @@ public class AuthController {
         }
         String email = jwtUtil.extractEmail(body.getPendingToken());
         String name  = jwtUtil.extractNameFromPending(body.getPendingToken());
-        String role  = body.getRole();
-        if (role == null || (!role.equalsIgnoreCase("PATIENT") && !role.equalsIgnoreCase("DOCTOR"))) {
-            throw new IllegalArgumentException("Role must be PATIENT or DOCTOR.");
-        }
+        String role  = userRoleStrategyResolver.resolveNormalizedRole(body.getRole());
         AuthResponse authResponse = authService.completeGoogleRegistration(email, name, role);
         return ApiResponse.ok(authResponse);
     }
