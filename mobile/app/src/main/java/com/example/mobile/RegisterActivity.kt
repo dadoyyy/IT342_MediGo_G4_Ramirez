@@ -2,11 +2,13 @@ package com.example.mobile
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.api.ApiClient
 import com.example.mobile.api.ApiErrorParser
+import com.example.mobile.api.TokenHolder
 import com.example.mobile.databinding.ActivityRegisterBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.AuthResponse
@@ -27,6 +29,15 @@ class RegisterActivity : AppCompatActivity() {
             submitRegistration()
         }
 
+        binding.rgRole.setOnCheckedChangeListener { _, checkedId ->
+            val isDoctor = checkedId == R.id.rbDoctor
+            binding.licenseContainer.visibility = if (isDoctor) View.VISIBLE else View.GONE
+            if (!isDoctor) {
+                binding.etLicenseNumber.text?.clear()
+                binding.etLicenseNumber.error = null
+            }
+        }
+
         binding.tvGoToLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
@@ -34,25 +45,29 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun submitRegistration() {
-        val fullName = binding.etName.text.toString().trim()
+        val firstName = binding.etFirstName.text.toString().trim()
+        val lastName = binding.etLastName.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString()
+        val role = when (binding.rgRole.checkedRadioButtonId) {
+            R.id.rbPatient -> "PATIENT"
+            R.id.rbDoctor -> "DOCTOR"
+            else -> ""
+        }
+        val licenseNumber = binding.etLicenseNumber.text.toString().trim()
 
-        if (!isValidForm(fullName, email, password)) {
+        if (!isValidForm(firstName, lastName, email, password, role, licenseNumber)) {
             return
         }
 
-        val nameParts = fullName.split(" ").filter { it.isNotBlank() }
-        val firstname = nameParts.first()
-        val lastname = nameParts.drop(1).joinToString(" ")
-
         setLoading(true)
         val request = RegisterRequest(
-            firstname = firstname,
-            lastname = lastname,
+            firstname = firstName,
+            lastname = lastName,
             email = email,
             password = password,
-            role = "PATIENT"
+            role = role,
+            licenseNumber = if (role == "DOCTOR") licenseNumber else null
         )
 
         ApiClient.authApi.register(request).enqueue(object : Callback<ApiEnvelope<AuthResponse>> {
@@ -61,18 +76,27 @@ class RegisterActivity : AppCompatActivity() {
                 response: Response<ApiEnvelope<AuthResponse>>
             ) {
                 setLoading(false)
-                if (response.isSuccessful && response.body()?.success == true) {
+                val body = response.body()
+                if (response.isSuccessful && body?.success == true && body.data != null) {
+                    val auth = body.data
+                    val sessionManager = com.example.mobile.session.SessionManager(this@RegisterActivity)
+                    sessionManager.saveSession(
+                        token = auth.token,
+                        email = auth.user.email,
+                        fullName = auth.user.fullName,
+                        role = auth.user.role
+                    )
+                    TokenHolder.setToken(auth.token)
+
                     Toast.makeText(
                         this@RegisterActivity,
-                        "Registration successful. Please login.",
+                        "Registration successful",
                         Toast.LENGTH_LONG
                     ).show()
-                    val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
-                    intent.putExtra("prefill_email", email)
-                    startActivity(intent)
+                    startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
                     finish()
                 } else {
-                    val apiMessage = response.body()?.error?.message
+                    val apiMessage = body?.error?.message
                     val message = apiMessage ?: ApiErrorParser.parseMessage(
                         response.errorBody(),
                         "Registration failed. Please try again."
@@ -92,21 +116,29 @@ class RegisterActivity : AppCompatActivity() {
         })
     }
 
-    private fun isValidForm(fullName: String, email: String, password: String): Boolean {
-        binding.etName.error = null
+    private fun isValidForm(
+        firstName: String,
+        lastName: String,
+        email: String,
+        password: String,
+        role: String,
+        licenseNumber: String
+    ): Boolean {
+        binding.etFirstName.error = null
+        binding.etLastName.error = null
         binding.etEmail.error = null
         binding.etPassword.error = null
+        binding.etLicenseNumber.error = null
 
-        if (fullName.isBlank()) {
-            binding.etName.error = "Name is required"
-            binding.etName.requestFocus()
+        if (firstName.isBlank()) {
+            binding.etFirstName.error = "First name is required"
+            binding.etFirstName.requestFocus()
             return false
         }
 
-        val nameParts = fullName.split(" ").filter { it.isNotBlank() }
-        if (nameParts.size < 2) {
-            binding.etName.error = "Enter first and last name"
-            binding.etName.requestFocus()
+        if (lastName.isBlank()) {
+            binding.etLastName.error = "Last name is required"
+            binding.etLastName.requestFocus()
             return false
         }
 
@@ -120,6 +152,17 @@ class RegisterActivity : AppCompatActivity() {
         if (!passwordRegex.matches(password)) {
             binding.etPassword.error = "Min 8 chars, upper/lower/number/special"
             binding.etPassword.requestFocus()
+            return false
+        }
+
+        if (role.isBlank()) {
+            Toast.makeText(this, "Please select a role", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        if (role == "DOCTOR" && licenseNumber.isBlank()) {
+            binding.etLicenseNumber.error = "License number is required for doctors"
+            binding.etLicenseNumber.requestFocus()
             return false
         }
 

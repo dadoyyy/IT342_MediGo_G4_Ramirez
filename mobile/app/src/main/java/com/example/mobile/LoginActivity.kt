@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.api.ApiClient
 import com.example.mobile.api.ApiErrorParser
+import com.example.mobile.api.TokenHolder
 import com.example.mobile.databinding.ActivityLoginBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.AuthResponse
@@ -63,6 +64,7 @@ class LoginActivity : AppCompatActivity() {
                             fullName = auth.user.fullName,
                             role = auth.user.role
                         )
+                        TokenHolder.setToken(auth.token)
 
                         Toast.makeText(
                             this@LoginActivity,

@@ -1,5 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ── Primary Colors ── -->
+    <color name="primary">#2563EB</color>          <!-- Primary blue -->
+    <color name="primary_dark">#1e40af</color>     <!-- Dark blue for gradients -->
+    <color name="primary_light">#3b82f6</color>    <!-- Light blue -->
+    <color name="primary_accent">#7C3AED</color>   <!-- Purple accent -->
+
+    <!-- ── Grayscale ── -->
+    <color name="gray_50">#F9FAFB</color>           <!-- Nearly white -->
+    <color name="gray_100">#F3F4F6</color>          <!-- Light gray bg -->
+    <color name="gray_200">#E5E7EB</color>          <!-- Borders -->
+    <color name="gray_300">#D1D5DB</color>          <!-- Dividers -->
+    <color name="gray_400">#9CA3AF</color>          <!-- Secondary text (hints) -->
+    <color name="gray_500">#6B7280</color>          <!-- Body text -->
+    <color name="gray_600">#4B5563</color>          <!-- Labels -->
+    <color name="gray_700">#374151</color>          <!-- Darker text -->
+    <color name="gray_900">#111827</color>          <!-- Headings/primary text -->
+
+    <!-- ── Status Colors ── -->
+    <color name="success">#10B981</color>           <!-- Green success -->
+    <color name="success_bg">#D1FAE5</color>        <!-- Light green bg -->
+    <color name="success_light">#ECFDF5</color>     <!-- Very light green -->
+    
+    <color name="error">#EF4444</color>             <!-- Red error -->
+    <color name="error_bg">#FEE2E2</color>          <!-- Light red bg -->
+    <color name="error_light">#FEF2F2</color>       <!-- Very light red -->
+    
+    <color name="warning">#F59E0B</color>           <!-- Amber warning -->
+    <color name="warning_bg">#FEF3C7</color>        <!-- Light amber bg -->
+
+    <!-- ── Semantic Colors ── -->
+    <color name="background">#F9FAFB</color>        <!-- App background -->
+    <color name="surface">#FFFFFF</color>           <!-- Card/surface background -->
+    <color name="text_primary">#111827</color>      <!-- Primary text -->
+    <color name="text_secondary">#6B7280</color>    <!-- Secondary text -->
+    <color name="text_tertiary">#9CA3AF</color>     <!-- Tertiary/hint text -->
+    <color name="border">#E5E7EB</color>            <!-- Borders and dividers -->
+    <color name="shadow">#000000</color>            <!-- For shadows (20% opacity) -->
+
+    <!-- ── Legacy ── -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
