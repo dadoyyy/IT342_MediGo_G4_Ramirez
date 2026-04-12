@@ -1,41 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp"
-    tools:context=".MainActivity">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="MediGo"
-        android:textSize="32sp"
+        android:text="After Login Screen"
+        android:textSize="28sp"
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tvUserName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text="Mobile Authentication"
+        android:layout_marginTop="24dp"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvUserEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tvUserRole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:textSize="16sp" />
 
     <Button
-        android:id="@+id/btnGoToLogin"
+        android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:text="Login" />
-
-    <Button
-        android:id="@+id/btnGoToRegister"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Register" />
+        android:layout_marginTop="30dp"
+        android:text="Logout" />
 
 </LinearLayout>
