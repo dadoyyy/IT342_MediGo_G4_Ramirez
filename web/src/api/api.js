@@ -50,4 +50,25 @@ export const authApi = {
   me:             ()                     => api.get('/auth/me'),
 };
 
+export const doctorApi = {
+  search: (query = '') => api.get('/doctors/search', { params: { q: query } }),
+  getMyProfile: () => api.get('/doctors/me/profile'),
+  upsertMyProfile: (payload) => api.put('/doctors/me/profile', payload),
+};
+
+export const appointmentApi = {
+  create: (payload) => api.post('/appointments', payload),
+  listMine: () => api.get('/appointments'),
+  update: (id, payload) => api.put(`/appointments/${id}`, payload),
+  cancel: (id) => api.put(`/appointments/${id}/cancel`),
+  delete: (id) => api.delete(`/appointments/${id}`),
+  updateStatus: (id, payload) => api.put(`/appointments/${id}/status`, payload),
+};
+
+export const chatApi = {
+  contacts: (query = '') => api.get('/chat/contacts', { params: { q: query } }),
+  conversation: (otherUserId) => api.get(`/chat/conversations/${otherUserId}`),
+  sendMessage: (payload) => api.post('/chat/messages', payload),
+};
+
 export default api;

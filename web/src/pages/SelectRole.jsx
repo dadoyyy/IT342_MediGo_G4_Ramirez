@@ -57,7 +57,7 @@ export default function SelectRole() {
       {/* ── Left branding panel ── */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563EB 50%, #7C3AED 100%)' }}
+        style={{ backgroundColor: '#7C2327' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-10" style={{ background: 'white' }} />
@@ -76,7 +76,7 @@ export default function SelectRole() {
             <h2 className="text-white text-4xl font-bold leading-tight">
               Almost there!
             </h2>
-            <p className="text-blue-100 text-lg leading-relaxed">
+            <p className="text-rose-100 text-lg leading-relaxed">
               Just one more step — let us know how you'll be using MediGo.
             </p>
           </div>
@@ -85,13 +85,13 @@ export default function SelectRole() {
               ['👨‍⚕️', 'Doctors can manage schedules & patient records']].map(([icon, text]) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center text-sm">{icon}</div>
-                <span className="text-blue-100 text-sm font-medium">{text}</span>
+                <span className="text-rose-100 text-sm font-medium">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="relative text-blue-200 text-xs">© 2026 MediGo. All rights reserved.</p>
+        <p className="relative text-rose-200 text-xs">© 2026 MediGo. All rights reserved.</p>
       </div>
 
       {/* ── Right form panel ── */}
@@ -100,10 +100,10 @@ export default function SelectRole() {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#2563EB' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#B4232A' }}>
               <span className="text-white text-sm">⚕</span>
             </div>
-            <span className="text-xl font-bold" style={{ color: '#2563EB' }}>MediGo</span>
+            <span className="text-xl font-bold" style={{ color: '#B4232A' }}>MediGo</span>
           </div>
 
           <div className="space-y-2 mb-8">
@@ -138,15 +138,15 @@ export default function SelectRole() {
                     onClick={() => { setRole(value); setRoleError(''); }}
                     className={`flex flex-col items-center gap-2 rounded-2xl border-2 px-4 py-5 text-center cursor-pointer transition-all ${
                       role === value
-                        ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-100'
+                        ? 'border-rose-500 bg-rose-50 shadow-md shadow-rose-100'
                         : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <span className="text-3xl">{icon}</span>
-                    <span className={`text-sm font-semibold ${role === value ? 'text-blue-700' : 'text-gray-700'}`}>
+                    <span className={`text-sm font-semibold ${role === value ? 'text-rose-700' : 'text-gray-700'}`}>
                       {label}
                     </span>
-                    <span className={`text-xs leading-relaxed ${role === value ? 'text-blue-500' : 'text-gray-400'}`}>
+                    <span className={`text-xs leading-relaxed ${role === value ? 'text-rose-500' : 'text-gray-400'}`}>
                       {desc}
                     </span>
                   </button>
@@ -163,8 +163,8 @@ export default function SelectRole() {
             <button
               type="submit"
               disabled={loading || !role}
-              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0"
-              style={{ background: 'linear-gradient(135deg, #2563EB, #1d4ed8)' }}
+              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-200 hover:-translate-y-0.5 active:translate-y-0"
+              style={{ backgroundColor: '#7C2327' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">

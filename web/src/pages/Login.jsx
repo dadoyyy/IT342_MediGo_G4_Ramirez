@@ -60,7 +60,7 @@ export default function Login() {
       {/* ── Left branding panel ── */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563EB 50%, #7C3AED 100%)' }}
+        style={{ backgroundColor: '#7C2327' }}
       >
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -85,7 +85,7 @@ export default function Login() {
             <h2 className="text-white text-4xl font-bold leading-tight">
               Your health,<br />our priority.
             </h2>
-            <p className="text-blue-100 text-lg leading-relaxed">
+            <p className="text-rose-100 text-lg leading-relaxed">
               Book appointments, consult doctors, and manage your healthcare — all in one place.
             </p>
           </div>
@@ -95,14 +95,14 @@ export default function Login() {
             {[['📅', 'Easy appointment booking'],['👨‍⚕️', 'Verified doctors'],['🔒', 'Secure & private']].map(([icon, text]) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center text-sm">{icon}</div>
-                <span className="text-blue-100 text-sm font-medium">{text}</span>
+                <span className="text-rose-100 text-sm font-medium">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Footer */}
-        <p className="relative text-blue-200 text-xs">© 2026 MediGo. All rights reserved.</p>
+        <p className="relative text-rose-200 text-xs">© 2026 MediGo. All rights reserved.</p>
       </div>
 
       {/* ── Right form panel ── */}
@@ -111,10 +111,10 @@ export default function Login() {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#2563EB' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#B4232A' }}>
               <span className="text-white text-sm">⚕</span>
             </div>
-            <span className="text-xl font-bold" style={{ color: '#2563EB' }}>MediGo</span>
+            <span className="text-xl font-bold" style={{ color: '#B4232A' }}>MediGo</span>
           </div>
 
           <div className="space-y-2 mb-8">
@@ -165,7 +165,7 @@ export default function Login() {
                 className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] transition-all outline-none focus:ring-2 ${
                   fieldErrors.email
                     ? 'border-red-300 focus:ring-red-100 focus:border-red-400'
-                    : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
+                    : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
                 }`}
               />
               {fieldErrors.email && <p className="text-xs text-red-500 flex items-center gap-1"><span>⚠</span>{fieldErrors.email}</p>}
@@ -185,7 +185,7 @@ export default function Login() {
                   className={`w-full rounded-xl border bg-white px-4 py-3 pr-12 text-sm min-h-[44px] transition-all outline-none focus:ring-2 ${
                     fieldErrors.password
                       ? 'border-red-300 focus:ring-red-100 focus:border-red-400'
-                      : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
+                      : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
                   }`}
                 />
                 <button
@@ -204,8 +204,8 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0"
-              style={{ background: 'linear-gradient(135deg, #2563EB, #1d4ed8)' }}
+              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-200 hover:-translate-y-0.5 active:translate-y-0"
+              style={{ backgroundColor: '#7C2327' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -218,7 +218,7 @@ export default function Login() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Don&apos;t have an account?{' '}
-            <Link to="/register" className="font-semibold hover:underline" style={{ color: '#2563EB' }}>
+            <Link to="/register" className="font-semibold hover:underline" style={{ color: '#B4232A' }}>
               Create one
             </Link>
           </p>
