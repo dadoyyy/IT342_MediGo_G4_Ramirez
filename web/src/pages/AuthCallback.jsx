@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authSession } from '../session/authSession';
+import { authEvents } from '../patterns/observer/authEventBus';
+import { resolveAuthCallbackAction } from '../patterns/strategy/authCallbackResolutionStrategy';
 
 /**
  * Landing page for the OAuth2 redirect.
@@ -12,19 +15,17 @@ export default function AuthCallback() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const params  = new URLSearchParams(window.location.search);
-    const token   = params.get('token');
-    const pending = params.get('pending');
-    const err     = params.get('error');
+    const action = resolveAuthCallbackAction(globalThis.location.search);
 
-    if (token) {
-      localStorage.setItem('medigo_token', token);
+    if (action.type === 'TOKEN_SUCCESS') {
+      authSession.setToken(action.token);
+      authEvents.emit(authEvents.names.login, { source: 'oauth2' });
       navigate('/dashboard', { replace: true, state: { justLoggedIn: true } });
-    } else if (pending) {
+    } else if (action.type === 'PENDING_ROLE') {
       // New user — redirect to role selection, keeping the pending token in the URL
-      navigate(`/auth/select-role?pending=${encodeURIComponent(pending)}`, { replace: true });
+      navigate(action.path, { replace: true });
     } else {
-      setError(err ? decodeURIComponent(err) : 'Google sign-in failed. Please try again.');
+      setError(action.error);
     }
   }, [navigate]);
 

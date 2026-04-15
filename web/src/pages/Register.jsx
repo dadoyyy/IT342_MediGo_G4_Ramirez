@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api/api';
 import axios from 'axios';
+import { authResponseAdapter } from '../patterns/adapter/authResponseAdapter';
 
 const EMAIL_RE    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
@@ -57,7 +58,7 @@ export default function Register() {
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(err.response.data.error?.message ?? 'Registration failed. Please try again.');
+        setApiError(authResponseAdapter.extractApiErrorMessage(err, 'Registration failed. Please try again.'));
       } else {
         setApiError('Unable to connect to the server. Please try again.');
       }
@@ -138,7 +139,7 @@ export default function Register() {
           {/* Google OAuth button */}
           <button
             type="button"
-            onClick={() => { window.location.href = '/oauth2/authorization/google'; }}
+            onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
             className="w-full min-h-[46px] flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all"
           >
             <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
