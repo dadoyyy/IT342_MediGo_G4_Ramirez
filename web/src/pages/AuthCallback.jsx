@@ -33,7 +33,7 @@ export default function AuthCallback() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4 text-gray-500">
-          <span className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+          <span className="w-10 h-10 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin" />
           <p className="text-sm">Completing sign-in…</p>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function AuthCallback() {
         <button
           onClick={() => navigate('/login', { replace: true })}
           className="mt-2 px-6 py-2.5 rounded-xl text-white text-sm font-medium"
-          style={{ background: 'linear-gradient(135deg, #2563EB, #1d4ed8)' }}
+          style={{ backgroundColor: '#7C2327' }}
         >
           Back to Login
         </button>

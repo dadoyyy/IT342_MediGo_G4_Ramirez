@@ -1,5 +1,5 @@
-/* ─── Google Fonts: Inter ─────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ─── Google Fonts: Plus Jakarta Sans ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* ─── Tailwind CSS v4 ─────────────────────────────────────────────────────── */
 @import "tailwindcss";
@@ -7,14 +7,14 @@
 /* ─── MediGo Design System Theme ─────────────────────────────────────────── */
 @theme {
   /* Brand colours */
-  --color-primary:   #2563EB;
-  --color-primary-dark: #1d4ed8;
-  --color-secondary: #7C3AED;
+  --color-primary:   #B4232A;
+  --color-primary-dark: #8F1B21;
+  --color-secondary: #D13A41;
   --color-success:   #10B981;
   --color-error:     #EF4444;
 
   /* Typography */
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-sans: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
 
   /* Border radius (8px grid) */
   --radius-input: 8px;
@@ -30,8 +30,25 @@ html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #f9fafb;
+  background-color: #f7f3f3;
+}
+
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
 }
 

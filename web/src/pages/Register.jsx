@@ -73,7 +73,7 @@ export default function Register() {
       {/* ── Left branding panel ── */}
       <div
         className="hidden lg:flex lg:w-2/5 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563EB 50%, #7C3AED 100%)' }}
+        style={{ backgroundColor: '#7C2327' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-10" style={{ background: 'white' }} />
@@ -90,7 +90,7 @@ export default function Register() {
         <div className="relative space-y-6">
           <div className="space-y-3">
             <h2 className="text-white text-4xl font-bold leading-tight">Join MediGo<br />today.</h2>
-            <p className="text-blue-100 text-lg leading-relaxed">
+            <p className="text-rose-100 text-lg leading-relaxed">
               Create your account and start managing your healthcare journey in minutes.
             </p>
           </div>
@@ -98,13 +98,13 @@ export default function Register() {
             {[['🏥', 'Patients & Doctors welcome'],['📋', 'Digital health records'],['💬', 'Seamless consultations']].map(([icon, text]) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center text-sm">{icon}</div>
-                <span className="text-blue-100 text-sm font-medium">{text}</span>
+                <span className="text-rose-100 text-sm font-medium">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="relative text-blue-200 text-xs">© 2026 MediGo. All rights reserved.</p>
+        <p className="relative text-rose-200 text-xs">© 2026 MediGo. All rights reserved.</p>
       </div>
 
       {/* ── Right form panel ── */}
@@ -113,10 +113,10 @@ export default function Register() {
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#2563EB' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#B4232A' }}>
               <span className="text-white text-sm">⚕</span>
             </div>
-            <span className="text-xl font-bold" style={{ color: '#2563EB' }}>MediGo</span>
+            <span className="text-xl font-bold" style={{ color: '#B4232A' }}>MediGo</span>
           </div>
 
           <div className="space-y-1 mb-8">
@@ -187,7 +187,7 @@ export default function Register() {
                   value={form.password} onChange={handleChange}
                   autoComplete="new-password" placeholder="••••••••"
                   className={`w-full rounded-xl border bg-white px-4 py-3 pr-12 text-sm min-h-[44px] transition-all outline-none focus:ring-2 ${
-                    fieldErrors.password ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
+                    fieldErrors.password ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
                   }`}
                 />
                 <button type="button" tabIndex={-1}
@@ -214,7 +214,7 @@ export default function Register() {
                     key={r}
                     className={`flex items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 cursor-pointer text-sm font-medium transition-all ${
                       form.role === r
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        ? 'border-rose-500 bg-rose-50 text-rose-700'
                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -237,8 +237,8 @@ export default function Register() {
             {/* Submit */}
             <button
               type="submit" disabled={loading}
-              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm mt-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0"
-              style={{ background: 'linear-gradient(135deg, #2563EB, #1d4ed8)' }}
+              className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm mt-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-rose-200 hover:shadow-lg hover:shadow-rose-200 hover:-translate-y-0.5 active:translate-y-0"
+              style={{ backgroundColor: '#7C2327' }}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -251,7 +251,7 @@ export default function Register() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold hover:underline" style={{ color: '#2563EB' }}>Sign in</Link>
+            <Link to="/login" className="font-semibold hover:underline" style={{ color: '#B4232A' }}>Sign in</Link>
           </p>
         </div>
       </div>
@@ -270,7 +270,7 @@ function InputField({ label, id, name, value, onChange, error, type = 'text', au
         id={id} name={name} type={type} value={value} onChange={onChange}
         autoComplete={autoComplete} placeholder={placeholder}
         className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] transition-all outline-none focus:ring-2 ${
-          error ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
+          error ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
         }`}
       />
       {error && <p className="text-xs text-red-500 flex items-center gap-1"><span>⚠</span>{error}</p>}
