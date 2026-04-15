@@ -48,6 +48,30 @@ public class GlobalExceptionHandler {
         return ApiResponse.fail("INVALID_CREDENTIALS", "Invalid email or password.");
     }
 
+    // ── Bad request (400) ────────────────────────────────────────────────────
+
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Void> handleBadRequest(RuntimeException ex) {
+        return ApiResponse.fail("BAD_REQUEST", ex.getMessage());
+    }
+
+    // ── Forbidden (403) ──────────────────────────────────────────────────────
+
+    @ExceptionHandler(ForbiddenActionException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<Void> handleForbidden(ForbiddenActionException ex) {
+        return ApiResponse.fail("FORBIDDEN", ex.getMessage());
+    }
+
+    // ── Not found (404) ──────────────────────────────────────────────────────
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse<Void> handleNotFound(ResourceNotFoundException ex) {
+        return ApiResponse.fail("NOT_FOUND", ex.getMessage());
+    }
+
     // ── Anything else (500) ───────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
