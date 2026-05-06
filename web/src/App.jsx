@@ -1,18 +1,30 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Register    from './pages/Register';
-import Login       from './pages/Login';
-import Dashboard   from './pages/Dashboard';
-import AuthCallback from './pages/AuthCallback';
-import SelectRole  from './pages/SelectRole';
-import PatientHome from './pages/PatientHome';
-import DoctorDetail from './pages/DoctorDetail';
-import MyAppointments from './pages/MyAppointments';
-import DoctorRegistration from './pages/DoctorRegistration';
-import PendingApproval from './pages/PendingApproval';
-import AdminVerification from './pages/AdminVerification';
-import ChatInterface from './pages/ChatInterface';
-import DoctorSchedule from './pages/DoctorSchedule';
-import { authSession } from './session/authSession';
+
+// ── Auth feature ──────────────────────────────────────────────────────────
+import Login        from './features/auth/pages/Login';
+import Register     from './features/auth/pages/Register';
+import AuthCallback from './features/auth/pages/AuthCallback';
+import SelectRole   from './features/auth/pages/SelectRole';
+import { authSession } from './features/auth/authSession';
+
+// ── Dashboard feature ─────────────────────────────────────────────────────
+import Dashboard   from './features/dashboard/pages/Dashboard';
+import PatientHome from './features/dashboard/pages/PatientHome';
+
+// ── Appointment feature ───────────────────────────────────────────────────
+import MyAppointments from './features/appointment/pages/MyAppointments';
+import DoctorSchedule from './features/appointment/pages/DoctorSchedule';
+
+// ── Chat feature ──────────────────────────────────────────────────────────
+import ChatInterface from './features/chat/pages/ChatInterface';
+
+// ── Doctor feature ────────────────────────────────────────────────────────
+import DoctorDetail       from './features/doctor/pages/DoctorDetail';
+import DoctorRegistration from './features/doctor/pages/DoctorRegistration';
+import PendingApproval    from './features/doctor/pages/PendingApproval';
+
+// ── Admin feature ─────────────────────────────────────────────────────────
+import AdminVerification from './features/admin/pages/AdminVerification';
 
 function ProtectedRoute({ children }) {
   return authSession.getToken() ? children : <Navigate to="/login" replace />;
