@@ -25,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.Instant;
 import java.util.Optional;
 
+import edu.cit.ramirez.medigo.shared.patterns.observer.AuthEvent;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -104,7 +106,7 @@ class AuthServiceTest {
 
         verify(userRepository).save(any(User.class));
         verify(jwtUtil).generateToken("patient@example.com");
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher).publishEvent(any(AuthEvent.class));
     }
 
     @Test
@@ -143,7 +145,7 @@ class AuthServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getToken()).isEqualTo("mock.jwt.token");
-        verify(eventPublisher).publishEvent(any());
+        verify(eventPublisher).publishEvent(any(AuthEvent.class));
     }
 
     @Test
