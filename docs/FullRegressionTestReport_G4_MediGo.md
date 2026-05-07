@@ -337,11 +337,12 @@ cd backend
 
 | Test Class | Type | Test Cases | Feature Covered |
 |------------|------|-----------|-----------------|
-| `AuthServiceTest` | Unit | 17 | Authentication |
-| `AppointmentServiceTest` | Unit | 15 | Appointments |
-| `ChatServiceTest` | Unit | 8 | Chat |
+| `AuthServiceTest` | Unit | 10 | Authentication |
+| `AppointmentServiceTest` | Unit | 17 | Appointments |
+| `ChatServiceTest` | Unit | 10 | Chat |
 | `AuthControllerIntegrationTest` | Integration | 12 | Auth endpoints |
-| `AppointmentControllerIntegrationTest` | Integration | 10 | Appointment endpoints |
+| `AppointmentControllerIntegrationTest` | Integration | 11 | Appointment endpoints |
+| `MedigoApplicationTests` | Integration | 1 | Application context |
 | **Total** | | **61** | |
 
 ### 5.2 Test Execution Result

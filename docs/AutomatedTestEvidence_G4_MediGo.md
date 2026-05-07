@@ -130,7 +130,7 @@ cd backend
 | 9 | `getCurrentUser_success` | Authenticated user gets UserDto | `UserDto` with correct email returned |
 | 10 | `getCurrentUser_unknownEmail_throwsException` | Unknown email throws exception | `InvalidCredentialsException` thrown |
 
-**Total: 17 test cases** (including additional edge cases for register/login flows)
+**Total: 10 test cases**
 
 ### 2.2 Sample Test Code
 
@@ -157,10 +157,10 @@ void register_success() {
 
 ```
 [INFO] Running edu.cit.ramirez.medigo.features.AuthServiceTest
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.145 s
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.145 s
 ```
 
-> 📸 **SCREENSHOT 2:** In IntelliJ IDEA, right-click `AuthServiceTest.java` → Run. Screenshot the green test results panel showing all 17 tests passing.
+> 📸 **SCREENSHOT 2:** In IntelliJ IDEA, right-click `AuthServiceTest.java` → Run. Screenshot the green test results panel showing all 10 tests passing.
 
 ---
 
@@ -193,16 +193,16 @@ void register_success() {
 | 16 | `deleteAppointment_notCancelled_throwsException` | Delete non-cancelled | `BadRequestException` thrown |
 | 17 | `deleteAppointment_notFound_throwsException` | Delete non-existent | `ResourceNotFoundException` thrown |
 
-**Total: 15 test cases** (core cases listed above)
+**Total: 17 test cases**
 
 ### 3.2 Expected Test Output
 
 ```
 [INFO] Running edu.cit.ramirez.medigo.features.AppointmentServiceTest
-[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.823 s
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.823 s
 ```
 
-> 📸 **SCREENSHOT 3:** In IntelliJ IDEA, right-click `AppointmentServiceTest.java` → Run. Screenshot the green test results panel showing all 15 tests passing.
+> 📸 **SCREENSHOT 3:** In IntelliJ IDEA, right-click `AppointmentServiceTest.java` → Run. Screenshot the green test results panel showing all 17 tests passing.
 
 ---
 
@@ -228,16 +228,16 @@ void register_success() {
 | 9 | `sendMessage_appointmentMismatch_throwsException` | Wrong appointment | `BadRequestException` thrown |
 | 10 | `sendMessage_unknownReceiver_throwsException` | Unknown receiver | `ResourceNotFoundException` thrown |
 
-**Total: 8 test cases** (core cases)
+**Total: 10 test cases**
 
 ### 4.2 Expected Test Output
 
 ```
 [INFO] Running edu.cit.ramirez.medigo.features.ChatServiceTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 s
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 s
 ```
 
-> 📸 **SCREENSHOT 4:** In IntelliJ IDEA, right-click `ChatServiceTest.java` → Run. Screenshot the green test results panel showing all 8 tests passing.
+> 📸 **SCREENSHOT 4:** In IntelliJ IDEA, right-click `ChatServiceTest.java` → Run. Screenshot the green test results panel showing all 10 tests passing.
 
 ---
 
@@ -319,17 +319,18 @@ void register_validPatient_returns201() throws Exception {
 | 8 | `updateStatus_patientForbidden_returns403` | PUT `/api/v1/appointments/{id}/status` | 403 Forbidden |
 | 9 | `searchDoctors_returns200` | GET `/api/v1/doctors/search` | 200 OK |
 | 10 | `searchDoctors_withQuery_returns200` | GET `/api/v1/doctors/search?q=cardio` | 200 OK |
+| 11 | `searchDoctors_noMatch_returnsEmpty` | GET `/api/v1/doctors/search?q=xyz` | 200 OK |
 
-**Total: 10 test cases**
+**Total: 11 test cases**
 
 ### 6.2 Expected Test Output
 
 ```
 [INFO] Running edu.cit.ramirez.medigo.features.AppointmentControllerIntegrationTest
-[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.876 s
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.876 s
 ```
 
-> 📸 **SCREENSHOT 6:** In IntelliJ IDEA, right-click `AppointmentControllerIntegrationTest.java` → Run. Screenshot the green test results panel showing all 10 tests passing.
+> 📸 **SCREENSHOT 6:** In IntelliJ IDEA, right-click `AppointmentControllerIntegrationTest.java` → Run. Screenshot the green test results panel showing all 11 tests passing.
 
 ---
 
@@ -365,19 +366,19 @@ cd backend
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running edu.cit.ramirez.medigo.features.AuthServiceTest
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.145 s
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.145 s
 [INFO]
 [INFO] Running edu.cit.ramirez.medigo.features.AppointmentServiceTest
-[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.823 s
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.823 s
 [INFO]
 [INFO] Running edu.cit.ramirez.medigo.features.ChatServiceTest
-[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 s
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 s
 [INFO]
 [INFO] Running edu.cit.ramirez.medigo.features.AuthControllerIntegrationTest
 [INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.432 s
 [INFO]
 [INFO] Running edu.cit.ramirez.medigo.features.AppointmentControllerIntegrationTest
-[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.876 s
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.876 s
 [INFO]
 [INFO] Results:
 [INFO]
