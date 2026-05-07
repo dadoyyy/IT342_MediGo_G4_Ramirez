@@ -363,7 +363,7 @@ cd backend
 | Controller Layer | ≥ 60% | ~65% |
 | Overall Backend | ≥ 60% | ~70% |
 
-> 📸 **SCREENSHOT 6:** If using IntelliJ IDEA, right-click the `features/` test folder → "Run with Coverage" → screenshot the coverage report panel showing percentages per class.
+> 📸 **SCREENSHOT 6:** Run `./mvnw clean test` from the `backend/` directory, then open `backend/target/site/jacoco/index.html` in a browser and screenshot the JaCoCo coverage summary table showing percentages per class.
 
 ---
 

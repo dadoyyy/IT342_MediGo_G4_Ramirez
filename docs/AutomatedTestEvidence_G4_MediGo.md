@@ -405,36 +405,26 @@ cd backend
 
 ### 8.1 How to Generate Coverage in IntelliJ IDEA
 
-1. Right-click the `features/` folder under `src/test/`
-2. Select **"Run 'All Tests' with Coverage"**
-3. Wait for tests to complete
-4. The **Coverage** panel will appear on the right side
+> ⚠️ **Note:** If IntelliJ shows `CreateProcess error=2 — cannot find file specified`, your project SDK is not configured. Fix it:
+> 1. Press `Ctrl+Shift+Alt+S` → **Project Structure**
+> 2. Under **Project SDK**, select your JDK 17 installation (or click **Download JDK**)
+> 3. Click **Apply → OK**, then retry
 
-### 8.2 How to Generate Coverage via Maven (JaCoCo)
+### 8.2 How to Generate Coverage via Maven (JaCoCo) — Recommended
 
-Add to `pom.xml` if not present:
-```xml
-<plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <executions>
-        <execution>
-            <goals><goal>prepare-agent</goal></goals>
-        </execution>
-        <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals><goal>report</goal></goals>
-        </execution>
-    </executions>
-</plugin>
-```
+JaCoCo is already configured in `pom.xml`. Run:
 
-Then run:
 ```bash
-./mvnw clean verify
-# Report generated at: target/site/jacoco/index.html
+cd backend
+./mvnw clean test
 ```
+
+The coverage report is automatically generated at:
+```
+backend/target/site/jacoco/index.html
+```
+
+Open that file in any browser to see the full coverage report.
 
 ### 8.3 Expected Coverage Results
 
@@ -478,14 +468,14 @@ Here is the complete list of screenshots you need to take for this document and 
 | 10 | AuthControllerIntegrationTest — all green | IntelliJ: right-click → Run → screenshot results panel |
 | 11 | AppointmentControllerIntegrationTest — all green | IntelliJ: right-click → Run → screenshot results panel |
 | 12 | All 5 test classes run together — all green | IntelliJ: right-click `features/` test folder → Run All Tests → screenshot |
-| 13 | Coverage report per class | IntelliJ: Run with Coverage → screenshot Coverage panel |
+| 13 | Coverage report — JaCoCo HTML | Run `./mvnw clean test` → open `target/site/jacoco/index.html` in browser → screenshot the summary table |
 
 ### Tips for Good Screenshots
 
-- **Use IntelliJ IDEA** for the clearest test result panels — it shows green checkmarks per method
-- **Expand all test methods** in the results panel before screenshotting so each test case is visible
-- **For the terminal**, use a dark theme and make the font large enough to read
-- **Crop** screenshots to show only the relevant content — no need to show the entire screen
+- **For terminal screenshots:** Run `./mvnw clean test` in the `backend/` directory and screenshot the full output ending with `BUILD SUCCESS`
+- **For the JaCoCo report:** After running tests, open `backend/target/site/jacoco/index.html` in Chrome/Edge and screenshot the table showing class-by-class coverage percentages
+- **For IntelliJ test results:** Open the test file → click the green play button next to the class name → screenshot the green checkmarks in the Run panel
+- **Crop** screenshots to show only the relevant content
 - **Name your screenshot files** clearly: e.g., `screenshot-01-backend-folder-tree.png`, `screenshot-07-auth-service-test-green.png`
 - **Save screenshots** to a folder like `docs/screenshots/` and reference them in the report
 
