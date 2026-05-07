@@ -627,8 +627,7 @@ c9d5923 test(backend): add unit and integration tests
 | 1 | Backend `features/` + `shared/` folder tree expanded | IntelliJ IDEA or VS Code file explorer |
 | 2 | Web `features/` + `shared/` folder tree expanded | VS Code file explorer |
 | 3 | Mobile `features/` + `shared/` folder tree expanded | Android Studio or VS Code |
-| 4 | Git log showing all 11 commits | Terminal: `git log --oneline` |
-| 5 | Maven test run — final summary line | Terminal: `./mvnw clean test` |
-| 6 | Test coverage report | IntelliJ: Run with Coverage |
-| 7 | All 5 test classes listed in IDE test runner | IntelliJ test results panel |
-| 8 | Green checkmarks on all test methods | IntelliJ test results expanded |
+| 4 | Git log showing all commits on refactor branch | Terminal: `git log --oneline` |
+| 5 | Maven test run — all 5 test classes running | Terminal: `./mvnw clean test` → scroll up to the 5 `[INFO] Running ...` lines |
+| 6 | Maven test run — final BUILD SUCCESS summary | Terminal: scroll to bottom showing `Tests run: XX, Failures: 0` + `BUILD SUCCESS` |
+| 7 | JaCoCo coverage report | Open `backend/target/site/jacoco/index.html` in browser after running tests |

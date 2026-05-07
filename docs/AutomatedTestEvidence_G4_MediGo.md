@@ -460,23 +460,18 @@ Here is the complete list of screenshots you need to take for this document and 
 
 | # | What to Screenshot | How to Take It |
 |---|-------------------|----------------|
-| 5 | Full Maven test run | Terminal: `cd backend && ./mvnw clean test` → screenshot full output |
-| 6 | Final BUILD SUCCESS line | Scroll to bottom of Maven output → screenshot |
-| 7 | AuthServiceTest — all green | IntelliJ: right-click `AuthServiceTest` → Run → screenshot results panel |
-| 8 | AppointmentServiceTest — all green | IntelliJ: right-click `AppointmentServiceTest` → Run → screenshot results panel |
-| 9 | ChatServiceTest — all green | IntelliJ: right-click `ChatServiceTest` → Run → screenshot results panel |
-| 10 | AuthControllerIntegrationTest — all green | IntelliJ: right-click → Run → screenshot results panel |
-| 11 | AppointmentControllerIntegrationTest — all green | IntelliJ: right-click → Run → screenshot results panel |
-| 12 | All 5 test classes run together — all green | IntelliJ: right-click `features/` test folder → Run All Tests → screenshot |
-| 13 | Coverage report — JaCoCo HTML | Run `./mvnw clean test` → open `target/site/jacoco/index.html` in browser → screenshot the summary table |
+| 5 | Full Maven test run — all 5 classes | Terminal: `cd backend && ./mvnw clean test` → screenshot the section showing all 5 `[INFO] Running ...` lines |
+| 6 | Final BUILD SUCCESS summary | Scroll to bottom of Maven output → screenshot the block showing `Tests run: XX, Failures: 0` and `BUILD SUCCESS` |
+| 7 | JaCoCo coverage report | Open `backend/target/site/jacoco/index.html` in browser → screenshot the table |
+
+> **Note on screenshots 7–12 (IntelliJ green checkmarks):** If IntelliJ shows `CreateProcess error=2`, your JDK is not configured. Fix it via `Ctrl+Shift+Alt+S → Project SDK → select JDK 17`. Alternatively, the Maven terminal output (screenshots 5–6) is fully sufficient evidence for a university submission.
 
 ### Tips for Good Screenshots
 
-- **For terminal screenshots:** Run `./mvnw clean test` in the `backend/` directory and screenshot the full output ending with `BUILD SUCCESS`
+- **For terminal screenshots:** Run `./mvnw clean test` in the `backend/` directory — scroll up to find the 5 `[INFO] Running edu.cit.ramirez.medigo.features.XxxTest` lines and screenshot that section, then screenshot the final `BUILD SUCCESS` block
 - **For the JaCoCo report:** After running tests, open `backend/target/site/jacoco/index.html` in Chrome/Edge and screenshot the table showing class-by-class coverage percentages
-- **For IntelliJ test results:** Open the test file → click the green play button next to the class name → screenshot the green checkmarks in the Run panel
 - **Crop** screenshots to show only the relevant content
-- **Name your screenshot files** clearly: e.g., `screenshot-01-backend-folder-tree.png`, `screenshot-07-auth-service-test-green.png`
+- **Name your screenshot files** clearly: e.g., `screenshot-01-backend-folder-tree.png`, `screenshot-05-maven-test-run.png`
 - **Save screenshots** to a folder like `docs/screenshots/` and reference them in the report
 
 ### How to Embed Screenshots in the Report
