@@ -342,16 +342,16 @@ cd backend
 | `ChatServiceTest` | Unit | 8 | Chat |
 | `AuthControllerIntegrationTest` | Integration | 12 | Auth endpoints |
 | `AppointmentControllerIntegrationTest` | Integration | 10 | Appointment endpoints |
-| **Total** | | **62** | |
+| **Total** | | **61** | |
 
 ### 5.2 Test Execution Result
 
 ```
-[INFO] Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
-> 📸 **SCREENSHOT 5:** Run `./mvnw clean test` inside the `backend/` folder and screenshot the terminal showing the final test results summary (`Tests run: 62, Failures: 0, BUILD SUCCESS`).
+> 📸 **SCREENSHOT 5:** Run `./mvnw clean test` inside the `backend/` folder and screenshot the terminal showing the final test results summary (`Tests run: 61, Failures: 0, BUILD SUCCESS`).
 
 ### 5.3 Test Coverage Summary
 
@@ -553,7 +553,7 @@ app.jwt.secret=test-secret-key-for-medigo-unit-tests-only
 
 | Metric | Result |
 |--------|--------|
-| Total test cases executed | 44 manual + 62 automated = **106** |
+| Total test cases executed | 44 manual + 61 automated = **105** |
 | Regressions found | **0** |
 | Test pass rate | **100%** |
 | Old directories removed | **83 files deleted** |

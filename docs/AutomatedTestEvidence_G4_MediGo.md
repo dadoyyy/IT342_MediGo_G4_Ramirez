@@ -381,7 +381,7 @@ cd backend
 [INFO]
 [INFO] Results:
 [INFO]
-[INFO] Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
@@ -395,7 +395,7 @@ cd backend
 
 > 📸 **SCREENSHOT 8:** Screenshot just the final summary block:
 > ```
-> Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
+> Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
 > BUILD SUCCESS
 > ```
 
