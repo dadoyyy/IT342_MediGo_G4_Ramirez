@@ -6,8 +6,10 @@ import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 
 const SPECIALTIES = ['All', 'General Practice', 'Cardiology', 'Dermatology', 'Pediatrics', 'Orthopedics', 'Neurology'];
+const ACCENTS = ['#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6'];
+
 const container = { animate: { transition: { staggerChildren: 0.06 } } };
-const item = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+const cardItem = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
 
 export default function PatientHome() {
   const navigate = useNavigate();
@@ -44,36 +46,36 @@ export default function PatientHome() {
 
   return (
     <AppShell user={user}>
-      <div className="px-6 py-8 max-w-5xl mx-auto">
+      <div style={{ padding: '32px 24px', maxWidth: 1100, margin: '0 auto' }}>
+
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <p className="text-sm mb-1" style={{ color: '#9CA3AF' }}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.5)', letterSpacing: '0.07em', marginBottom: 4 }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}
           </p>
-          <h1 className="text-2xl font-bold" style={{ color: '#1F2937' }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA' }}>
             Hello{firstName ? `, ${firstName}` : ''} 👋
           </h1>
-          <p className="text-sm mt-1" style={{ color: '#6B7280' }}>Find and book your next appointment</p>
+          <p style={{ fontSize: 14, color: '#8892A4', marginTop: 4 }}>Find and book your next appointment</p>
         </motion.div>
 
         {/* Search */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-          className="relative mb-5">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
+          style={{ position: 'relative', marginBottom: 20 }}>
+          <Search size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.4)' }} />
           <input type="text" value={query} onChange={e => setQuery(e.target.value)}
             placeholder="Search doctors by name or specialization…"
-            className="mg-input pl-11" />
+            className="mg-input" style={{ paddingLeft: 44 }} />
         </motion.div>
 
         {/* Specialty pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}
-          className="flex gap-2 flex-wrap mb-8">
+          style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
           {SPECIALTIES.map(s => (
             <button key={s} onClick={() => setActiveSpecialty(s)}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
               style={activeSpecialty === s
-                ? { background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', color: '#fff', boxShadow: '0 2px 10px rgba(20,184,166,0.25)' }
-                : { background: '#fff', border: '1.5px solid #E5E7EB', color: '#6B7280' }
+                ? { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(46,196,182,0.3)', transition: 'all 0.2s' }
+                : { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(136,146,164,0.75)', cursor: 'pointer', transition: 'all 0.2s' }
               }>
               {s}
             </button>
@@ -82,57 +84,60 @@ export default function PatientHome() {
 
         {/* Doctor grid */}
         {loading || searching ? (
-          <div className="flex justify-center py-20">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
             <div className="w-8 h-8 rounded-full border-2 animate-spin"
-              style={{ borderColor: 'rgba(20,184,166,0.2)', borderTopColor: '#14B8A6' }} />
+              style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
           </div>
         ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ background: '#F0FDFA', border: '1.5px solid #CCFBF1' }}>
-              <Search size={22} style={{ color: '#14B8A6' }} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.15)' }}>
+              <Search size={22} style={{ color: 'rgba(46,196,182,0.5)' }} />
             </div>
-            <p className="font-semibold mb-1" style={{ color: '#374151' }}>No doctors found</p>
-            <p className="text-sm" style={{ color: '#9CA3AF' }}>Try a different search or specialty</p>
+            <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 4 }}>No doctors found</p>
+            <p style={{ fontSize: 14, color: '#8892A4' }}>Try a different search or specialty</p>
           </motion.div>
         ) : (
           <motion.div variants={container} initial="initial" animate="animate"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(doctor => (
-              <motion.button key={doctor.doctorId} variants={item}
-                onClick={() => navigate(`/doctor/${doctor.doctorId}`)}
-                className="card p-5 text-left group"
-                whileHover={{ y: -3, boxShadow: '0 12px 32px rgba(20,184,166,0.1)' }}
-                transition={{ duration: 0.2 }}>
-                {/* Avatar */}
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-sm font-bold"
-                  style={{ background: 'linear-gradient(135deg, #CCFBF1, #EDE9FE)', color: '#0D9488' }}>
-                  {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
-                </div>
-                <p className="font-semibold text-sm mb-0.5" style={{ color: '#1F2937' }}>
-                  Dr. {doctor.doctorName}
-                </p>
-                {doctor.specialization && (
-                  <p className="text-xs font-medium mb-2" style={{ color: '#14B8A6' }}>{doctor.specialization}</p>
-                )}
-                {doctor.clinicName && (
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <MapPin size={11} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-                    <p className="text-xs truncate" style={{ color: '#6B7280' }}>{doctor.clinicName}</p>
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            {filtered.map((doctor, idx) => {
+              const accent = ACCENTS[idx % ACCENTS.length];
+              return (
+                <motion.button key={doctor.doctorId} variants={cardItem}
+                  onClick={() => navigate(`/doctor/${doctor.doctorId}`)}
+                  className="card"
+                  style={{ padding: 20, textAlign: 'left', cursor: 'pointer', background: 'rgba(17,24,39,0.8)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, position: 'relative', overflow: 'hidden', transition: 'all 0.25s ease' }}
+                  whileHover={{ y: -3, boxShadow: `0 16px 40px rgba(0,0,0,0.4), 0 0 24px rgba(${accent === '#2EC4B6' ? '46,196,182' : accent === '#9B8CFF' ? '155,140,255' : '255,117,89'},0.08)` }}
+                  transition={{ duration: 0.2 }}>
+                  {/* Top accent line */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${accent}50, transparent)` }} />
+
+                  {/* Avatar */}
+                  <div style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, fontSize: 13, fontWeight: 700, background: `rgba(${accent === '#2EC4B6' ? '46,196,182' : accent === '#9B8CFF' ? '155,140,255' : '255,117,89'},0.1)`, border: `1px solid rgba(${accent === '#2EC4B6' ? '46,196,182' : accent === '#9B8CFF' ? '155,140,255' : '255,117,89'},0.2)`, color: accent }}>
+                    {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
                   </div>
-                )}
-                <div className="flex items-center justify-between pt-3"
-                  style={{ borderTop: '1px solid #F3F4F6' }}>
-                  <div className="flex items-center gap-1">
-                    <BadgeCheck size={12} style={{ color: '#14B8A6' }} />
-                    <span className="text-xs font-medium" style={{ color: '#6B7280' }}>Verified</span>
+
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA', marginBottom: 2 }}>Dr. {doctor.doctorName}</p>
+                  {doctor.specialization && (
+                    <p style={{ fontSize: 12, fontWeight: 500, color: accent, marginBottom: 8 }}>{doctor.specialization}</p>
+                  )}
+                  {doctor.clinicName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
+                      <MapPin size={10} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />
+                      <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.55)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doctor.clinicName}</p>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <BadgeCheck size={11} style={{ color: '#2EC4B6' }} />
+                      <span style={{ fontSize: 11, fontWeight: 500, color: 'rgba(136,146,164,0.5)' }}>Verified</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: accent }}>
+                      Book <ArrowRight size={11} />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#14B8A6' }}>
-                    Book <ArrowRight size={11} />
-                  </div>
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
           </motion.div>
         )}
       </div>

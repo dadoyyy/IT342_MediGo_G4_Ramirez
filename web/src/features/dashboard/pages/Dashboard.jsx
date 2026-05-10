@@ -15,9 +15,8 @@ export default function Dashboard() {
         if (user?.role === 'PATIENT') { navigate('/home', { replace: true }); return; }
         if (user?.role === 'DOCTOR')  { navigate('/doctor/schedule', { replace: true }); return; }
         if (user?.role === 'ADMIN')   { navigate('/admin/verification', { replace: true }); return; }
-      } catch {
-        navigate('/login', { replace: true });
-      } finally { setDone(true); }
+      } catch { navigate('/login', { replace: true }); }
+      finally { setDone(true); }
     }
     redirect();
   }, [navigate]);
@@ -25,15 +24,13 @@ export default function Dashboard() {
   if (done) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FC' }}>
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', boxShadow: '0 0 20px rgba(20,184,166,0.25)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 28px rgba(46,196,182,0.4)' }}>
           <Stethoscope size={22} color="#fff" strokeWidth={2.5} />
         </div>
-        <div className="w-6 h-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'rgba(20,184,166,0.2)', borderTopColor: '#14B8A6' }} />
-        <p className="text-sm" style={{ color: '#6B7280' }}>Loading…</p>
+        <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+        <p style={{ fontSize: 14, color: '#8892A4' }}>Loading…</p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Stethoscope, Calendar, Users, Activity } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Stethoscope, Users, Calendar, Activity, TrendingUp } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import axios from 'axios';
 import { authSession } from '../authSession';
@@ -9,47 +9,47 @@ import { authResponseAdapter } from '../authResponseAdapter';
 import { authEvents } from '../authEventBus';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-function validate(form) {
-  const errors = {};
-  if (!form.email.trim()) errors.email = 'Email is required.';
-  else if (!EMAIL_RE.test(form.email)) errors.email = 'Enter a valid email address.';
-  if (!form.password) errors.password = 'Password is required.';
-  return errors;
+function validate(f) {
+  const e = {};
+  if (!f.email.trim()) e.email = 'Email is required.';
+  else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email.';
+  if (!f.password) e.password = 'Password is required.';
+  return e;
 }
 
-const stats = [
-  { icon: Users,       value: '12,400+', label: 'Patients' },
-  { icon: Stethoscope, value: '840+',    label: 'Doctors' },
-  { icon: Calendar,    value: '98,000+', label: 'Appointments' },
-  { icon: Activity,    value: '99.9%',   label: 'Uptime' },
+const STATS = [
+  { icon: Users,      value: '12,400+', label: 'Patients',     color: '#2EC4B6' },
+  { icon: Stethoscope,value: '840+',    label: 'Doctors',      color: '#9B8CFF' },
+  { icon: Calendar,   value: '98K+',    label: 'Appointments', color: '#FF7A59' },
+  { icon: TrendingUp, value: '99.9%',   label: 'Uptime',       color: '#2EC4B6' },
 ];
 
-const floatingCards = [
-  { title: 'Next Appointment', sub: 'Dr. Sarah Chen · Cardiology', time: 'Today, 2:30 PM', color: '#5EEAD4' },
-  { title: 'Prescription Ready', sub: 'Metformin 500mg · 30 tabs', time: 'Pickup available', color: '#C4B5FD' },
-  { title: 'Lab Results', sub: 'Blood panel complete', time: 'View report →', color: '#FFD2C7' },
+const PREVIEW_CARDS = [
+  { label: 'Next Appointment', value: 'Dr. Sarah Chen', sub: 'Cardiology · Today 2:30 PM', color: '#2EC4B6' },
+  { label: 'Prescription',     value: 'Metformin 500mg', sub: 'Ready for pickup',           color: '#9B8CFF' },
+  { label: 'Lab Results',      value: 'Blood Panel',     sub: 'Complete · View report',     color: '#FF7A59' },
 ];
 
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [apiError, setApiError] = useState('');
+  const [errs, setErrs] = useState({});
+  const [apiErr, setApiErr] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
-  function handleChange(e) {
+  function onChange(e) {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
-    setFieldErrors(p => ({ ...p, [name]: undefined }));
-    setApiError('');
+    setErrs(p => ({ ...p, [name]: undefined }));
+    setApiErr('');
   }
 
-  async function handleSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
-    const errors = validate(form);
-    if (Object.keys(errors).length) { setFieldErrors(errors); return; }
-    setLoading(true); setApiError('');
+    const v = validate(form);
+    if (Object.keys(v).length) { setErrs(v); return; }
+    setLoading(true); setApiErr('');
     try {
       const res = await authApi.login({ email: form.email.trim(), password: form.password });
       const token = authResponseAdapter.extractToken(res);
@@ -57,127 +57,162 @@ export default function Login() {
       authEvents.emit(authEvents.names.login, { source: 'login' });
       navigate('/dashboard', { state: { justLoggedIn: true } });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(authResponseAdapter.extractApiErrorMessage(err, 'Invalid credentials. Please try again.'));
-      } else { setApiError('Unable to connect. Please try again.'); }
+      if (axios.isAxiosError(err) && err.response?.data)
+        setApiErr(authResponseAdapter.extractApiErrorMessage(err, 'Invalid credentials.'));
+      else setApiErr('Unable to connect. Please try again.');
     } finally { setLoading(false); }
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#F7F9FC' }}>
+    <div className="min-h-screen flex overflow-hidden" style={{ background: '#0B1020' }}>
 
-      {/* ── LEFT PANEL — dark branded ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col justify-between p-12"
-        style={{ background: 'linear-gradient(145deg, #111827 0%, #1a2744 50%, #0f2030 100%)' }}>
+      {/* ── LEFT PANEL ── */}
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-between p-12 overflow-hidden"
+        style={{ background: 'linear-gradient(145deg, #0B1020 0%, #0E1628 45%, #111827 100%)' }}>
 
-        {/* Blobs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="blob-1 absolute w-[500px] h-[500px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.25), transparent)', top: '-120px', left: '-120px', filter: 'blur(70px)' }} />
-          <div className="blob-2 absolute w-96 h-96 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(139,147,255,0.2), transparent)', bottom: '5%', right: '-80px', filter: 'blur(60px)' }} />
-          <div className="blob-3 absolute w-72 h-72 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(103,232,249,0.12), transparent)', top: '45%', left: '35%', filter: 'blur(80px)' }} />
-          <div className="absolute inset-0 opacity-[0.025]"
-            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '44px 44px' }} />
+        {/* Ambient orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="blob-1 absolute rounded-full"
+            style={{ width: 560, height: 560, top: -180, left: -180,
+              background: 'radial-gradient(circle, rgba(46,196,182,0.14) 0%, transparent 70%)',
+              filter: 'blur(50px)' }} />
+          <div className="blob-2 absolute rounded-full"
+            style={{ width: 480, height: 480, bottom: -120, right: -120,
+              background: 'radial-gradient(circle, rgba(155,140,255,0.14) 0%, transparent 70%)',
+              filter: 'blur(55px)' }} />
+          <div className="blob-3 absolute rounded-full"
+            style={{ width: 320, height: 320, top: '42%', left: '38%',
+              background: 'radial-gradient(circle, rgba(255,117,89,0.07) 0%, transparent 70%)',
+              filter: 'blur(65px)' }} />
+          {/* Subtle dot grid */}
+          <div className="absolute inset-0"
+            style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>
 
         {/* Logo */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="relative flex items-center gap-3 z-10">
+          className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', boxShadow: '0 0 24px rgba(20,184,166,0.45)' }}>
+            style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 24px rgba(46,196,182,0.4)' }}>
             <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">MediGo</span>
+          <div>
+            <p className="text-xl font-bold text-white leading-tight">MediGo</p>
+            <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.6)', letterSpacing: '0.1em' }}>HEALTHCARE PLATFORM</p>
+          </div>
         </motion.div>
 
-        {/* Hero */}
+        {/* Hero content */}
         <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="relative z-10 space-y-7">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium"
-              style={{ background: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.25)', color: '#5EEAD4' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-              Healthcare Platform 2026
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)' }}>
+              <span className="pulse-dot w-1.5 h-1.5 rounded-full" style={{ background: '#2EC4B6', display: 'inline-block' }} />
+              <span style={{ fontSize: 12, color: '#5EEAD4', fontWeight: 500 }}>Healthcare Platform · 2026</span>
             </div>
-            <h1 className="text-5xl font-bold leading-tight text-white">
+            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white">
               Your health,<br />
               <span className="gradient-text">reimagined.</span>
             </h1>
-            <p className="text-base leading-relaxed max-w-sm" style={{ color: 'rgba(249,250,251,0.55)' }}>
-              Connect with verified specialists, manage appointments, and take control of your healthcare journey.
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: 'rgba(136,146,164,0.75)', maxWidth: 380 }}>
+              Connect with verified specialists, manage appointments intelligently, and take control of your healthcare journey.
             </p>
           </div>
 
+          {/* Animated heartbeat line */}
+          <div style={{ maxWidth: 300, height: 44 }}>
+            <svg viewBox="0 0 200 44" style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="hbg" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(46,196,182,0)" />
+                  <stop offset="25%" stopColor="#2EC4B6" />
+                  <stop offset="75%" stopColor="#9B8CFF" />
+                  <stop offset="100%" stopColor="rgba(155,140,255,0)" />
+                </linearGradient>
+              </defs>
+              <motion.path
+                d="M0,22 L30,22 L42,6 L54,38 L66,22 L80,22 L90,14 L100,30 L110,22 L130,22 L140,10 L152,34 L164,22 L200,22"
+                fill="none" stroke="url(#hbg)" strokeWidth="1.5"
+                strokeDasharray="300"
+                initial={{ strokeDashoffset: 300, opacity: 0 }}
+                animate={{ strokeDashoffset: 0, opacity: [0, 1, 1, 0] }}
+                transition={{ duration: 2.5, delay: 1, ease: 'easeInOut', repeat: Infinity, repeatDelay: 1.5 }}
+              />
+            </svg>
+          </div>
+
           {/* Floating preview cards */}
-          <div className="space-y-3 max-w-xs">
-            {floatingCards.map((card, i) => (
-              <motion.div key={card.title}
+          <div className="space-y-2.5" style={{ maxWidth: 340 }}>
+            {PREVIEW_CARDS.map((c, i) => (
+              <motion.div key={c.label}
                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + i * 0.12 }}
-                className="float-y rounded-2xl p-4"
-                style={{ animationDelay: `${i * 1.4}s`, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
+                transition={{ delay: 0.5 + i * 0.12 }}
+                className="float-y glass rounded-2xl px-4 py-3"
+                style={{ animationDelay: `${i * 1.5}s` }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: card.color, boxShadow: `0 0 8px ${card.color}` }} />
+                  <span className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: c.color, boxShadow: `0 0 8px ${c.color}`, display: 'inline-block' }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-white truncate">{card.title}</p>
-                    <p className="text-xs truncate" style={{ color: 'rgba(249,250,251,0.45)' }}>{card.sub}</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: '#F7F8FA' }} className="truncate">{c.value}</p>
+                    <p style={{ fontSize: 11, color: 'rgba(136,146,164,0.6)' }} className="truncate">{c.sub}</p>
                   </div>
-                  <span className="text-xs flex-shrink-0 font-medium" style={{ color: card.color }}>{card.time}</span>
+                  <span style={{ fontSize: 11, color: c.color, fontWeight: 500, flexShrink: 0 }}>{c.label}</span>
                 </div>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Stats */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }}
+        {/* Stats row */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
           className="relative z-10 grid grid-cols-4 gap-4">
-          {stats.map(({ icon: Icon, value, label }) => (
+          {STATS.map(({ icon: Icon, value, label, color }) => (
             <div key={label} className="text-center">
-              <Icon size={13} className="mx-auto mb-1" style={{ color: 'rgba(249,250,251,0.3)' }} />
-              <p className="text-sm font-bold text-white">{value}</p>
-              <p className="text-xs" style={{ color: 'rgba(249,250,251,0.35)' }}>{label}</p>
+              <Icon size={13} style={{ color: 'rgba(136,146,164,0.4)', margin: '0 auto 6px' }} />
+              <p style={{ fontSize: 14, fontWeight: 700, color }}>{value}</p>
+              <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.45)', marginTop: 2 }}>{label}</p>
             </div>
           ))}
         </motion.div>
       </div>
 
-      {/* ── RIGHT PANEL — clean white ── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="w-full max-w-sm">
+      {/* ── RIGHT PANEL ── */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative"
+        style={{ background: 'linear-gradient(180deg, #0E1628 0%, #0B1020 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(155,140,255,0.05) 0%, transparent 70%)' }} />
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          className="w-full relative z-10" style={{ maxWidth: 360 }}>
 
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)' }}>
+              style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
               <Stethoscope size={16} color="#fff" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-bold" style={{ color: '#1F2937' }}>MediGo</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-1" style={{ color: '#1F2937' }}>Welcome back</h2>
-            <p className="text-sm" style={{ color: '#6B7280' }}>Sign in to your account to continue</p>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA', marginBottom: 6 }}>Welcome back</h2>
+            <p style={{ fontSize: 14, color: '#8892A4' }}>Sign in to your account to continue</p>
           </div>
 
           <AnimatePresence>
-            {apiError && (
+            {apiErr && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-5 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
-                style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
-                <span className="mt-0.5 flex-shrink-0">⚠</span>
-                <span>{apiError}</span>
+                className="mb-5 flex items-start gap-3 rounded-xl px-4 py-3"
+                style={{ background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+                <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
+                <span>{apiErr}</span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Google */}
-          <button type="button"
-            onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
+          {/* Google OAuth */}
+          <button type="button" onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
             className="mg-btn-ghost w-full mb-5">
             <svg width="16" height="16" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -189,54 +224,52 @@ export default function Login() {
           </button>
 
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-xs" style={{ color: '#9CA3AF' }}>or sign in with email</span>
-            <div className="flex-1 h-px bg-gray-100" />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>or sign in with email</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <form onSubmit={onSubmit} noValidate className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold" style={{ color: '#374151' }}>Email address</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.8)', letterSpacing: '0.04em' }}>
+                EMAIL ADDRESS
+              </label>
               <div className="relative">
-                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                <input name="email" type="email" value={form.email} onChange={handleChange}
+                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'rgba(136,146,164,0.4)' }} />
+                <input name="email" type="email" value={form.email} onChange={onChange}
                   autoComplete="email" placeholder="you@example.com"
-                  className={`mg-input pl-11 ${fieldErrors.email ? 'error' : ''}`} />
+                  className={`mg-input pl-11 ${errs.email ? 'error' : ''}`} />
               </div>
-              {fieldErrors.email && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
+              {errs.email && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{errs.email}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold" style={{ color: '#374151' }}>Password</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.8)', letterSpacing: '0.04em' }}>
+                PASSWORD
+              </label>
               <div className="relative">
-                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                <input name="password" type={showPassword ? 'text' : 'password'}
-                  value={form.password} onChange={handleChange}
+                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'rgba(136,146,164,0.4)' }} />
+                <input name="password" type={showPw ? 'text' : 'password'} value={form.password} onChange={onChange}
                   autoComplete="current-password" placeholder="••••••••"
-                  className={`mg-input pl-11 pr-12 ${fieldErrors.password ? 'error' : ''}`} />
-                <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
-                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', background: 'none', border: 'none', padding: 0 }}>
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  className={`mg-input pl-11 pr-12 ${errs.password ? 'error' : ''}`} />
+                <button type="button" onClick={() => setShowPw(v => !v)} tabIndex={-1}
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.4)', background: 'none', border: 'none', padding: 0 }}>
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {fieldErrors.password && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors.password}</p>}
+              {errs.password && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{errs.password}</p>}
             </div>
 
-            <button type="submit" disabled={loading} className="mg-btn-primary w-full mt-1">
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                <>Sign In <ArrowRight size={15} /></>
-              )}
+            <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 4 }}>
+              {loading
+                ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Signing in…</>
+                : <>Sign In <ArrowRight size={15} /></>}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm" style={{ color: '#6B7280' }}>
+          <p style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: 'rgba(136,146,164,0.55)' }}>
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold" style={{ color: '#14B8A6' }}>Create one</Link>
+            <Link to="/register" style={{ color: '#2EC4B6', fontWeight: 600 }}>Create one</Link>
           </p>
         </motion.div>
       </div>

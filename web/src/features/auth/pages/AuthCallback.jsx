@@ -24,32 +24,27 @@ export default function AuthCallback() {
   }, [navigate]);
 
   if (!error) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FC' }}>
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', boxShadow: '0 0 24px rgba(20,184,166,0.3)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 28px rgba(46,196,182,0.4)' }}>
           <Stethoscope size={22} color="#fff" strokeWidth={2.5} />
         </div>
-        <div className="w-6 h-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'rgba(20,184,166,0.2)', borderTopColor: '#14B8A6' }} />
-        <p className="text-sm" style={{ color: '#6B7280' }}>Completing sign-in…</p>
+        <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+        <p style={{ fontSize: 14, color: '#8892A4' }}>Completing sign-in…</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#F7F9FC' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px', background: '#0B1020' }}>
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-        className="card rounded-3xl p-10 max-w-sm w-full text-center space-y-5">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
-          style={{ background: '#FEF2F2', border: '1.5px solid #FECACA' }}>
-          <AlertTriangle size={24} style={{ color: '#EF4444' }} />
+        className="glass" style={{ borderRadius: 24, padding: 40, maxWidth: 380, width: '100%', textAlign: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)' }}>
+          <AlertTriangle size={24} style={{ color: 'rgba(255,117,89,0.7)' }} />
         </div>
-        <div>
-          <h2 className="text-lg font-bold mb-2" style={{ color: '#1F2937' }}>Sign-in failed</h2>
-          <p className="text-sm" style={{ color: '#6B7280' }}>{error}</p>
-        </div>
-        <button onClick={() => navigate('/login', { replace: true })} className="mg-btn-primary w-full">
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#F7F8FA', marginBottom: 8 }}>Sign-in failed</h2>
+        <p style={{ fontSize: 14, color: '#8892A4', marginBottom: 24 }}>{error}</p>
+        <button onClick={() => navigate('/login', { replace: true })} className="mg-btn w-full">
           Back to Login
         </button>
       </motion.div>

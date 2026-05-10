@@ -7,11 +7,11 @@ import { authSession } from '../../auth/authSession';
 import axios from 'axios';
 
 function validate(form) {
-  const errors = {};
-  if (!form.specialization.trim()) errors.specialization = 'Specialization is required.';
-  if (!form.clinicName.trim()) errors.clinicName = 'Clinic / hospital name is required.';
-  if (!form.clinicAddress.trim()) errors.clinicAddress = 'Clinic address is required.';
-  return errors;
+  const e = {};
+  if (!form.specialization.trim()) e.specialization = 'Specialization is required.';
+  if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
+  if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
+  return e;
 }
 
 export default function DoctorRegistration() {
@@ -49,75 +49,75 @@ export default function DoctorRegistration() {
       await doctorApi.upsertMyProfile({ specialization: form.specialization.trim(), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
       navigate('/pending-approval', { replace: true });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
+      if (axios.isAxiosError(err) && err.response?.data)
         setApiError(err.response.data?.error?.message || err.response.data?.message || 'Submission failed.');
-      } else { setApiError('Unable to connect. Please try again.'); }
+      else setApiError('Unable to connect. Please try again.');
     } finally { setLoading(false); }
   }
 
   if (checking) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FC' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'rgba(20,184,166,0.2)', borderTopColor: '#14B8A6' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
     </div>
   );
 
   return (
-    <div className="min-h-screen px-6 py-12" style={{ background: '#F7F9FC' }}>
-      <div className="max-w-lg mx-auto">
+    <div style={{ minHeight: '100vh', padding: '48px 24px', background: '#0B1020', position: 'relative' }}>
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div className="blob-1 absolute rounded-full" style={{ width: 400, height: 400, top: -100, right: -100, background: 'radial-gradient(circle, rgba(155,140,255,0.1) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      </div>
+
+      <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 mb-10">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', boxShadow: '0 0 16px rgba(20,184,166,0.25)' }}>
-            <Stethoscope size={18} color="#fff" strokeWidth={2.5} />
+          style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 18px rgba(46,196,182,0.35)' }}>
+            <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
           </div>
-          <span className="text-lg font-bold" style={{ color: '#1F2937' }}>MediGo</span>
+          <div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
+            <p style={{ fontSize: 9, color: 'rgba(136,146,164,0.45)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+          </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-          className="card rounded-3xl p-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: '#1F2937' }}>Doctor Profile</h1>
-            <p className="text-sm" style={{ color: '#6B7280' }}>
-              Complete your professional profile to start accepting appointments.
-            </p>
+          className="glass" style={{ borderRadius: 24, padding: 32 }}>
+          <div style={{ marginBottom: 32 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#F7F8FA', marginBottom: 8 }}>Doctor Profile</h1>
+            <p style={{ fontSize: 14, color: '#8892A4' }}>Complete your professional profile to start accepting appointments.</p>
           </div>
 
           {apiError && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
-              style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+            <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
               <span>⚠</span><span>{apiError}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {[
-              { name: 'specialization', label: 'Specialization', icon: Stethoscope, ph: 'e.g. Cardiology, General Practice, Pediatrics', textarea: false },
-              { name: 'clinicName',     label: 'Clinic / Hospital Name', icon: Building2, ph: 'e.g. St. Luke\'s Medical Center', textarea: false },
-              { name: 'clinicAddress',  label: 'Clinic Address', icon: MapPin, ph: 'Full address of your clinic or hospital', textarea: true },
-            ].map(({ name, label, icon: Icon, ph, textarea }) => (
-              <div key={name} className="space-y-1.5">
-                <label className="block text-xs font-semibold" style={{ color: '#374151' }}>
-                  {label} <span style={{ color: '#EF4444' }}>*</span>
+              { name: 'specialization', label: 'SPECIALIZATION', Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice', textarea: false },
+              { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
+              { name: 'clinicAddress',  label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
+            ].map(({ name, label, Icon, ph, textarea }) => (
+              <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>
+                  {label} <span style={{ color: '#FCA5A5' }}>*</span>
                 </label>
-                <div className="relative">
-                  <Icon size={15} className={`absolute left-4 ${textarea ? 'top-3.5' : 'top-1/2 -translate-y-1/2'}`} style={{ color: '#9CA3AF' }} />
+                <div style={{ position: 'relative' }}>
+                  <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} />
                   {textarea ? (
                     <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
-                      className={`mg-input pl-11 resize-none ${fieldErrors[name] ? 'error' : ''}`} style={{ lineHeight: '1.5' }} />
+                      className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
                   ) : (
                     <input name={name} type="text" value={form[name]} onChange={handleChange} placeholder={ph}
-                      className={`mg-input pl-11 ${fieldErrors[name] ? 'error' : ''}`} />
+                      className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
                   )}
                 </div>
-                {fieldErrors[name] && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors[name]}</p>}
+                {fieldErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{fieldErrors[name]}</p>}
               </div>
             ))}
 
-            <button type="submit" disabled={loading} className="mg-btn-primary w-full" style={{ padding: '15px' }}>
-              {loading ? (
-                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</>
-              ) : (<>Save Profile <ArrowRight size={15} /></>)}
+            <button type="submit" disabled={loading} className="mg-btn w-full" style={{ padding: 15, marginTop: 4 }}>
+              {loading ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Submitting…</> : <>Save Profile <ArrowRight size={15} /></>}
             </button>
           </form>
         </motion.div>

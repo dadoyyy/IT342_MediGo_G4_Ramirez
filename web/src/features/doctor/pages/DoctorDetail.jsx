@@ -10,7 +10,6 @@ function getTodayStr() { return new Date().toISOString().split('T')[0]; }
 export default function DoctorDetail() {
   const { doctorId } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
@@ -21,7 +20,6 @@ export default function DoctorDetail() {
   const [apiError, setApiError] = useState('');
 
   useEffect(() => {
-    authApi.me().then(r => setUser(r.data?.data ?? r.data)).catch(() => {});
     doctorApi.search('').then(res => {
       const list = res.data?.data ?? res.data;
       setDoctor((Array.isArray(list) ? list : []).find(d => String(d.doctorId) === String(doctorId)) || null);
@@ -29,12 +27,12 @@ export default function DoctorDetail() {
   }, [doctorId]);
 
   function validate() {
-    const errors = {};
-    if (!booking.date) errors.date = 'Select a date.';
-    else if (booking.date < getTodayStr()) errors.date = 'Date cannot be in the past.';
-    if (!booking.time) errors.time = 'Select a time.';
-    if (!booking.appointmentType.trim()) errors.appointmentType = 'Describe the reason for your visit.';
-    return errors;
+    const e = {};
+    if (!booking.date) e.date = 'Select a date.';
+    else if (booking.date < getTodayStr()) e.date = 'Date cannot be in the past.';
+    if (!booking.time) e.time = 'Select a time.';
+    if (!booking.appointmentType.trim()) e.appointmentType = 'Describe the reason for your visit.';
+    return e;
   }
 
   async function handleBook(e) {
@@ -46,107 +44,87 @@ export default function DoctorDetail() {
       await appointmentApi.create({ doctorId: Number(doctorId), appointmentAt: `${booking.date}T${booking.time}:00`, appointmentType: booking.appointmentType.trim(), notes: booking.notes.trim() || undefined });
       setSuccess(true);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
+      if (axios.isAxiosError(err) && err.response?.data)
         setApiError(err.response.data?.error?.message || err.response.data?.message || 'Booking failed.');
-      } else { setApiError('Unable to connect. Please try again.'); }
+      else setApiError('Unable to connect. Please try again.');
     } finally { setSubmitting(false); }
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FC' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'rgba(20,184,166,0.2)', borderTopColor: '#14B8A6' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
     </div>
   );
 
   if (!doctor) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FC' }}>
-      <div className="text-center space-y-4">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
-          style={{ background: '#FEF2F2', border: '1.5px solid #FECACA' }}>
-          <Stethoscope size={22} style={{ color: '#EF4444' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)' }}>
+          <Stethoscope size={22} style={{ color: 'rgba(255,117,89,0.6)' }} />
         </div>
-        <p className="font-semibold" style={{ color: '#1F2937' }}>Doctor not found</p>
-        <button onClick={() => navigate('/home')} className="mg-btn-primary" style={{ padding: '10px 20px', fontSize: '13px' }}>
-          Back to Search
-        </button>
+        <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 16 }}>Doctor not found</p>
+        <button onClick={() => navigate('/home')} className="mg-btn" style={{ padding: '10px 20px', fontSize: 13 }}>Back to Search</button>
       </div>
     </div>
   );
 
   if (success) return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#F7F9FC' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px', background: '#0B1020' }}>
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-        className="card rounded-3xl p-10 max-w-sm w-full text-center space-y-5">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-          style={{ background: '#DCFCE7', border: '1.5px solid #BBF7D0' }}>
-          <CheckCircle size={28} style={{ color: '#16A34A' }} />
+        className="glass" style={{ borderRadius: 24, padding: 40, maxWidth: 380, width: '100%', textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)' }}>
+          <CheckCircle size={28} style={{ color: '#2EC4B6' }} />
         </div>
-        <div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: '#1F2937' }}>Appointment Requested!</h2>
-          <p className="text-sm" style={{ color: '#6B7280' }}>
-            Your request with Dr. {doctor.doctorName} has been submitted for approval.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button onClick={() => navigate('/appointments')} className="mg-btn-primary flex-1" style={{ padding: '12px', fontSize: '13px' }}>
-            View Appointments
-          </button>
-          <button onClick={() => navigate('/home')} className="mg-btn-ghost flex-1" style={{ padding: '12px', fontSize: '13px' }}>
-            Find More
-          </button>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#F7F8FA', marginBottom: 8 }}>Appointment Requested!</h2>
+        <p style={{ fontSize: 14, color: '#8892A4', marginBottom: 24 }}>
+          Your request with Dr. {doctor.doctorName} has been submitted for approval.
+        </p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => navigate('/appointments')} className="mg-btn" style={{ flex: 1, padding: 12, fontSize: 13 }}>View Appointments</button>
+          <button onClick={() => navigate('/home')} className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13 }}>Find More</button>
         </div>
       </motion.div>
     </div>
   );
 
   return (
-    <div className="min-h-screen" style={{ background: '#F7F9FC' }}>
-      <header className="sticky top-0 z-10 px-6 py-4 flex items-center gap-3 bg-white"
-        style={{ borderBottom: '1px solid #F3F4F6', boxShadow: '0 1px 4px rgba(31,41,55,0.04)' }}>
-        <button onClick={() => navigate(-1)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-          style={{ background: '#F9FAFB', border: '1.5px solid #E5E7EB', color: '#6B7280' }}>
+    <div style={{ minHeight: '100vh', background: '#0B1020' }}>
+      <header style={{ position: 'sticky', top: 0, zIndex: 10, padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(11,16,32,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <button onClick={() => navigate(-1)} style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#8892A4', cursor: 'pointer' }}>
           <ArrowLeft size={15} />
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
             <Stethoscope size={14} color="#fff" strokeWidth={2.5} />
           </div>
-          <span className="font-bold text-sm" style={{ color: '#1F2937' }}>MediGo</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-8">
+      <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
         {/* Doctor card */}
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="card p-6 mb-5">
-          <div className="flex items-start gap-5">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #CCFBF1, #EDE9FE)', color: '#0D9488' }}>
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          className="card" style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+            <div style={{ width: 64, height: 64, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, flexShrink: 0, background: 'linear-gradient(135deg, rgba(46,196,182,0.15), rgba(155,140,255,0.15))', color: '#2EC4B6', border: '1px solid rgba(46,196,182,0.2)' }}>
               {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold" style={{ color: '#1F2937' }}>Dr. {doctor.doctorName}</h1>
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                  style={{ background: '#DCFCE7', border: '1px solid #BBF7D0' }}>
-                  <BadgeCheck size={11} style={{ color: '#16A34A' }} />
-                  <span className="text-xs font-semibold" style={{ color: '#16A34A' }}>Verified</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <h1 style={{ fontSize: 20, fontWeight: 700, color: '#F7F8FA' }}>Dr. {doctor.doctorName}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 99, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)' }}>
+                  <BadgeCheck size={10} style={{ color: '#2EC4B6' }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#5EEAD4' }}>Verified</span>
                 </div>
               </div>
-              {doctor.specialization && (
-                <p className="text-sm font-medium mb-2" style={{ color: '#14B8A6' }}>{doctor.specialization}</p>
-              )}
+              {doctor.specialization && <p style={{ fontSize: 14, fontWeight: 500, color: '#2EC4B6', marginBottom: 8 }}>{doctor.specialization}</p>}
               {doctor.clinicName && (
-                <div className="flex items-center gap-1.5 mb-1">
-                  <MapPin size={12} style={{ color: '#9CA3AF' }} />
-                  <p className="text-sm" style={{ color: '#6B7280' }}>{doctor.clinicName}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                  <MapPin size={12} style={{ color: 'rgba(136,146,164,0.4)' }} />
+                  <p style={{ fontSize: 13, color: '#8892A4' }}>{doctor.clinicName}</p>
                 </div>
               )}
-              {doctor.clinicAddress && (
-                <p className="text-xs" style={{ color: '#9CA3AF' }}>{doctor.clinicAddress}</p>
-              )}
+              {doctor.clinicAddress && <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.4)' }}>{doctor.clinicAddress}</p>}
             </div>
           </div>
         </motion.div>
@@ -155,76 +133,60 @@ export default function DoctorDetail() {
         <AnimatePresence mode="wait">
           {!showBooking ? (
             <motion.button key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowBooking(true)} className="mg-btn-primary w-full" style={{ padding: '15px' }}>
+              onClick={() => setShowBooking(true)} className="mg-btn w-full" style={{ padding: 15 }}>
               <Calendar size={16} /> Book Appointment
             </motion.button>
           ) : (
             <motion.div key="form" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="card p-6">
-              <h2 className="text-base font-bold mb-5" style={{ color: '#1F2937' }}>Book an Appointment</h2>
+              className="glass" style={{ borderRadius: 20, padding: 24 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#F7F8FA', marginBottom: 20 }}>Book an Appointment</h2>
 
               <AnimatePresence>
                 {apiError && (
                   <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="mb-4 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
-                    style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+                    style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
                     <span>⚠</span><span>{apiError}</span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <form onSubmit={handleBook} noValidate className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold" style={{ color: '#374151' }}>Date</label>
-                    <div className="relative">
-                      <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                      <input type="date" min={getTodayStr()} value={booking.date}
-                        onChange={e => { setBooking(p => ({ ...p, date: e.target.value })); setBookingErrors(p => ({ ...p, date: undefined })); }}
-                        className={`mg-input pl-10 ${bookingErrors.date ? 'error' : ''}`} />
+              <form onSubmit={handleBook} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  {[['date','DATE','date',getTodayStr(),null],['time','TIME','time',null,null]].map(([name,label,type,min]) => (
+                    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>{label}</label>
+                      <div style={{ position: 'relative' }}>
+                        {name === 'date' ? <Calendar size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} /> : <Clock size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} />}
+                        <input type={type} min={min || undefined} value={booking[name]}
+                          onChange={e => { setBooking(p => ({ ...p, [name]: e.target.value })); setBookingErrors(p => ({ ...p, [name]: undefined })); }}
+                          className={`mg-input ${bookingErrors[name] ? 'error' : ''}`}
+                          style={{ paddingLeft: 40, colorScheme: 'dark' }} />
+                      </div>
+                      {bookingErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{bookingErrors[name]}</p>}
                     </div>
-                    {bookingErrors.date && <p className="text-xs" style={{ color: '#EF4444' }}>{bookingErrors.date}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-semibold" style={{ color: '#374151' }}>Time</label>
-                    <div className="relative">
-                      <Clock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                      <input type="time" value={booking.time}
-                        onChange={e => { setBooking(p => ({ ...p, time: e.target.value })); setBookingErrors(p => ({ ...p, time: undefined })); }}
-                        className={`mg-input pl-10 ${bookingErrors.time ? 'error' : ''}`} />
-                    </div>
-                    {bookingErrors.time && <p className="text-xs" style={{ color: '#EF4444' }}>{bookingErrors.time}</p>}
-                  </div>
+                  ))}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold" style={{ color: '#374151' }}>
-                    Reason for Visit <span style={{ color: '#EF4444' }}>*</span>
-                  </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>REASON FOR VISIT <span style={{ color: '#FCA5A5' }}>*</span></label>
                   <input type="text" value={booking.appointmentType}
                     onChange={e => { setBooking(p => ({ ...p, appointmentType: e.target.value })); setBookingErrors(p => ({ ...p, appointmentType: undefined })); }}
                     placeholder="e.g. General check-up, Follow-up, Consultation"
                     className={`mg-input ${bookingErrors.appointmentType ? 'error' : ''}`} />
-                  {bookingErrors.appointmentType && <p className="text-xs" style={{ color: '#EF4444' }}>{bookingErrors.appointmentType}</p>}
+                  {bookingErrors.appointmentType && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{bookingErrors.appointmentType}</p>}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold" style={{ color: '#374151' }}>
-                    Notes <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(optional)</span>
-                  </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>NOTES <span style={{ fontSize: 11, color: 'rgba(136,146,164,0.35)', fontWeight: 400 }}>(optional)</span></label>
                   <textarea value={booking.notes} onChange={e => setBooking(p => ({ ...p, notes: e.target.value }))}
                     placeholder="Describe your symptoms or any additional information…"
-                    rows={3} className="mg-input resize-none" style={{ lineHeight: '1.5' }} />
+                    rows={3} className="mg-input" style={{ resize: 'none', lineHeight: 1.5 }} />
                 </div>
 
-                <div className="flex gap-3 pt-1">
-                  <button type="button" onClick={() => setShowBooking(false)} className="mg-btn-ghost flex-1" style={{ padding: '12px' }}>
-                    Cancel
-                  </button>
-                  <button type="submit" disabled={submitting} className="mg-btn-primary flex-1" style={{ padding: '12px' }}>
-                    {submitting ? (
-                      <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Booking…</>
-                    ) : 'Confirm Booking'}
+                <div style={{ display: 'flex', gap: 12, paddingTop: 4 }}>
+                  <button type="button" onClick={() => setShowBooking(false)} className="mg-btn-ghost" style={{ flex: 1, padding: 12 }}>Cancel</button>
+                  <button type="submit" disabled={submitting} className="mg-btn" style={{ flex: 1, padding: 12 }}>
+                    {submitting ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Booking…</> : 'Confirm Booking'}
                   </button>
                 </div>
               </form>

@@ -6,131 +6,138 @@ import { authApi } from '../../../shared/api/api';
 import axios from 'axios';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-function validate(form) {
-  const errors = {};
-  if (!form.firstName.trim()) errors.firstName = 'First name is required.';
-  if (!form.lastName.trim()) errors.lastName = 'Last name is required.';
-  if (!form.email.trim()) errors.email = 'Email is required.';
-  else if (!EMAIL_RE.test(form.email)) errors.email = 'Enter a valid email address.';
-  if (!form.password) errors.password = 'Password is required.';
-  else if (form.password.length < 8) errors.password = 'Minimum 8 characters.';
-  if (form.password !== form.confirmPassword) errors.confirmPassword = 'Passwords do not match.';
-  return errors;
+function validate(f) {
+  const e = {};
+  if (!f.firstName.trim()) e.firstName = 'Required.';
+  if (!f.lastName.trim()) e.lastName = 'Required.';
+  if (!f.email.trim()) e.email = 'Email is required.';
+  else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email.';
+  if (!f.password) e.password = 'Password is required.';
+  else if (f.password.length < 8) e.password = 'Min. 8 characters.';
+  if (f.password !== f.confirmPassword) e.confirmPassword = 'Passwords do not match.';
+  return e;
 }
 
-const perks = [
-  { icon: ShieldCheck, text: 'Verified healthcare professionals' },
-  { icon: Zap,         text: 'Instant appointment booking' },
-  { icon: Heart,       text: 'Personalized health tracking' },
+const PERKS = [
+  { icon: ShieldCheck, text: 'Verified healthcare professionals', color: '#2EC4B6' },
+  { icon: Zap,         text: 'Instant appointment booking',       color: '#9B8CFF' },
+  { icon: Heart,       text: 'Personalized health tracking',      color: '#FF7A59' },
 ];
 
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [apiError, setApiError] = useState('');
+  const [errs, setErrs] = useState({});
+  const [apiErr, setApiErr] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showCf, setShowCf] = useState(false);
 
-  function handleChange(e) {
+  function onChange(e) {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
-    setFieldErrors(p => ({ ...p, [name]: undefined }));
-    setApiError('');
+    setErrs(p => ({ ...p, [name]: undefined }));
+    setApiErr('');
   }
 
-  async function handleSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
-    const errors = validate(form);
-    if (Object.keys(errors).length) { setFieldErrors(errors); return; }
-    setLoading(true); setApiError('');
+    const v = validate(form);
+    if (Object.keys(v).length) { setErrs(v); return; }
+    setLoading(true); setApiErr('');
     try {
       await authApi.register({ firstName: form.firstName.trim(), lastName: form.lastName.trim(), email: form.email.trim(), password: form.password });
       navigate('/login', { state: { registered: true } });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(err.response.data?.error?.message || err.response.data?.message || 'Registration failed.');
-      } else { setApiError('Unable to connect. Please try again.'); }
+      if (axios.isAxiosError(err) && err.response?.data)
+        setApiErr(err.response.data?.error?.message || err.response.data?.message || 'Registration failed.');
+      else setApiErr('Unable to connect. Please try again.');
     } finally { setLoading(false); }
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#F7F9FC' }}>
+    <div className="min-h-screen flex overflow-hidden" style={{ background: '#0B1020' }}>
 
       {/* LEFT PANEL */}
-      <div className="hidden lg:flex lg:w-[42%] relative overflow-hidden flex-col justify-between p-12"
-        style={{ background: 'linear-gradient(145deg, #111827 0%, #1a2744 55%, #0f2030 100%)' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="blob-1 absolute w-80 h-80 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(139,147,255,0.28), transparent)', top: '-60px', right: '-60px', filter: 'blur(65px)' }} />
-          <div className="blob-2 absolute w-72 h-72 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.22), transparent)', bottom: '12%', left: '-40px', filter: 'blur(55px)' }} />
-          <div className="absolute inset-0 opacity-[0.025]"
-            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '44px 44px' }} />
+      <div className="hidden lg:flex lg:w-[42%] relative flex-col justify-between p-12 overflow-hidden"
+        style={{ background: 'linear-gradient(145deg, #0B1020 0%, #0E1628 50%, #111827 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="blob-1 absolute rounded-full"
+            style={{ width: 480, height: 480, top: -140, right: -140, background: 'radial-gradient(circle, rgba(155,140,255,0.14) 0%, transparent 70%)', filter: 'blur(55px)' }} />
+          <div className="blob-2 absolute rounded-full"
+            style={{ width: 380, height: 380, bottom: -80, left: -80, background: 'radial-gradient(circle, rgba(46,196,182,0.12) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+          <div className="absolute inset-0"
+            style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>
 
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="relative flex items-center gap-3 z-10">
+          className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)', boxShadow: '0 0 22px rgba(20,184,166,0.45)' }}>
+            style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 24px rgba(46,196,182,0.4)' }}>
             <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
           </div>
-          <span className="text-xl font-bold text-white">MediGo</span>
+          <div>
+            <p style={{ fontSize: 20, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
+            <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.55)', letterSpacing: '0.1em' }}>HEALTHCARE PLATFORM</p>
+          </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="relative z-10 space-y-8">
           <div className="space-y-3">
-            <h1 className="text-4xl font-bold leading-tight text-white">
+            <h1 style={{ fontSize: 38, fontWeight: 700, lineHeight: 1.15, color: '#F7F8FA' }}>
               Join the future<br />
               <span className="gradient-text">of healthcare.</span>
             </h1>
-            <p className="text-sm leading-relaxed" style={{ color: 'rgba(249,250,251,0.55)' }}>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(136,146,164,0.7)' }}>
               Create your account and experience a smarter way to manage your health.
             </p>
           </div>
           <div className="space-y-4">
-            {perks.map(({ icon: Icon, text }, i) => (
+            {PERKS.map(({ icon: Icon, text, color }, i) => (
               <motion.div key={text} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + i * 0.1 }} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.25)' }}>
-                  <Icon size={14} style={{ color: '#5EEAD4' }} />
+                  style={{ background: `rgba(${color === '#2EC4B6' ? '46,196,182' : color === '#9B8CFF' ? '155,140,255' : '255,117,89'},0.1)`, border: `1px solid rgba(${color === '#2EC4B6' ? '46,196,182' : color === '#9B8CFF' ? '155,140,255' : '255,117,89'},0.2)` }}>
+                  <Icon size={14} style={{ color }} />
                 </div>
-                <span className="text-sm" style={{ color: 'rgba(249,250,251,0.65)' }}>{text}</span>
+                <span style={{ fontSize: 13, color: 'rgba(136,146,164,0.75)' }}>{text}</span>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <p className="relative z-10 text-xs" style={{ color: 'rgba(249,250,251,0.2)' }}>© 2026 MediGo. All rights reserved.</p>
+        <p className="relative z-10" style={{ fontSize: 11, color: 'rgba(136,146,164,0.25)' }}>© 2026 MediGo. All rights reserved.</p>
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="w-full max-w-sm">
+      <div className="flex-1 flex items-center justify-center px-6 py-10 relative"
+        style={{ background: 'linear-gradient(180deg, #0E1628 0%, #0B1020 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(155,140,255,0.04) 0%, transparent 70%)' }} />
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          className="w-full relative z-10" style={{ maxWidth: 360 }}>
 
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #14B8A6, #8B93FF)' }}>
+              style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
               <Stethoscope size={16} color="#fff" strokeWidth={2.5} />
             </div>
-            <span className="text-lg font-bold" style={{ color: '#1F2937' }}>MediGo</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-1" style={{ color: '#1F2937' }}>Create account</h2>
-            <p className="text-sm" style={{ color: '#6B7280' }}>Get started with MediGo today</p>
+          <div className="mb-7">
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA', marginBottom: 6 }}>Create account</h2>
+            <p style={{ fontSize: 14, color: '#8892A4' }}>Get started with MediGo today</p>
           </div>
 
           <AnimatePresence>
-            {apiError && (
+            {apiErr && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-5 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
-                style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
-                <span className="mt-0.5">⚠</span><span>{apiError}</span>
+                className="mb-5 flex items-start gap-3 rounded-xl px-4 py-3"
+                style={{ background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+                <span>⚠</span><span>{apiErr}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -147,67 +154,67 @@ export default function Register() {
           </button>
 
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-xs" style={{ color: '#9CA3AF' }}>or register with email</span>
-            <div className="flex-1 h-px bg-gray-100" />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>or register with email</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <form onSubmit={onSubmit} noValidate className="space-y-3.5">
             <div className="grid grid-cols-2 gap-3">
-              {[['firstName','First name','John'],['lastName','Last name','Doe']].map(([name,label,ph]) => (
+              {[['firstName','FIRST NAME','John','given-name'],['lastName','LAST NAME','Doe','family-name']].map(([name,label,ph,ac]) => (
                 <div key={name} className="space-y-1.5">
-                  <label className="block text-xs font-semibold" style={{ color: '#374151' }}>{label}</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>{label}</label>
                   <div className="relative">
-                    <User size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                    <input name={name} type="text" value={form[name]} onChange={handleChange}
-                      autoComplete={name === 'firstName' ? 'given-name' : 'family-name'} placeholder={ph}
-                      className={`mg-input pl-10 ${fieldErrors[name] ? 'error' : ''}`} />
+                    <User size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'rgba(136,146,164,0.35)' }} />
+                    <input name={name} type="text" value={form[name]} onChange={onChange}
+                      autoComplete={ac} placeholder={ph}
+                      className={`mg-input pl-10 ${errs[name] ? 'error' : ''}`} />
                   </div>
-                  {fieldErrors[name] && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors[name]}</p>}
+                  {errs[name] && <p style={{ fontSize: 11, color: '#FCA5A5' }}>{errs[name]}</p>}
                 </div>
               ))}
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold" style={{ color: '#374151' }}>Email address</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>EMAIL ADDRESS</label>
               <div className="relative">
-                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                <input name="email" type="email" value={form.email} onChange={handleChange}
+                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'rgba(136,146,164,0.35)' }} />
+                <input name="email" type="email" value={form.email} onChange={onChange}
                   autoComplete="email" placeholder="you@example.com"
-                  className={`mg-input pl-11 ${fieldErrors.email ? 'error' : ''}`} />
+                  className={`mg-input pl-11 ${errs.email ? 'error' : ''}`} />
               </div>
-              {fieldErrors.email && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
+              {errs.email && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{errs.email}</p>}
             </div>
 
-            {[['password','Password','Min. 8 characters','new-password',showPassword,setShowPassword],
-              ['confirmPassword','Confirm password','Re-enter password','new-password',showConfirm,setShowConfirm]
+            {[['password','PASSWORD','Min. 8 characters','new-password',showPw,setShowPw],
+              ['confirmPassword','CONFIRM PASSWORD','Re-enter password','new-password',showCf,setShowCf]
             ].map(([name,label,ph,ac,show,setShow]) => (
               <div key={name} className="space-y-1.5">
-                <label className="block text-xs font-semibold" style={{ color: '#374151' }}>{label}</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>{label}</label>
                 <div className="relative">
-                  <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
-                  <input name={name} type={show ? 'text' : 'password'} value={form[name]} onChange={handleChange}
+                  <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'rgba(136,146,164,0.35)' }} />
+                  <input name={name} type={show ? 'text' : 'password'} value={form[name]} onChange={onChange}
                     autoComplete={ac} placeholder={ph}
-                    className={`mg-input pl-11 pr-12 ${fieldErrors[name] ? 'error' : ''}`} />
+                    className={`mg-input pl-11 pr-12 ${errs[name] ? 'error' : ''}`} />
                   <button type="button" onClick={() => setShow(v => !v)} tabIndex={-1}
-                    style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', background: 'none', border: 'none', padding: 0 }}>
+                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.35)', background: 'none', border: 'none', padding: 0 }}>
                     {show ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
-                {fieldErrors[name] && <p className="text-xs" style={{ color: '#EF4444' }}>{fieldErrors[name]}</p>}
+                {errs[name] && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{errs[name]}</p>}
               </div>
             ))}
 
-            <button type="submit" disabled={loading} className="mg-btn-primary w-full mt-1">
-              {loading ? (
-                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating account…</>
-              ) : (<>Create Account <ArrowRight size={15} /></>)}
+            <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 4 }}>
+              {loading
+                ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Creating account…</>
+                : <>Create Account <ArrowRight size={15} /></>}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm" style={{ color: '#6B7280' }}>
+          <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: 'rgba(136,146,164,0.55)' }}>
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold" style={{ color: '#14B8A6' }}>Sign in</Link>
+            <Link to="/login" style={{ color: '#2EC4B6', fontWeight: 600 }}>Sign in</Link>
           </p>
         </motion.div>
       </div>
