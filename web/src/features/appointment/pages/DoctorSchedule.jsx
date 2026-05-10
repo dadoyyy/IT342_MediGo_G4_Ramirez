@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Clock, User, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
 import { authApi, appointmentApi } from '../../../shared/api/api';
-import { authSession } from '../../auth/authSession';
-import { authEvents } from '../../auth/authEventBus';
+import AppShell from '../../../shared/ui/AppShell';
 
-const STATUS_LABELS = {
-  PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  CONFIRMED:               { label: 'Confirmed',        color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  COMPLETED:               { label: 'Completed',        color: 'bg-green-50 text-green-700 border-green-200' },
-  CANCELLED:               { label: 'Cancelled',        color: 'bg-gray-100 text-gray-500 border-gray-200' },
-  REJECTED:                { label: 'Rejected',         color: 'bg-red-50 text-red-600 border-red-200' },
+const STATUS_META = {
+  PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', cls: 'badge-pending' },
+  CONFIRMED:               { label: 'Confirmed',        cls: 'badge-confirmed' },
+  COMPLETED:               { label: 'Completed',        cls: 'badge-completed' },
+  CANCELLED:               { label: 'Cancelled',        cls: 'badge-cancelled' },
+  REJECTED:                { label: 'Rejected',         cls: 'badge-rejected' },
 };
 
-function formatDateTime(dt) {
+function fmtDt(dt) {
   if (!dt) return '—';
-  return new Date(dt).toLocaleString('en-US', {
-    weekday: 'short', year: 'numeric', month: 'short',
-    day: 'numeric', hour: 'numeric', minute: '2-digit',
-  });
+  return new Date(dt).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
+
+const FILTERS = ['ALL', 'PENDING_DOCTOR_APPROVAL', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'REJECTED'];
 
 export default function DoctorSchedule() {
   const navigate = useNavigate();
@@ -31,18 +31,11 @@ export default function DoctorSchedule() {
   useEffect(() => {
     async function load() {
       try {
-        const [meRes, apptRes] = await Promise.all([
-          authApi.me(),
-          appointmentApi.listMine(),
-        ]);
+        const [meRes, apptRes] = await Promise.all([authApi.me(), appointmentApi.listMine()]);
         setUser(meRes.data?.data ?? meRes.data);
         const list = apptRes.data?.data ?? apptRes.data;
         setAppointments(Array.isArray(list) ? list : []);
-      } catch {
-        // interceptor handles 401
-      } finally {
-        setLoading(false);
-      }
+      } catch {} finally { setLoading(false); }
     }
     load();
   }, []);
@@ -51,159 +44,129 @@ export default function DoctorSchedule() {
     setUpdating(id);
     try {
       await appointmentApi.updateStatus(id, { status });
-      setAppointments((prev) =>
-        prev.map((a) => a.id === id ? { ...a, status } : a)
-      );
-    } catch {
-      alert('Failed to update status. Please try again.');
-    } finally {
-      setUpdating(null);
-    }
+      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    } catch { alert('Failed to update. Please try again.'); }
+    finally { setUpdating(null); }
   }
 
-  function handleLogout() {
-    authApi.logout().catch(() => {});
-    authSession.clearSession();
-    authEvents.emit(authEvents.names.logout);
-    navigate('/login', { replace: true });
-  }
-
-  const filters = ['ALL', 'PENDING_DOCTOR_APPROVAL', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'REJECTED'];
   const displayed = filter === 'ALL' ? appointments : appointments.filter(a => a.status === filter);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#7C2327' }}>
-            <span className="text-white text-sm">⚕</span>
-          </div>
-          <span className="text-lg font-bold" style={{ color: '#7C2327' }}>MediGo</span>
-        </div>
-        <nav className="hidden md:flex items-center gap-6">
-          <button onClick={() => navigate('/chat')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            Messages
-          </button>
-        </nav>
-        <div className="flex items-center gap-4">
-          {user && <span className="text-sm text-gray-600 hidden sm:block">Dr. {user.fullName}</span>}
-          <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
-            Sign out
-          </button>
-        </div>
-      </header>
+  const stats = [
+    { label: 'Total',     value: appointments.length,                                                    color: '#9B8CFF' },
+    { label: 'Pending',   value: appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL').length, color: '#F59E0B' },
+    { label: 'Confirmed', value: appointments.filter(a => a.status === 'CONFIRMED').length,               color: '#2EC4B6' },
+    { label: 'Completed', value: appointments.filter(a => a.status === 'COMPLETED').length,               color: '#22D3A5' },
+  ];
 
-      <main className="max-w-3xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Schedule</h1>
-          <p className="text-gray-500 text-sm mt-1">Manage your patient appointments.</p>
-        </div>
+  return (
+    <AppShell user={user}>
+      <div className="px-6 py-8 max-w-3xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="text-2xl font-bold" style={{ color: '#F7F8FA' }}>My Schedule</h1>
+          <p className="text-sm mt-1" style={{ color: 'rgba(247,248,250,0.4)' }}>Manage your patient appointments</p>
+        </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {[
-            { label: 'Total',     value: appointments.length,                                                icon: '📋' },
-            { label: 'Pending',   value: appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL').length, icon: '⏳' },
-            { label: 'Confirmed', value: appointments.filter(a => a.status === 'CONFIRMED').length,          icon: '✅' },
-            { label: 'Completed', value: appointments.filter(a => a.status === 'COMPLETED').length,          icon: '🏁' },
-          ].map((s) => (
-            <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
-              <div className="text-xl mb-1">{s.icon}</div>
-              <p className="text-xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-500">{s.label}</p>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="grid grid-cols-4 gap-3 mb-8">
+          {stats.map(s => (
+            <div key={s.label} className="glass rounded-2xl p-4 text-center">
+              <p className="text-2xl font-bold mb-0.5" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-xs" style={{ color: 'rgba(247,248,250,0.4)' }}>{s.label}</p>
             </div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          {filters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                filter === f
-                  ? 'text-white shadow-sm'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-              style={filter === f ? { backgroundColor: '#7C2327' } : {}}
-            >
-              {f === 'ALL' ? 'All' : STATUS_LABELS[f]?.label}
+        {/* Filters */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
+          className="flex gap-2 flex-wrap mb-6">
+          {FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+              style={filter === f
+                ? { background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#0B1020', fontWeight: 600 }
+                : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(247,248,250,0.5)' }
+              }>
+              {f === 'ALL' ? 'All' : STATUS_META[f]?.label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <span className="w-8 h-8 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin" />
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 rounded-full border-2 animate-spin"
+              style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
           </div>
         ) : displayed.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <div className="text-4xl mb-3">📅</div>
-            <p className="text-sm">No appointments in this category.</p>
-          </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.15)' }}>
+              <TrendingUp size={24} style={{ color: 'rgba(46,196,182,0.5)' }} />
+            </div>
+            <p className="font-medium" style={{ color: 'rgba(247,248,250,0.5)' }}>No appointments here</p>
+          </motion.div>
         ) : (
           <div className="space-y-3">
-            {displayed.map((appt) => {
-              const statusInfo = STATUS_LABELS[appt.status] || { label: appt.status, color: 'bg-gray-100 text-gray-500 border-gray-200' };
+            {displayed.map((appt, i) => {
+              const meta = STATUS_META[appt.status] || { label: appt.status, cls: 'badge-cancelled' };
               return (
-                <div key={appt.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                <motion.div key={appt.id}
+                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="glass rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusInfo.color}`}>
-                          {statusInfo.label}
-                        </span>
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                        style={{ background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF' }}>
+                        {appt.patientName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'PT'}
                       </div>
-                      <p className="font-semibold text-gray-900 text-sm">{appt.patientName}</p>
-                      {appt.appointmentType && (
-                        <p className="text-xs text-gray-500 mt-0.5">{appt.appointmentType}</p>
-                      )}
-                      <p className="text-xs text-gray-400 mt-1">
-                        📅 {formatDateTime(appt.appointmentAt)}
-                      </p>
-                      {appt.notes && (
-                        <p className="text-xs text-gray-400 mt-2 italic">"{appt.notes}"</p>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
+                        </div>
+                        <p className="font-semibold text-sm" style={{ color: '#F7F8FA' }}>{appt.patientName}</p>
+                        {appt.appointmentType && (
+                          <p className="text-xs mt-0.5" style={{ color: '#9B8CFF' }}>{appt.appointmentType}</p>
+                        )}
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <Clock size={11} style={{ color: 'rgba(247,248,250,0.3)' }} />
+                          <span className="text-xs" style={{ color: 'rgba(247,248,250,0.4)' }}>{fmtDt(appt.appointmentAt)}</span>
+                        </div>
+                        {appt.notes && (
+                          <p className="text-xs mt-2 italic" style={{ color: 'rgba(247,248,250,0.3)' }}>"{appt.notes}"</p>
+                        )}
+                      </div>
                     </div>
-                    {/* Action buttons */}
                     <div className="flex flex-col gap-1.5 flex-shrink-0">
                       {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
-                        <button
-                          onClick={() => updateStatus(appt.id, 'CONFIRMED')}
-                          disabled={updating === appt.id}
-                          className="text-xs px-3 py-1.5 rounded-lg text-white font-medium disabled:opacity-50 transition-all"
-                          style={{ backgroundColor: '#7C2327' }}
-                        >
-                          Confirm
-                        </button>
-                      )}
-                      {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
-                        <button
-                          onClick={() => updateStatus(appt.id, 'REJECTED')}
-                          disabled={updating === appt.id}
-                          className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 disabled:opacity-50 transition-all"
-                        >
-                          Reject
-                        </button>
+                        <>
+                          <button onClick={() => updateStatus(appt.id, 'CONFIRMED')} disabled={updating === appt.id}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: 'rgba(46,196,182,0.15)', border: '1px solid rgba(46,196,182,0.25)', color: '#2EC4B6' }}>
+                            <CheckCircle size={12} /> Confirm
+                          </button>
+                          <button onClick={() => updateStatus(appt.id, 'REJECTED')} disabled={updating === appt.id}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: 'rgba(255,92,122,0.1)', border: '1px solid rgba(255,92,122,0.2)', color: '#FF5C7A' }}>
+                            <XCircle size={12} /> Reject
+                          </button>
+                        </>
                       )}
                       {appt.status === 'CONFIRMED' && (
-                        <button
-                          onClick={() => updateStatus(appt.id, 'COMPLETED')}
-                          disabled={updating === appt.id}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-medium disabled:opacity-50 transition-all"
-                        >
-                          Complete
+                        <button onClick={() => updateStatus(appt.id, 'COMPLETED')} disabled={updating === appt.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                          style={{ background: 'rgba(34,211,165,0.15)', border: '1px solid rgba(34,211,165,0.25)', color: '#22D3A5' }}>
+                          <CheckCircle size={12} /> Complete
                         </button>
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

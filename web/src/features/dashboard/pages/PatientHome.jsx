@@ -1,8 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Search, MapPin, Star, ArrowRight, Stethoscope } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
-import { authSession } from '../../auth/authSession';
-import { authEvents } from '../../auth/authEventBus';
+import AppShell from '../../../shared/ui/AppShell';
+
+const SPECIALTIES = ['All', 'General Practice', 'Cardiology', 'Dermatology', 'Pediatrics', 'Orthopedics', 'Neurology'];
+
+const container = { animate: { transition: { staggerChildren: 0.07 } } };
+const item = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
 export default function PatientHome() {
   const navigate = useNavigate();
@@ -11,159 +17,129 @@ export default function PatientHome() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const [activeSpecialty, setActiveSpecialty] = useState('All');
 
   useEffect(() => {
-    authApi.me()
-      .then((res) => setUser(res.data?.data ?? res.data))
-      .catch(() => {});
+    authApi.me().then(r => setUser(r.data?.data ?? r.data)).catch(() => {});
   }, []);
 
   const searchDoctors = useCallback(async (q) => {
     setSearching(true);
     try {
       const res = await doctorApi.search(q);
-      // API returns ApiResponse envelope: { success, data: [...] }
       const list = res.data?.data ?? res.data;
       setDoctors(Array.isArray(list) ? list : []);
-    } catch {
-      setDoctors([]);
-    } finally {
-      setSearching(false);
-      setLoading(false);
-    }
+    } catch { setDoctors([]); }
+    finally { setSearching(false); setLoading(false); }
   }, []);
 
+  useEffect(() => { searchDoctors(''); }, [searchDoctors]);
   useEffect(() => {
-    searchDoctors('');
-  }, [searchDoctors]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => searchDoctors(query), 400);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => searchDoctors(query), 400);
+    return () => clearTimeout(t);
   }, [query, searchDoctors]);
-
-  function handleLogout() {
-    authApi.logout().catch(() => {});
-    authSession.clearSession();
-    authEvents.emit(authEvents.names.logout);
-    navigate('/login', { replace: true });
-  }
-
-  const specialties = ['All', 'General', 'Cardiology', 'Dermatology', 'Pediatrics', 'Orthopedics'];
-  const [activeSpecialty, setActiveSpecialty] = useState('All');
 
   const filtered = activeSpecialty === 'All'
     ? doctors
     : doctors.filter(d => d.specialization?.toLowerCase().includes(activeSpecialty.toLowerCase()));
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#7C2327' }}>
-            <span className="text-white text-sm">⚕</span>
-          </div>
-          <span className="text-lg font-bold" style={{ color: '#7C2327' }}>MediGo</span>
-        </div>
-        <nav className="hidden md:flex items-center gap-6">
-          <button onClick={() => navigate('/appointments')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            My Appointments
-          </button>
-          <button onClick={() => navigate('/chat')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            Messages
-          </button>
-        </nav>
-        <div className="flex items-center gap-4">
-          {user && <span className="text-sm text-gray-600 hidden sm:block">{user.fullName}</span>}
-          <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
-            Sign out
-          </button>
-        </div>
-      </header>
+  const greeting = user?.fullName ? `Hello, ${user.fullName.split(' ')[0]}` : 'Hello';
 
-      <main className="max-w-5xl mx-auto px-6 py-10">
-        {/* Hero */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Find a Doctor
-          </h1>
-          <p className="text-gray-500 mt-1">Search from our network of verified healthcare professionals.</p>
-        </div>
+  return (
+    <AppShell user={user}>
+      <div className="px-6 py-8 max-w-5xl mx-auto">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <p className="text-sm mb-1" style={{ color: 'rgba(247,248,250,0.4)' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+          <h1 className="text-2xl font-bold" style={{ color: '#F7F8FA' }}>{greeting} 👋</h1>
+          <p className="text-sm mt-1" style={{ color: 'rgba(247,248,250,0.4)' }}>Find and book your next appointment</p>
+        </motion.div>
 
         {/* Search */}
-        <div className="relative mb-6">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or specialty…"
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:ring-2 focus:ring-rose-100 focus:border-rose-400 transition-all shadow-sm"
-          />
-        </div>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="relative mb-6">
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'rgba(247,248,250,0.3)' }} />
+          <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Search doctors by name or specialization…"
+            className="mg-input pl-11"
+            style={{ fontSize: '14px' }} />
+        </motion.div>
 
-        {/* Specialty filter */}
-        <div className="flex gap-2 flex-wrap mb-8">
-          {specialties.map((s) => (
-            <button
-              key={s}
-              onClick={() => setActiveSpecialty(s)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                activeSpecialty === s
-                  ? 'text-white shadow-sm'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-              style={activeSpecialty === s ? { backgroundColor: '#7C2327' } : {}}
-            >
+        {/* Specialty pills */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
+          className="flex gap-2 flex-wrap mb-8">
+          {SPECIALTIES.map(s => (
+            <button key={s} onClick={() => setActiveSpecialty(s)}
+              className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
+              style={activeSpecialty === s
+                ? { background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#0B1020', fontWeight: 600 }
+                : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(247,248,250,0.5)' }
+              }>
               {s}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Doctor list */}
+        {/* Doctor grid */}
         {loading || searching ? (
-          <div className="flex justify-center py-16">
-            <span className="w-8 h-8 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin" />
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 rounded-full border-2 animate-spin"
+              style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-sm">No doctors found. Try a different search.</p>
-          </div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="text-center py-20">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.15)' }}>
+              <Search size={24} style={{ color: 'rgba(46,196,182,0.5)' }} />
+            </div>
+            <p className="font-medium mb-1" style={{ color: 'rgba(247,248,250,0.6)' }}>No doctors found</p>
+            <p className="text-sm" style={{ color: 'rgba(247,248,250,0.3)' }}>Try a different search or specialty</p>
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((doctor) => (
-              <button
-                key={doctor.doctorId}
+          <motion.div variants={container} initial="initial" animate="animate"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map(doctor => (
+              <motion.button key={doctor.doctorId} variants={item}
                 onClick={() => navigate(`/doctor/${doctor.doctorId}`)}
-                className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm text-left hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-2xl mb-4">
-                  👨‍⚕️
+                className="glass rounded-2xl p-5 text-left group transition-all duration-200 hover:border-teal-500/30"
+                style={{ borderColor: 'rgba(155,140,255,0.12)' }}
+                whileHover={{ y: -3, boxShadow: '0 12px 40px rgba(46,196,182,0.12)' }}>
+                {/* Avatar */}
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-sm font-bold"
+                  style={{ background: 'linear-gradient(135deg, rgba(46,196,182,0.2), rgba(155,140,255,0.2))', color: '#2EC4B6', border: '1px solid rgba(46,196,182,0.2)' }}>
+                  {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
                 </div>
-                <p className="font-semibold text-gray-900 text-sm">
+                <p className="font-semibold text-sm mb-0.5" style={{ color: '#F7F8FA' }}>
                   Dr. {doctor.doctorName}
                 </p>
                 {doctor.specialization && (
-                  <p className="text-xs text-gray-500 mt-0.5">{doctor.specialization}</p>
+                  <p className="text-xs mb-2" style={{ color: '#2EC4B6' }}>{doctor.specialization}</p>
                 )}
                 {doctor.clinicName && (
-                  <p className="text-xs text-gray-400 mt-1">🏥 {doctor.clinicName}</p>
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <MapPin size={11} style={{ color: 'rgba(247,248,250,0.3)', flexShrink: 0 }} />
+                    <p className="text-xs truncate" style={{ color: 'rgba(247,248,250,0.4)' }}>{doctor.clinicName}</p>
+                  </div>
                 )}
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <span
-                    className="text-xs font-medium px-2 py-1 rounded-full"
-                    style={{ backgroundColor: '#FEF2F2', color: '#B4232A' }}
-                  >
-                    Book Appointment
-                  </span>
+                <div className="flex items-center justify-between pt-3"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center gap-1">
+                    <Star size={11} style={{ color: '#F59E0B', fill: '#F59E0B' }} />
+                    <span className="text-xs font-medium" style={{ color: 'rgba(247,248,250,0.5)' }}>Verified</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs font-medium transition-colors"
+                    style={{ color: '#2EC4B6' }}>
+                    Book <ArrowRight size={11} />
+                  </div>
                 </div>
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

@@ -1,7 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { authSession } from '../../auth/authSession';
+import { motion } from 'framer-motion';
+import { Stethoscope, Clock, CheckCircle, Bell, LogOut } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
+import { authSession } from '../../auth/authSession';
 import { authEvents } from '../../auth/authEventBus';
+
+const steps = [
+  { icon: CheckCircle, label: 'Profile submitted', done: true },
+  { icon: Clock,       label: 'Under review by admin team', done: false },
+  { icon: Bell,        label: 'Approval notification sent', done: false },
+];
 
 export default function PendingApproval() {
   const navigate = useNavigate();
@@ -14,62 +22,70 @@ export default function PendingApproval() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md text-center">
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#0B1020' }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="blob-1 absolute w-96 h-96 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)', top: '-80px', left: '-80px', filter: 'blur(80px)' }} />
+        <div className="blob-2 absolute w-80 h-80 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #9B8CFF, transparent)', bottom: '-60px', right: '-60px', filter: 'blur(70px)' }} />
+      </div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative z-10">
         <div className="flex items-center gap-2 mb-10 justify-center">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#7C2327' }}>
-            <span className="text-white text-xl">⚕</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 20px rgba(46,196,182,0.4)' }}>
+            <Stethoscope size={20} color="#0B1020" strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-bold" style={{ color: '#7C2327' }}>MediGo</span>
+          <span className="text-xl font-bold" style={{ color: '#F7F8FA' }}>MediGo</span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm space-y-5">
-          <div className="w-16 h-16 rounded-2xl bg-yellow-50 flex items-center justify-center text-3xl mx-auto">
-            ⏳
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-xl font-bold text-gray-900">Verification Pending</h1>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Your doctor profile has been submitted and is currently under review by our admin team.
-              You'll be notified once your account is verified.
+        <div className="glass rounded-3xl p-8 space-y-6">
+          {/* Icon */}
+          <div className="text-center">
+            <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <Clock size={28} style={{ color: '#F59E0B' }} />
+            </motion.div>
+            <h1 className="text-xl font-bold mb-2" style={{ color: '#F7F8FA' }}>Verification Pending</h1>
+            <p className="text-sm" style={{ color: 'rgba(247,248,250,0.4)' }}>
+              Your profile is under review. We'll notify you once approved.
             </p>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-left space-y-2">
-            <p className="text-sm font-medium text-yellow-800">What happens next?</p>
-            <ul className="text-xs text-yellow-700 space-y-1.5">
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">1.</span>
-                <span>Our team reviews your license and credentials.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">2.</span>
-                <span>Verification typically takes 1–2 business days.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">3.</span>
-                <span>Once approved, you can start accepting appointments.</span>
-              </li>
-            </ul>
+          {/* Steps */}
+          <div className="space-y-3">
+            {steps.map(({ icon: Icon, label, done }, i) => (
+              <div key={label} className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ background: done ? 'rgba(34,211,165,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(34,211,165,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: done ? 'rgba(34,211,165,0.15)' : 'rgba(255,255,255,0.05)' }}>
+                  <Icon size={14} style={{ color: done ? '#22D3A5' : 'rgba(247,248,250,0.3)' }} />
+                </div>
+                <span className="text-sm" style={{ color: done ? '#22D3A5' : 'rgba(247,248,250,0.4)' }}>{label}</span>
+                {i === 1 && (
+                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full badge-pending">In Progress</span>
+                )}
+              </div>
+            ))}
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => navigate('/doctor/register')}
-              className="flex-1 min-h-[44px] rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-all"
-            >
+          <div className="p-4 rounded-2xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+            <p className="text-xs" style={{ color: 'rgba(245,158,11,0.8)' }}>
+              ⏱ Verification typically takes 1–2 business days. You'll receive a notification once your account is approved.
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={() => navigate('/doctor/register')} className="mg-btn-ghost flex-1" style={{ padding: '12px', fontSize: '13px' }}>
               Edit Profile
             </button>
-            <button
-              onClick={handleLogout}
-              className="flex-1 min-h-[44px] rounded-xl text-white text-sm font-semibold transition-all"
-              style={{ backgroundColor: '#7C2327' }}
-            >
-              Sign Out
+            <button onClick={handleLogout} className="mg-btn-primary flex-1" style={{ padding: '12px', fontSize: '13px', background: 'rgba(255,92,122,0.15)', boxShadow: 'none', color: '#FF5C7A', border: '1px solid rgba(255,92,122,0.2)' }}>
+              <LogOut size={14} /> Sign Out
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

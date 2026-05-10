@@ -1,132 +1,114 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { User, Stethoscope, ArrowRight } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import { authSession } from '../authSession';
 import { authResponseAdapter } from '../authResponseAdapter';
 import { authEvents } from '../authEventBus';
 import axios from 'axios';
 
+const roles = [
+  { id: 'PATIENT', icon: User, title: 'Patient', description: 'Book appointments and consult with verified doctors', color: '#2EC4B6' },
+  { id: 'DOCTOR', icon: Stethoscope, title: 'Doctor', description: 'Manage your schedule and accept patient appointments', color: '#9B8CFF' },
+];
+
 export default function SelectRole() {
   const navigate = useNavigate();
   const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const pendingToken = params.get('pendingToken') || '';
-
+  const pendingToken = new URLSearchParams(location.search).get('pendingToken') || '';
   const [selected, setSelected] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   async function handleContinue() {
     if (!selected) return;
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
       const res = await authApi.completeOAuth2(pendingToken, selected);
       const token = authResponseAdapter.extractToken(res);
       authSession.setToken(token);
       authEvents.emit(authEvents.names.login, { source: 'oauth2' });
-      if (selected === 'DOCTOR') {
-        navigate('/doctor/register', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true, state: { justLoggedIn: true } });
-      }
+      navigate(selected === 'DOCTOR' ? '/doctor/register' : '/dashboard', { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
-        setError(err.response.data.message || 'Something went wrong. Please try again.');
-      } else {
-        setError('Unable to connect to the server. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
+        setError(err.response.data?.error?.message || err.response.data?.message || 'Something went wrong.');
+      } else { setError('Unable to connect. Please try again.'); }
+    } finally { setLoading(false); }
   }
 
-  const roles = [
-    {
-      id: 'PATIENT',
-      icon: '🧑‍⚕️',
-      title: 'Patient',
-      description: 'Book appointments and consult with doctors',
-    },
-    {
-      id: 'DOCTOR',
-      icon: '👨‍⚕️',
-      title: 'Doctor',
-      description: 'Manage your schedule and see patients',
-    },
-  ];
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: '#0B1020' }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="blob-1 absolute w-96 h-96 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #2EC4B6, transparent)', top: '-100px', left: '-100px', filter: 'blur(80px)' }} />
+        <div className="blob-2 absolute w-80 h-80 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #9B8CFF, transparent)', bottom: '-80px', right: '-80px', filter: 'blur(70px)' }} />
+      </div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative z-10">
         <div className="flex items-center gap-2 mb-10 justify-center">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#7C2327' }}>
-            <span className="text-white text-xl">⚕</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 20px rgba(46,196,182,0.4)' }}>
+            <Stethoscope size={20} color="#0B1020" strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-bold" style={{ color: '#7C2327' }}>MediGo</span>
+          <span className="text-xl font-bold" style={{ color: '#F7F8FA' }}>MediGo</span>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <div className="space-y-2 mb-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Choose your role</h1>
-            <p className="text-gray-500 text-sm">How will you be using MediGo?</p>
+        <div className="glass rounded-3xl p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mb-2" style={{ color: '#F7F8FA' }}>Choose your role</h1>
+            <p className="text-sm" style={{ color: 'rgba(247,248,250,0.4)' }}>How will you be using MediGo?</p>
           </div>
 
           {error && (
-            <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
-              <span className="text-base mt-0.5">⚠</span>
-              <span>{error}</span>
+            <div className="mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
+              style={{ background: 'rgba(255,92,122,0.1)', border: '1px solid rgba(255,92,122,0.2)', color: '#FF5C7A' }}>
+              <span>⚠</span><span>{error}</span>
             </div>
           )}
 
           <div className="space-y-3 mb-8">
-            {roles.map((role) => (
-              <button
-                key={role.id}
-                type="button"
-                onClick={() => setSelected(role.id)}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                  selected === role.id
-                    ? 'border-rose-500 bg-rose-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                  selected === role.id ? 'bg-rose-100' : 'bg-gray-100'
-                }`}>
-                  {role.icon}
-                </div>
-                <div className="flex-1">
-                  <p className={`font-semibold text-sm ${selected === role.id ? 'text-rose-700' : 'text-gray-800'}`}>
-                    {role.title}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{role.description}</p>
-                </div>
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  selected === role.id ? 'border-rose-500 bg-rose-500' : 'border-gray-300'
-                }`}>
-                  {selected === role.id && <span className="w-2 h-2 rounded-full bg-white block" />}
-                </div>
-              </button>
-            ))}
+            {roles.map(role => {
+              const Icon = role.icon;
+              const active = selected === role.id;
+              return (
+                <motion.button key={role.id} onClick={() => setSelected(role.id)}
+                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all"
+                  style={active
+                    ? { background: `rgba(${role.color === '#2EC4B6' ? '46,196,182' : '155,140,255'},0.1)`, border: `1px solid ${role.color}40` }
+                    : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }
+                  }>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: active ? `${role.color}20` : 'rgba(255,255,255,0.05)', border: `1px solid ${active ? role.color + '40' : 'rgba(255,255,255,0.08)'}` }}>
+                    <Icon size={20} style={{ color: active ? role.color : 'rgba(247,248,250,0.4)' }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm" style={{ color: active ? role.color : '#F7F8FA' }}>{role.title}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'rgba(247,248,250,0.4)' }}>{role.description}</p>
+                  </div>
+                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                    style={{ borderColor: active ? role.color : 'rgba(255,255,255,0.2)', background: active ? role.color : 'transparent' }}>
+                    {active && <div className="w-2 h-2 rounded-full" style={{ background: '#0B1020' }} />}
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
 
-          <button
-            type="button"
-            onClick={handleContinue}
-            disabled={!selected || loading}
-            className="w-full min-h-[46px] rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-rose-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-            style={{ backgroundColor: '#7C2327' }}
-          >
+          <button onClick={handleContinue} disabled={!selected || loading} className="mg-btn-primary w-full">
             {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              <>
+                <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(11,16,32,0.3)', borderTopColor: '#0B1020' }} />
                 Setting up…
-              </span>
-            ) : 'Continue'}
+              </>
+            ) : (
+              <>Continue <ArrowRight size={15} /></>
+            )}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
