@@ -41,7 +41,7 @@ export default function DoctorSchedule() {
           authApi.me(),
           appointmentApi.listMine(),
         ]);
-        setUser(meRes.data);
+        setUser(meRes.data?.data ?? meRes.data);
         setAppointments(apptRes.data || []);
       } catch {
         // interceptor handles 401
@@ -91,7 +91,7 @@ export default function DoctorSchedule() {
           </button>
         </nav>
         <div className="flex items-center gap-4">
-          {user && <span className="text-sm text-gray-600 hidden sm:block">Dr. {user.firstName} {user.lastName}</span>}
+          {user && <span className="text-sm text-gray-600 hidden sm:block">Dr. {user.fullName}</span>}
           <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
             Sign out
           </button>

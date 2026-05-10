@@ -17,7 +17,7 @@ export default function Dashboard() {
           authApi.me(),
           appointmentApi.listMine(),
         ]);
-        const userData = meRes.data;
+        const userData = meRes.data?.data ?? meRes.data;
         setUser(userData);
 
         // Redirect based on role
@@ -36,7 +36,8 @@ export default function Dashboard() {
 
         setAppointments(apptRes.data || []);
       } catch {
-        // session likely expired — interceptor handles redirect
+        // Token missing, expired, or API unreachable — send to login
+        navigate('/login', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -71,7 +72,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           {user && (
             <span className="text-sm text-gray-600">
-              {user.firstName} {user.lastName}
+              {user.fullName}
             </span>
           )}
           <button
@@ -86,7 +87,7 @@ export default function Dashboard() {
       <main className="max-w-4xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back{user ? `, ${user.firstName}` : ''}
+            Welcome back{user ? `, ${user.fullName}` : ''}
           </h1>
           <p className="text-gray-500 text-sm mt-1">Here's an overview of your activity.</p>
         </div>
