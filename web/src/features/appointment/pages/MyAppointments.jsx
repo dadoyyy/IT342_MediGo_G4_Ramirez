@@ -3,25 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { appointmentApi } from '../../../shared/api/api';
 
 const STATUS_LABELS = {
-  PENDING: { label: 'Pending', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  CONFIRMED: { label: 'Confirmed', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  COMPLETED: { label: 'Completed', color: 'bg-green-50 text-green-700 border-green-200' },
-  CANCELLED: { label: 'Cancelled', color: 'bg-gray-100 text-gray-500 border-gray-200' },
+  PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  CONFIRMED:               { label: 'Confirmed',        color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  COMPLETED:               { label: 'Completed',        color: 'bg-green-50 text-green-700 border-green-200' },
+  CANCELLED:               { label: 'Cancelled',        color: 'bg-gray-100 text-gray-500 border-gray-200' },
+  REJECTED:                { label: 'Rejected',         color: 'bg-red-50 text-red-600 border-red-200' },
 };
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+function formatDateTime(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short',
+    day: 'numeric', hour: 'numeric', minute: '2-digit',
   });
-}
-
-function formatTime(timeStr) {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':');
-  const d = new Date();
-  d.setHours(+h, +m);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
 export default function MyAppointments() {
@@ -34,7 +28,9 @@ export default function MyAppointments() {
   async function load() {
     try {
       const res = await appointmentApi.listMine();
-      setAppointments(res.data || []);
+      // API returns ApiResponse envelope
+      const list = res.data?.data ?? res.data;
+      setAppointments(Array.isArray(list) ? list : []);
     } catch {
       setAppointments([]);
     } finally {
@@ -59,7 +55,7 @@ export default function MyAppointments() {
     }
   }
 
-  const filters = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
+  const filters = ['ALL', 'PENDING_DOCTOR_APPROVAL', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'REJECTED'];
   const displayed = filter === 'ALL' ? appointments : appointments.filter(a => a.status === filter);
 
   return (
@@ -98,8 +94,7 @@ export default function MyAppointments() {
               }`}
               style={filter === f ? { backgroundColor: '#7C2327' } : {}}
             >
-              {f === 'ALL' ? 'All' : STATUS_LABELS[f]?.label}
-              {f === 'ALL' && ` (${appointments.length})`}
+              {f === 'ALL' ? `All (${appointments.length})` : STATUS_LABELS[f]?.label}
             </button>
           ))}
         </div>
@@ -124,7 +119,7 @@ export default function MyAppointments() {
           <div className="space-y-3">
             {displayed.map((appt) => {
               const statusInfo = STATUS_LABELS[appt.status] || { label: appt.status, color: 'bg-gray-100 text-gray-500 border-gray-200' };
-              const canCancel = appt.status === 'PENDING' || appt.status === 'CONFIRMED';
+              const canCancel = appt.status === 'PENDING_DOCTOR_APPROVAL' || appt.status === 'CONFIRMED';
               return (
                 <div key={appt.id} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
                   <div className="flex items-start justify-between gap-4">
@@ -135,15 +130,14 @@ export default function MyAppointments() {
                         </span>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm">
-                        Dr. {appt.doctorFirstName} {appt.doctorLastName}
+                        Dr. {appt.doctorName}
                       </p>
-                      {appt.doctorSpecialty && (
-                        <p className="text-xs text-gray-500 mt-0.5">{appt.doctorSpecialty}</p>
+                      {appt.appointmentType && (
+                        <p className="text-xs text-gray-500 mt-0.5">{appt.appointmentType}</p>
                       )}
-                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                        <span>📅 {formatDate(appt.appointmentDate)}</span>
-                        {appt.appointmentTime && <span>🕐 {formatTime(appt.appointmentTime)}</span>}
-                      </div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        📅 {formatDateTime(appt.appointmentAt)}
+                      </p>
                       {appt.notes && (
                         <p className="text-xs text-gray-400 mt-2 italic">"{appt.notes}"</p>
                       )}

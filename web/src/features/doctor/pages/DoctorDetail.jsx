@@ -13,7 +13,7 @@ export default function DoctorDetail() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
-  const [booking, setBooking] = useState({ appointmentDate: '', appointmentTime: '', notes: '' });
+  const [booking, setBooking] = useState({ date: '', time: '', appointmentType: '', notes: '' });
   const [bookingErrors, setBookingErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,8 +23,10 @@ export default function DoctorDetail() {
     async function load() {
       try {
         const res = await doctorApi.search('');
-        const all = res.data || [];
-        const found = all.find((d) => String(d.userId) === String(doctorId));
+        // API returns ApiResponse envelope
+        const list = res.data?.data ?? res.data;
+        const all = Array.isArray(list) ? list : [];
+        const found = all.find((d) => String(d.doctorId) === String(doctorId));
         setDoctor(found || null);
       } catch {
         setDoctor(null);
@@ -37,9 +39,10 @@ export default function DoctorDetail() {
 
   function validateBooking() {
     const errors = {};
-    if (!booking.appointmentDate) errors.appointmentDate = 'Please select a date.';
-    else if (booking.appointmentDate < getTodayStr()) errors.appointmentDate = 'Date cannot be in the past.';
-    if (!booking.appointmentTime) errors.appointmentTime = 'Please select a time.';
+    if (!booking.date) errors.date = 'Please select a date.';
+    else if (booking.date < getTodayStr()) errors.date = 'Date cannot be in the past.';
+    if (!booking.time) errors.time = 'Please select a time.';
+    if (!booking.appointmentType.trim()) errors.appointmentType = 'Please describe the reason for your visit.';
     return errors;
   }
 
@@ -50,16 +53,21 @@ export default function DoctorDetail() {
     setSubmitting(true);
     setApiError('');
     try {
+      // Backend expects LocalDateTime as ISO string: "2026-05-15T10:30:00"
+      const appointmentAt = `${booking.date}T${booking.time}:00`;
       await appointmentApi.create({
         doctorId: Number(doctorId),
-        appointmentDate: booking.appointmentDate,
-        appointmentTime: booking.appointmentTime,
+        appointmentAt,
+        appointmentType: booking.appointmentType.trim(),
         notes: booking.notes.trim() || undefined,
       });
       setSuccess(true);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
-        setApiError(err.response.data.message || 'Booking failed. Please try again.');
+        const msg = err.response.data?.error?.message
+          || err.response.data?.message
+          || 'Booking failed. Please try again.';
+        setApiError(msg);
       } else {
         setApiError('Unable to connect to the server. Please try again.');
       }
@@ -95,9 +103,9 @@ export default function DoctorDetail() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="w-full max-w-sm text-center space-y-4 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
           <div className="text-5xl">🎉</div>
-          <h2 className="text-xl font-bold text-gray-900">Appointment Booked!</h2>
+          <h2 className="text-xl font-bold text-gray-900">Appointment Requested!</h2>
           <p className="text-sm text-gray-500">
-            Your appointment with Dr. {doctor.firstName} {doctor.lastName} has been requested.
+            Your appointment with Dr. {doctor.doctorName} has been submitted for approval.
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <button
@@ -140,16 +148,16 @@ export default function DoctorDetail() {
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900">
-                Dr. {doctor.firstName} {doctor.lastName}
+                Dr. {doctor.doctorName}
               </h1>
-              {doctor.specialty && (
-                <p className="text-sm text-gray-500 mt-0.5">{doctor.specialty}</p>
+              {doctor.specialization && (
+                <p className="text-sm text-gray-500 mt-0.5">{doctor.specialization}</p>
               )}
-              {doctor.hospital && (
-                <p className="text-sm text-gray-400 mt-1">🏥 {doctor.hospital}</p>
+              {doctor.clinicName && (
+                <p className="text-sm text-gray-400 mt-1">🏥 {doctor.clinicName}</p>
               )}
-              {doctor.bio && (
-                <p className="text-sm text-gray-600 mt-3 leading-relaxed">{doctor.bio}</p>
+              {doctor.clinicAddress && (
+                <p className="text-sm text-gray-400 mt-0.5">📍 {doctor.clinicAddress}</p>
               )}
             </div>
           </div>
@@ -175,37 +183,55 @@ export default function DoctorDetail() {
             )}
 
             <form onSubmit={handleBook} noValidate className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Date</label>
-                <input
-                  type="date"
-                  min={getTodayStr()}
-                  value={booking.appointmentDate}
-                  onChange={(e) => {
-                    setBooking((p) => ({ ...p, appointmentDate: e.target.value }));
-                    setBookingErrors((p) => ({ ...p, appointmentDate: undefined }));
-                  }}
-                  className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] outline-none focus:ring-2 transition-all ${
-                    bookingErrors.appointmentDate ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
-                  }`}
-                />
-                {bookingErrors.appointmentDate && <p className="text-xs text-red-500">{bookingErrors.appointmentDate}</p>}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-gray-700">Date</label>
+                  <input
+                    type="date"
+                    min={getTodayStr()}
+                    value={booking.date}
+                    onChange={(e) => {
+                      setBooking((p) => ({ ...p, date: e.target.value }));
+                      setBookingErrors((p) => ({ ...p, date: undefined }));
+                    }}
+                    className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] outline-none focus:ring-2 transition-all ${
+                      bookingErrors.date ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
+                    }`}
+                  />
+                  {bookingErrors.date && <p className="text-xs text-red-500">{bookingErrors.date}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-gray-700">Time</label>
+                  <input
+                    type="time"
+                    value={booking.time}
+                    onChange={(e) => {
+                      setBooking((p) => ({ ...p, time: e.target.value }));
+                      setBookingErrors((p) => ({ ...p, time: undefined }));
+                    }}
+                    className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] outline-none focus:ring-2 transition-all ${
+                      bookingErrors.time ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
+                    }`}
+                  />
+                  {bookingErrors.time && <p className="text-xs text-red-500">{bookingErrors.time}</p>}
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Time</label>
+                <label className="block text-sm font-medium text-gray-700">Reason for Visit <span className="text-red-500">*</span></label>
                 <input
-                  type="time"
-                  value={booking.appointmentTime}
+                  type="text"
+                  value={booking.appointmentType}
                   onChange={(e) => {
-                    setBooking((p) => ({ ...p, appointmentTime: e.target.value }));
-                    setBookingErrors((p) => ({ ...p, appointmentTime: undefined }));
+                    setBooking((p) => ({ ...p, appointmentType: e.target.value }));
+                    setBookingErrors((p) => ({ ...p, appointmentType: undefined }));
                   }}
+                  placeholder="e.g. General check-up, Follow-up, Consultation"
                   className={`w-full rounded-xl border bg-white px-4 py-3 text-sm min-h-[44px] outline-none focus:ring-2 transition-all ${
-                    bookingErrors.appointmentTime ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
+                    bookingErrors.appointmentType ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-rose-100 focus:border-rose-400'
                   }`}
                 />
-                {bookingErrors.appointmentTime && <p className="text-xs text-red-500">{bookingErrors.appointmentTime}</p>}
+                {bookingErrors.appointmentType && <p className="text-xs text-red-500">{bookingErrors.appointmentType}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -213,7 +239,7 @@ export default function DoctorDetail() {
                 <textarea
                   value={booking.notes}
                   onChange={(e) => setBooking((p) => ({ ...p, notes: e.target.value }))}
-                  placeholder="Describe your symptoms or reason for visit…"
+                  placeholder="Describe your symptoms or any additional information…"
                   rows={3}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-rose-100 focus:border-rose-400 transition-all resize-none"
                 />

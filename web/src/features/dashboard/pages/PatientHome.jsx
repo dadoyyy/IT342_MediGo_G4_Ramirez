@@ -22,7 +22,9 @@ export default function PatientHome() {
     setSearching(true);
     try {
       const res = await doctorApi.search(q);
-      setDoctors(res.data || []);
+      // API returns ApiResponse envelope: { success, data: [...] }
+      const list = res.data?.data ?? res.data;
+      setDoctors(Array.isArray(list) ? list : []);
     } catch {
       setDoctors([]);
     } finally {
@@ -52,7 +54,7 @@ export default function PatientHome() {
 
   const filtered = activeSpecialty === 'All'
     ? doctors
-    : doctors.filter(d => d.specialty?.toLowerCase().includes(activeSpecialty.toLowerCase()));
+    : doctors.filter(d => d.specialization?.toLowerCase().includes(activeSpecialty.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,21 +135,21 @@ export default function PatientHome() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((doctor) => (
               <button
-                key={doctor.userId}
-                onClick={() => navigate(`/doctor/${doctor.userId}`)}
+                key={doctor.doctorId}
+                onClick={() => navigate(`/doctor/${doctor.doctorId}`)}
                 className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm text-left hover:shadow-md hover:-translate-y-0.5 transition-all"
               >
                 <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-2xl mb-4">
                   👨‍⚕️
                 </div>
                 <p className="font-semibold text-gray-900 text-sm">
-                  Dr. {doctor.firstName} {doctor.lastName}
+                  Dr. {doctor.doctorName}
                 </p>
-                {doctor.specialty && (
-                  <p className="text-xs text-gray-500 mt-0.5">{doctor.specialty}</p>
+                {doctor.specialization && (
+                  <p className="text-xs text-gray-500 mt-0.5">{doctor.specialization}</p>
                 )}
-                {doctor.hospital && (
-                  <p className="text-xs text-gray-400 mt-1">🏥 {doctor.hospital}</p>
+                {doctor.clinicName && (
+                  <p className="text-xs text-gray-400 mt-1">🏥 {doctor.clinicName}</p>
                 )}
                 <div className="mt-3 pt-3 border-t border-gray-100">
                   <span

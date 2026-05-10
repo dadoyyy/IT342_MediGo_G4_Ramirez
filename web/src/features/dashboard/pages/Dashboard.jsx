@@ -34,7 +34,7 @@ export default function Dashboard() {
           return;
         }
 
-        setAppointments(apptRes.data || []);
+        setAppointments(Array.isArray(apptRes.data?.data ?? apptRes.data) ? (apptRes.data?.data ?? apptRes.data) : []);
       } catch {
         // Token missing, expired, or API unreachable — send to login
         navigate('/login', { replace: true });

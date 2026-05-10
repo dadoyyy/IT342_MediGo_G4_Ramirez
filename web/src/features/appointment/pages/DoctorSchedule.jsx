@@ -5,25 +5,19 @@ import { authSession } from '../../auth/authSession';
 import { authEvents } from '../../auth/authEventBus';
 
 const STATUS_LABELS = {
-  PENDING: { label: 'Pending', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  CONFIRMED: { label: 'Confirmed', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  COMPLETED: { label: 'Completed', color: 'bg-green-50 text-green-700 border-green-200' },
-  CANCELLED: { label: 'Cancelled', color: 'bg-gray-100 text-gray-500 border-gray-200' },
+  PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  CONFIRMED:               { label: 'Confirmed',        color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  COMPLETED:               { label: 'Completed',        color: 'bg-green-50 text-green-700 border-green-200' },
+  CANCELLED:               { label: 'Cancelled',        color: 'bg-gray-100 text-gray-500 border-gray-200' },
+  REJECTED:                { label: 'Rejected',         color: 'bg-red-50 text-red-600 border-red-200' },
 };
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+function formatDateTime(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short',
+    day: 'numeric', hour: 'numeric', minute: '2-digit',
   });
-}
-
-function formatTime(timeStr) {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':');
-  const d = new Date();
-  d.setHours(+h, +m);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
 export default function DoctorSchedule() {
@@ -42,7 +36,8 @@ export default function DoctorSchedule() {
           appointmentApi.listMine(),
         ]);
         setUser(meRes.data?.data ?? meRes.data);
-        setAppointments(apptRes.data || []);
+        const list = apptRes.data?.data ?? apptRes.data;
+        setAppointments(Array.isArray(list) ? list : []);
       } catch {
         // interceptor handles 401
       } finally {
@@ -73,7 +68,7 @@ export default function DoctorSchedule() {
     navigate('/login', { replace: true });
   }
 
-  const filters = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
+  const filters = ['ALL', 'PENDING_DOCTOR_APPROVAL', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'REJECTED'];
   const displayed = filter === 'ALL' ? appointments : appointments.filter(a => a.status === filter);
 
   return (
@@ -107,10 +102,10 @@ export default function DoctorSchedule() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { label: 'Total', value: appointments.length, icon: '📋' },
-            { label: 'Pending', value: appointments.filter(a => a.status === 'PENDING').length, icon: '⏳' },
-            { label: 'Confirmed', value: appointments.filter(a => a.status === 'CONFIRMED').length, icon: '✅' },
-            { label: 'Completed', value: appointments.filter(a => a.status === 'COMPLETED').length, icon: '🏁' },
+            { label: 'Total',     value: appointments.length,                                                icon: '📋' },
+            { label: 'Pending',   value: appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL').length, icon: '⏳' },
+            { label: 'Confirmed', value: appointments.filter(a => a.status === 'CONFIRMED').length,          icon: '✅' },
+            { label: 'Completed', value: appointments.filter(a => a.status === 'COMPLETED').length,          icon: '🏁' },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
               <div className="text-xl mb-1">{s.icon}</div>
@@ -160,20 +155,20 @@ export default function DoctorSchedule() {
                           {statusInfo.label}
                         </span>
                       </div>
-                      <p className="font-semibold text-gray-900 text-sm">
-                        {appt.patientFirstName} {appt.patientLastName}
+                      <p className="font-semibold text-gray-900 text-sm">{appt.patientName}</p>
+                      {appt.appointmentType && (
+                        <p className="text-xs text-gray-500 mt-0.5">{appt.appointmentType}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1">
+                        📅 {formatDateTime(appt.appointmentAt)}
                       </p>
-                      <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
-                        <span>📅 {formatDate(appt.appointmentDate)}</span>
-                        {appt.appointmentTime && <span>🕐 {formatTime(appt.appointmentTime)}</span>}
-                      </div>
                       {appt.notes && (
                         <p className="text-xs text-gray-400 mt-2 italic">"{appt.notes}"</p>
                       )}
                     </div>
                     {/* Action buttons */}
                     <div className="flex flex-col gap-1.5 flex-shrink-0">
-                      {appt.status === 'PENDING' && (
+                      {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
                         <button
                           onClick={() => updateStatus(appt.id, 'CONFIRMED')}
                           disabled={updating === appt.id}
@@ -183,6 +178,15 @@ export default function DoctorSchedule() {
                           Confirm
                         </button>
                       )}
+                      {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
+                        <button
+                          onClick={() => updateStatus(appt.id, 'REJECTED')}
+                          disabled={updating === appt.id}
+                          className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 disabled:opacity-50 transition-all"
+                        >
+                          Reject
+                        </button>
+                      )}
                       {appt.status === 'CONFIRMED' && (
                         <button
                           onClick={() => updateStatus(appt.id, 'COMPLETED')}
@@ -190,15 +194,6 @@ export default function DoctorSchedule() {
                           className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white font-medium disabled:opacity-50 transition-all"
                         >
                           Complete
-                        </button>
-                      )}
-                      {(appt.status === 'PENDING' || appt.status === 'CONFIRMED') && (
-                        <button
-                          onClick={() => updateStatus(appt.id, 'CANCELLED')}
-                          disabled={updating === appt.id}
-                          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-50 transition-all"
-                        >
-                          Cancel
                         </button>
                       )}
                     </div>
