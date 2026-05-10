@@ -6,6 +6,9 @@ import { authApi } from '../../../shared/api/api';
 import axios from 'axios';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Password must have uppercase, lowercase, number, and special character
+const PW_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
 function validate(f) {
   const e = {};
   if (!f.firstName.trim()) e.firstName = 'Required.';
@@ -14,6 +17,7 @@ function validate(f) {
   else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email.';
   if (!f.password) e.password = 'Password is required.';
   else if (f.password.length < 8) e.password = 'Min. 8 characters.';
+  else if (!PW_RE.test(f.password)) e.password = 'Must include uppercase, lowercase, number & special character.';
   if (f.password !== f.confirmPassword) e.confirmPassword = 'Passwords do not match.';
   return e;
 }
@@ -46,12 +50,27 @@ export default function Register() {
     if (Object.keys(v).length) { setErrs(v); return; }
     setLoading(true); setApiErr('');
     try {
-      await authApi.register({ firstName: form.firstName.trim(), lastName: form.lastName.trim(), email: form.email.trim(), password: form.password });
+      await authApi.register({
+        firstname: form.firstName.trim(),
+        lastname: form.lastName.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role: 'PATIENT',
+      });
       navigate('/login', { state: { registered: true } });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data)
-        setApiErr(err.response.data?.error?.message || err.response.data?.message || 'Registration failed.');
-      else setApiErr('Unable to connect. Please try again.');
+      if (axios.isAxiosError(err) && err.response?.data) {
+        const errData = err.response.data?.error;
+        // If there are field-level validation details, show them
+        if (errData?.details && typeof errData.details === 'object') {
+          const msgs = Object.values(errData.details).join(' · ');
+          setApiErr(msgs);
+        } else {
+          setApiErr(errData?.message || err.response.data?.message || 'Registration failed.');
+        }
+      } else {
+        setApiErr('Unable to connect. Please try again.');
+      }
     } finally { setLoading(false); }
   }
 
@@ -193,7 +212,7 @@ export default function Register() {
 
             {/* Password fields */}
             {[
-              ['password','PASSWORD','Min. 8 characters','new-password',showPw,setShowPw],
+              ['password','PASSWORD','Min. 8 chars, uppercase, number & symbol','new-password',showPw,setShowPw],
               ['confirmPassword','CONFIRM PASSWORD','Re-enter password','new-password',showCf,setShowCf],
             ].map(([name,label,ph,ac,show,setShow]) => (
               <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
