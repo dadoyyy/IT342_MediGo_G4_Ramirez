@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
-import { authApi } from '../../../shared/api/api';
+import { authApi, doctorApi } from '../../../shared/api/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,11 +12,40 @@ export default function Dashboard() {
       try {
         const res = await authApi.me();
         const user = res.data?.data ?? res.data;
-        if (user?.role === 'PATIENT') { navigate('/home', { replace: true }); return; }
-        if (user?.role === 'DOCTOR')  { navigate('/doctor/schedule', { replace: true }); return; }
-        if (user?.role === 'ADMIN')   { navigate('/admin/verification', { replace: true }); return; }
-      } catch { navigate('/login', { replace: true }); }
-      finally { setDone(true); }
+
+        if (user?.role === 'PATIENT') {
+          navigate('/home', { replace: true });
+          return;
+        }
+
+        if (user?.role === 'DOCTOR') {
+          // Check if doctor has already set up their profile
+          try {
+            const profileRes = await doctorApi.getMyProfile();
+            const profile = profileRes.data?.data ?? profileRes.data;
+            if (profile?.specialization) {
+              // Profile complete — go to schedule
+              navigate('/doctor/schedule', { replace: true });
+            } else {
+              // Profile incomplete — go to profile setup
+              navigate('/doctor/profile', { replace: true });
+            }
+          } catch {
+            // No profile yet — go to profile setup
+            navigate('/doctor/profile', { replace: true });
+          }
+          return;
+        }
+
+        if (user?.role === 'ADMIN') {
+          navigate('/admin/verification', { replace: true });
+          return;
+        }
+      } catch {
+        navigate('/login', { replace: true });
+      } finally {
+        setDone(true);
+      }
     }
     redirect();
   }, [navigate]);

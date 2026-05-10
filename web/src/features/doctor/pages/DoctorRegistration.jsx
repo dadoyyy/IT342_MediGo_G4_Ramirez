@@ -47,7 +47,7 @@ export default function DoctorRegistration() {
     setLoading(true); setApiError('');
     try {
       await doctorApi.upsertMyProfile({ specialization: form.specialization.trim(), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
-      navigate('/pending-approval', { replace: true });
+      navigate('/doctor/profile', { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data)
         setApiError(err.response.data?.error?.message || err.response.data?.message || 'Submission failed.');

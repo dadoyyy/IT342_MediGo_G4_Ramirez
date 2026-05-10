@@ -21,6 +21,7 @@ import ChatInterface from './features/chat/pages/ChatInterface';
 // ── Doctor feature ────────────────────────────────────────────────────────
 import DoctorDetail       from './features/doctor/pages/DoctorDetail';
 import DoctorRegistration from './features/doctor/pages/DoctorRegistration';
+import DoctorProfile      from './features/doctor/pages/DoctorProfile';
 import PendingApproval    from './features/doctor/pages/PendingApproval';
 
 // ── Admin feature ─────────────────────────────────────────────────────────
@@ -37,6 +38,7 @@ function App() {
         <Route path="/"                element={<Navigate to="/login" replace />} />
         <Route path="/register"        element={<Register />} />
         <Route path="/doctor/register" element={<DoctorRegistration />} />
+        <Route path="/doctor/profile"  element={<ProtectedRoute><DoctorProfile /></ProtectedRoute>} />
         <Route path="/login"           element={<Login />} />
         <Route path="/dashboard"       element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/home"            element={<ProtectedRoute><PatientHome /></ProtectedRoute>} />

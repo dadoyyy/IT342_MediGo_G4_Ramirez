@@ -3,6 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Stethoscope, ShieldCheck, Zap, Heart, ChevronLeft } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
+import { authSession } from '../authSession';
+import { authResponseAdapter } from '../authResponseAdapter';
+import { authEvents } from '../authEventBus';
 import axios from 'axios';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -76,16 +79,22 @@ export default function Register() {
     if (Object.keys(v).length) { setErrs(v); return; }
     setLoading(true); setApiErr('');
     try {
-      await authApi.register({
+      const res = await authApi.register({
         firstname: form.firstName.trim(),
         lastname: form.lastName.trim(),
         email: form.email.trim(),
         password: form.password,
         role,
       });
-      // Doctors go to their profile setup; patients go to login
+      // Auto-login with the returned token
+      const token = authResponseAdapter.extractToken(res);
+      if (token) {
+        authSession.setToken(token);
+        authEvents.emit(authEvents.names.login, { source: 'register' });
+      }
+      // Doctors go straight to profile setup; patients go to login
       if (role === 'DOCTOR') {
-        navigate('/doctor/register', { state: { fromRegistration: true } });
+        navigate('/doctor/profile', { replace: true });
       } else {
         navigate('/login', { state: { registered: true } });
       }

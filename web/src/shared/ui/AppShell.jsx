@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, Bell, ChevronRight } from 'lucide-react';
+import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, Bell, ChevronRight, UserCircle } from 'lucide-react';
 import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
@@ -12,6 +12,7 @@ const patientNav = [
   { icon: MessageSquare,   label: 'Messages',     path: '/chat' },
 ];
 const doctorNav = [
+  { icon: UserCircle,    label: 'My Profile',  path: '/doctor/profile' },
   { icon: Calendar,      label: 'My Schedule', path: '/doctor/schedule' },
   { icon: MessageSquare, label: 'Messages',    path: '/chat' },
 ];
