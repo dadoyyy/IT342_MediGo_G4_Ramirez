@@ -38,4 +38,26 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             LocalDateTime appointmentAt,
             List<AppointmentStatus> disallowedStatuses
     );
+
+    /**
+     * Returns true if a CONFIRMED or COMPLETED appointment exists
+     * between the given patient and doctor (in either direction).
+     */
+    @Query("""
+            SELECT COUNT(a) > 0
+            FROM Appointment a
+            WHERE a.status IN (
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.CONFIRMED,
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.COMPLETED
+            )
+            AND (
+                (a.patient.id = :patientId AND a.doctor.id = :doctorId)
+                OR
+                (a.patient.id = :doctorId AND a.doctor.id = :patientId)
+            )
+            """)
+    boolean existsSuccessfulAppointmentBetween(
+            @Param("patientId") Long patientId,
+            @Param("doctorId") Long doctorId
+    );
 }

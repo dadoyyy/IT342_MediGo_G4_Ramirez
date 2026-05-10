@@ -106,7 +106,12 @@ export default function ChatInterface() {
                 <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
               </div>
             ) : contacts.length === 0 ? (
-              <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(136,146,164,0.4)', padding: '32px 16px' }}>No contacts found</p>
+              <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.5)', marginBottom: 6 }}>No contacts yet</p>
+                <p style={{ fontSize: 11, color: 'rgba(136,146,164,0.35)', lineHeight: 1.5 }}>
+                  You can message doctors once you have a confirmed or completed appointment with them.
+                </p>
+              </div>
             ) : contacts.map(c => (
               <button key={c.userId} onClick={() => setSelected(c)}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', textAlign: 'left', cursor: 'pointer', transition: 'all 0.15s', background: selected?.userId === c.userId ? 'rgba(46,196,182,0.08)' : 'transparent', borderRight: `2px solid ${selected?.userId === c.userId ? '#2EC4B6' : 'transparent'}`, border: 'none' }}>
