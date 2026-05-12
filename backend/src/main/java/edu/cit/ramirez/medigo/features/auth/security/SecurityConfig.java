@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/doctors/search", "/api/v1/appointments").authenticated()
                         .requestMatchers("/api/v1/doctors/me/profile").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/doctors/me/documents/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/appointments/*/status").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/appointments/*/cancel", "/api/v1/appointments/*").hasRole("PATIENT")
                         .anyRequest().authenticated())

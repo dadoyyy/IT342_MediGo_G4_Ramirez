@@ -14,6 +14,8 @@ public interface DoctorProfileRepository extends JpaRepository<DoctorProfile, Lo
 
     Optional<DoctorProfile> findByDoctorId(Long doctorId);
 
+    List<DoctorProfile> findByVerifiedFalse();
+
     @Query("""
             SELECT dp
             FROM DoctorProfile dp

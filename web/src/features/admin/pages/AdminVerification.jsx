@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Stethoscope, Building2, MapPin, LogOut, ShieldCheck } from 'lucide-react';
-import { authApi } from '../../../shared/api/api';
+import { CheckCircle, XCircle, Stethoscope, Building2, MapPin, LogOut, ShieldCheck, FileText, ExternalLink } from 'lucide-react';
+import { authApi, adminApi } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
 import { authEvents } from '../../auth/authEventBus';
-import api from '../../../shared/api/api';
+
+const DOC_LABELS = {
+  medicalLicenseUrl:   'Medical License',
+  prcIdUrl:            'PRC ID',
+  boardCertificateUrl: 'Board Certificate',
+  governmentIdUrl:     'Government ID',
+};
 
 export default function AdminVerification() {
   const navigate = useNavigate();
@@ -24,9 +30,10 @@ export default function AdminVerification() {
     authApi.me().then(r => {
       const u = r.data?.data ?? r.data;
       setUser(u);
+      authSession.setUser(u);
       if (u?.role !== 'ADMIN') navigate('/dashboard', { replace: true });
     }).catch(() => {});
-    api.get('/admin/doctors/pending').then(r => {
+    adminApi.getPendingDoctors().then(r => {
       const list = r.data?.data ?? r.data;
       setPending(Array.isArray(list) ? list : []);
     }).catch(() => {}).finally(() => setLoading(false));
@@ -35,8 +42,12 @@ export default function AdminVerification() {
   async function handleAction(doctorId, action) {
     setProcessing(doctorId);
     try {
-      await api.put(`/admin/doctors/${doctorId}/${action}`);
-      setPending(prev => prev.filter(d => d.userId !== doctorId));
+      if (action === 'approve') {
+        await adminApi.approveDoctor(doctorId);
+      } else {
+        await adminApi.rejectDoctor(doctorId);
+      }
+      setPending(prev => prev.filter(d => d.doctorId !== doctorId));
       showToast(`Doctor ${action === 'approve' ? 'approved' : 'rejected'} successfully.`, action === 'approve' ? 'success' : 'error');
     } catch { showToast('Action failed. Please try again.', 'error'); }
     finally { setProcessing(null); }
@@ -102,57 +113,83 @@ export default function AdminVerification() {
           </motion.div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {pending.map((doctor, i) => (
-              <motion.div key={doctor.userId}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="card" style={{ padding: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flex: 1, minWidth: 0 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0, background: 'linear-gradient(135deg, rgba(46,196,182,0.12), rgba(155,140,255,0.12))', color: '#2EC4B6', border: '1px solid rgba(46,196,182,0.15)' }}>
-                      {(doctor.doctorName || `${doctor.firstName || ''} ${doctor.lastName || ''}`).trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 2 }}>
-                        Dr. {doctor.doctorName || `${doctor.firstName} ${doctor.lastName}`}
-                      </p>
-                      <p style={{ fontSize: 13, color: '#8892A4', marginBottom: 8 }}>{doctor.email}</p>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                        {(doctor.specialization || doctor.specialty) && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Stethoscope size={11} style={{ color: '#2EC4B6' }} />
-                            <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.specialization || doctor.specialty}</span>
-                          </div>
-                        )}
-                        {(doctor.clinicName || doctor.hospital) && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Building2 size={11} style={{ color: '#9B8CFF' }} />
-                            <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.clinicName || doctor.hospital}</span>
-                          </div>
-                        )}
-                        {doctor.clinicAddress && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <MapPin size={11} style={{ color: 'rgba(136,146,164,0.4)' }} />
-                            <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>{doctor.clinicAddress}</span>
-                          </div>
-                        )}
+            {pending.map((doctor, i) => {
+              const hasAnyDoc = doctor.medicalLicenseUrl || doctor.prcIdUrl || doctor.boardCertificateUrl || doctor.governmentIdUrl;
+              return (
+                <motion.div key={doctor.doctorId}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="card" style={{ padding: 24 }}>
+
+                  {/* Doctor info + action buttons */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: hasAnyDoc ? 20 : 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flex: 1, minWidth: 0 }}>
+                      <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0, background: 'linear-gradient(135deg, rgba(46,196,182,0.12), rgba(155,140,255,0.12))', color: '#2EC4B6', border: '1px solid rgba(46,196,182,0.15)' }}>
+                        {(doctor.doctorName || '').trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 2 }}>Dr. {doctor.doctorName}</p>
+                        <p style={{ fontSize: 13, color: '#8892A4', marginBottom: 8 }}>{doctor.email}</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                          {doctor.specialization && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Stethoscope size={11} style={{ color: '#2EC4B6' }} />
+                              <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.specialization}</span>
+                            </div>
+                          )}
+                          {doctor.clinicName && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Building2 size={11} style={{ color: '#9B8CFF' }} />
+                              <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.clinicName}</span>
+                            </div>
+                          )}
+                          {doctor.clinicAddress && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <MapPin size={11} style={{ color: 'rgba(136,146,164,0.4)' }} />
+                              <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>{doctor.clinicAddress}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                      <button onClick={() => handleAction(doctor.doctorId, 'reject')} disabled={processing === doctor.doctorId}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', color: '#FCA5A5', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
+                        <XCircle size={14} /> Reject
+                      </button>
+                      <button onClick={() => handleAction(doctor.doctorId, 'approve')} disabled={processing === doctor.doctorId}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)', color: '#5EEAD4', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
+                        {processing === doctor.doctorId
+                          ? <span className="w-3 h-3 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(46,196,182,0.3)', borderTopColor: '#2EC4B6' }} />
+                          : <CheckCircle size={14} />}
+                        Approve
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                    <button onClick={() => handleAction(doctor.userId, 'reject')} disabled={processing === doctor.userId}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', color: '#FCA5A5', cursor: 'pointer', opacity: processing === doctor.userId ? 0.5 : 1, transition: 'all 0.2s' }}>
-                      <XCircle size={14} /> Reject
-                    </button>
-                    <button onClick={() => handleAction(doctor.userId, 'approve')} disabled={processing === doctor.userId}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)', color: '#5EEAD4', cursor: 'pointer', opacity: processing === doctor.userId ? 0.5 : 1, transition: 'all 0.2s' }}>
-                      {processing === doctor.userId ? <span className="w-3 h-3 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(46,196,182,0.3)', borderTopColor: '#2EC4B6' }} /> : <CheckCircle size={14} />}
-                      Approve
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Documents */}
+                  {hasAnyDoc && (
+                    <div style={{ paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.4)', letterSpacing: '0.07em', marginBottom: 10 }}>SUBMITTED DOCUMENTS</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {Object.entries(DOC_LABELS).map(([key, label]) => {
+                          const url = doctor[key];
+                          if (!url) return null;
+                          return (
+                            <a key={key} href={url} target="_blank" rel="noopener noreferrer"
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, background: 'rgba(155,140,255,0.08)', border: '1px solid rgba(155,140,255,0.18)', color: '#9B8CFF', textDecoration: 'none', transition: 'all 0.2s' }}>
+                              <FileText size={12} />
+                              {label}
+                              <ExternalLink size={10} style={{ opacity: 0.6 }} />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </main>

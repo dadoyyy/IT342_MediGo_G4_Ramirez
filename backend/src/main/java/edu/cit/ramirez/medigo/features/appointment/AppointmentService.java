@@ -56,7 +56,7 @@ public class AppointmentService {
         profile.setSpecialization(request.getSpecialization().trim());
         profile.setClinicName(request.getClinicName().trim());
         profile.setClinicAddress(request.getClinicAddress().trim());
-        profile.setVerified(true);
+        // Do NOT set verified here — admin must approve via /admin/doctors/{id}/approve
 
         DoctorProfile saved = doctorProfileRepository.save(profile);
         return toDoctorProfileDto(saved);

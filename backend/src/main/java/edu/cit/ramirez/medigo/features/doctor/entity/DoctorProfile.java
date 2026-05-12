@@ -36,7 +36,7 @@ public class DoctorProfile {
 
     @Column(name = "verified", nullable = false)
     @Builder.Default
-    private boolean verified = true;
+    private boolean verified = false;
 
     // ── Document uploads ──────────────────────────────────────────────────────
     @Column(name = "medical_license_url", length = 512)
