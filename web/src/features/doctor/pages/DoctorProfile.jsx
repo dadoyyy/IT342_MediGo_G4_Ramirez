@@ -158,12 +158,15 @@ export default function DoctorProfile() {
 
   /** Open a document in a new tab using an authenticated blob URL */
   async function openDoc(url) {
+    // Open the window synchronously (before any await) so browsers don't block it as a popup
+    const win = window.open('', '_blank');
+    if (!win) { alert('Please allow popups for this site to view documents.'); return; }
     try {
       const blobUrl = await fetchAuthBlob(url);
-      window.open(blobUrl, '_blank');
-      // Revoke after a short delay to allow the tab to load
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      win.location.href = blobUrl;
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
     } catch {
+      win.close();
       alert('Could not open document. Please try again.');
     }
   }
