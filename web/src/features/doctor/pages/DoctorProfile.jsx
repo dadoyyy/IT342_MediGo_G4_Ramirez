@@ -23,11 +23,11 @@ function validate(form) {
 const REQUIRED_DOCS = ['profile_picture', 'medical_license', 'prc_id', 'board_certificate', 'government_id'];
 
 const DOC_META = {
-  profile_picture:   { label: 'Profile Picture',    hint: 'A clear photo of yourself',                  accept: '.jpg,.jpeg,.png' },
-  medical_license:   { label: 'Medical License',    hint: 'PRC-issued medical license',                 accept: '.pdf,.jpg,.jpeg,.png' },
-  prc_id:            { label: 'PRC ID',             hint: 'Professional Regulation Commission ID',      accept: '.pdf,.jpg,.jpeg,.png' },
-  board_certificate: { label: 'Board Certificate',  hint: 'Certificate of board examination',           accept: '.pdf,.jpg,.jpeg,.png' },
-  government_id:     { label: 'Government-Issued ID', hint: "Passport, driver's license, or national ID", accept: '.pdf,.jpg,.jpeg,.png' },
+  profile_picture:   { label: 'Profile Picture',      hint: 'A clear photo of yourself',                   accept: '.jpg,.jpeg,.png' },
+  medical_license:   { label: 'Medical License',      hint: 'PRC-issued medical license',                  accept: '.pdf,.jpg,.jpeg,.png' },
+  prc_id:            { label: 'PRC ID',               hint: 'Professional Regulation Commission ID',       accept: '.pdf,.jpg,.jpeg,.png' },
+  board_certificate: { label: 'Board Certificate',    hint: 'Certificate of board examination',            accept: '.pdf,.jpg,.jpeg,.png' },
+  government_id:     { label: 'Government-Issued ID', hint: "Passport, driver's license, or national ID",  accept: '.pdf,.jpg,.jpeg,.png' },
 };
 
 /* ── Component ──────────────────────────────────────────────────────────── */
@@ -36,38 +36,29 @@ export default function DoctorProfile() {
   const avatarInputRef = useRef(null);
 
   const { isProfileComplete, isLoading, markProfileComplete } = useDoctorProfile();
-
   const [user, setUser] = useState(null);
 
-  // Profile form
   const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Documents + profile picture (keyed by docType)
   const [docs, setDocs] = useState({
-    profile_picture:   null,
-    medical_license:   null,
-    prc_id:            null,
-    board_certificate: null,
-    government_id:     null,
+    profile_picture: null, medical_license: null,
+    prc_id: null, board_certificate: null, government_id: null,
   });
   const [docUploading, setDocUploading] = useState({});
   const [docErrors, setDocErrors] = useState({});
   const [docSuccess, setDocSuccess] = useState({});
 
-  // Derived: is every required item present?
   const formFilled = form.specialization.trim() && form.clinicName.trim() && form.clinicAddress.trim();
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
-  const canSave = formFilled && allDocsUploaded && !saving;
+  const canSave = !!(formFilled && allDocsUploaded && !saving);
 
-  // Progress count (form counts as 1 item)
-  const totalSteps = 1 + REQUIRED_DOCS.length; // 6
+  const totalSteps = 1 + REQUIRED_DOCS.length;
   const doneSteps  = (formFilled ? 1 : 0) + REQUIRED_DOCS.filter(k => !!docs[k]).length;
 
-  /* Load user + existing profile data */
   useEffect(() => {
     async function load() {
       try {
@@ -113,7 +104,7 @@ export default function DoctorProfile() {
     e.preventDefault();
     const errors = validate(form);
     if (Object.keys(errors).length) { setFieldErrors(errors); return; }
-    if (!allDocsUploaded) return; // belt-and-suspenders
+    if (!allDocsUploaded) return;
     setSaving(true); setApiError(''); setSaveSuccess(false);
     try {
       await doctorApi.upsertMyProfile({
@@ -144,14 +135,14 @@ export default function DoctorProfile() {
     try {
       const res = await doctorApi.uploadDocument(docType, file);
       const p = res.data?.data ?? res.data;
-      const urlMap = {
-        profile_picture:   p.profilePictureUrl,
-        medical_license:   p.medicalLicenseUrl,
-        prc_id:            p.prcIdUrl,
-        board_certificate: p.boardCertificateUrl,
-        government_id:     p.governmentIdUrl,
-      };
-      setDocs(prev => ({ ...prev, [docType]: urlMap[docType] }));
+      setDocs(prev => ({
+        ...prev,
+        profile_picture:   p.profilePictureUrl   ?? prev.profile_picture,
+        medical_license:   p.medicalLicenseUrl   ?? prev.medical_license,
+        prc_id:            p.prcIdUrl            ?? prev.prc_id,
+        board_certificate: p.boardCertificateUrl ?? prev.board_certificate,
+        government_id:     p.governmentIdUrl     ?? prev.government_id,
+      }));
       setDocSuccess(prev => ({ ...prev, [docType]: true }));
       setTimeout(() => setDocSuccess(prev => ({ ...prev, [docType]: false })), 3000);
     } catch (err) {
@@ -177,7 +168,7 @@ export default function DoctorProfile() {
     <AppShell user={user}>
       <div style={{ padding: '32px 24px', maxWidth: 800, margin: '0 auto' }}>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
           {!isProfileComplete && (
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, marginBottom: 20, background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.2)' }}>
@@ -202,7 +193,7 @@ export default function DoctorProfile() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
 
-          {/* ── Progress bar (only shown for new doctors) ── */}
+          {/* Progress bar */}
           {!isProfileComplete && (
             <div style={{ marginBottom: 20, padding: '16px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -226,12 +217,11 @@ export default function DoctorProfile() {
             </div>
           )}
 
-          {/* ── Profile card ── */}
-          <div className="card" style={{ padding: 28 }}>
+          {/* ── Profile info card ── */}
+          <div className="card" style={{ padding: 28, marginBottom: 20 }}>
 
-            {/* ── Avatar + identity ── */}
+            {/* Avatar + identity */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              {/* Clickable avatar */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <div
                   onClick={() => avatarInputRef.current?.click()}
@@ -239,23 +229,17 @@ export default function DoctorProfile() {
                     width: 72, height: 72, borderRadius: 20, overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', position: 'relative',
-                    background: avatarUrl
-                      ? 'transparent'
-                      : 'linear-gradient(135deg, rgba(46,196,182,0.15), rgba(155,140,255,0.15))',
+                    background: avatarUrl ? 'transparent' : 'linear-gradient(135deg, rgba(46,196,182,0.15), rgba(155,140,255,0.15))',
                     border: avatarUrl ? '2px solid rgba(46,196,182,0.4)' : '2px dashed rgba(46,196,182,0.3)',
                     transition: 'all 0.2s',
                   }}>
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>
-                  )}
-                  {/* Hover overlay */}
+                  {avatarUrl
+                    ? <img src={avatarUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>}
                   <div style={{
                     position: 'absolute', inset: 0, borderRadius: 18,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-                    background: 'rgba(11,16,32,0.65)', opacity: 0,
-                    transition: 'opacity 0.2s',
+                    background: 'rgba(11,16,32,0.65)', opacity: 0, transition: 'opacity 0.2s',
                   }}
                     onMouseEnter={e => e.currentTarget.style.opacity = 1}
                     onMouseLeave={e => e.currentTarget.style.opacity = 0}>
@@ -263,21 +247,16 @@ export default function DoctorProfile() {
                     <span style={{ fontSize: 9, color: '#fff', fontWeight: 600 }}>CHANGE</span>
                   </div>
                 </div>
-
-                {/* Upload indicator */}
                 {docUploading.profile_picture && (
                   <div style={{ position: 'absolute', inset: 0, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,16,32,0.7)' }}>
                     <span className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
                   </div>
                 )}
-
-                {/* Green tick when uploaded */}
                 {docs.profile_picture && !docUploading.profile_picture && (
                   <div style={{ position: 'absolute', bottom: -4, right: -4, width: 20, height: 20, borderRadius: '50%', background: '#2EC4B6', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1020' }}>
                     <CheckCircle size={11} style={{ color: '#fff' }} />
                   </div>
                 )}
-
                 <input ref={avatarInputRef} type="file" accept=".jpg,.jpeg,.png" style={{ display: 'none' }}
                   onChange={e => { const f = e.target.files?.[0]; if (f) handleDocUpload('profile_picture', f); e.target.value = ''; }} />
               </div>
@@ -294,7 +273,7 @@ export default function DoctorProfile() {
               </div>
             </div>
 
-            {/* ── Alerts ── */}
+            {/* Alerts */}
             <AnimatePresence>
               {apiError && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -311,7 +290,7 @@ export default function DoctorProfile() {
               )}
             </AnimatePresence>
 
-            {/* ── Form ── */}
+            {/* Form — id so the external submit button can target it */}
             <form id="profile-form" onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
                 { name: 'specialization', label: 'SPECIALIZATION',        Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice, Pediatrics', textarea: false },
@@ -337,11 +316,12 @@ export default function DoctorProfile() {
                   {fieldErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{fieldErrors[name]}</p>}
                 </div>
               ))}
-
             </form>
 
-          {/* ── Verification Documents ── */}
-          <div className="card" style={{ padding: 28, marginTop: 20 }}>
+          </div>{/* end profile info card */}
+
+          {/* ── Verification Documents card ── */}
+          <div className="card" style={{ padding: 28 }}>
             <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
               <p style={{ fontSize: 15, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>Verification Documents</p>
               <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>
@@ -365,7 +345,6 @@ export default function DoctorProfile() {
                       <span style={{ fontSize: 10, color: '#FCA5A5' }}>*</span>
                       {existing && <CheckCircle size={11} style={{ color: '#2EC4B6', marginLeft: 2 }} />}
                     </div>
-
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <label style={{
                         flex: 1, display: 'flex', alignItems: 'center', gap: 10,
@@ -378,14 +357,11 @@ export default function DoctorProfile() {
                         <input type="file" accept={accept} style={{ display: 'none' }}
                           disabled={uploading}
                           onChange={e => { const f = e.target.files?.[0]; if (f) handleDocUpload(key, f); e.target.value = ''; }} />
-                        {uploading ? (
-                          <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0"
-                            style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
-                        ) : existing ? (
-                          <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
-                        ) : (
-                          <Upload size={15} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />
-                        )}
+                        {uploading
+                          ? <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                          : existing
+                          ? <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
+                          : <Upload size={15} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: existing ? '#5EEAD4' : 'rgba(136,146,164,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {uploading ? 'Uploading…' : existing ? 'Uploaded — click to replace' : hint}
@@ -393,7 +369,6 @@ export default function DoctorProfile() {
                         </div>
                         {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
                       </label>
-
                       {existing && !uploading && (
                         <a href={existing} target="_blank" rel="noopener noreferrer"
                           style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
@@ -401,7 +376,6 @@ export default function DoctorProfile() {
                         </a>
                       )}
                     </div>
-
                     {err && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>⚠ {err}</p>}
                     {success && (
                       <p style={{ fontSize: 12, color: '#5EEAD4', margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -413,7 +387,7 @@ export default function DoctorProfile() {
               })}
             </div>
 
-            {/* ── Submit button — at the bottom after all documents ── */}
+            {/* Submit button — at the very bottom, after all documents */}
             <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
               {!canSave && !saving && (
                 <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
@@ -429,17 +403,14 @@ export default function DoctorProfile() {
                 form="profile-form"
                 disabled={!canSave}
                 className="mg-btn"
-                style={{
-                  width: '100%', padding: 14,
-                  opacity: canSave ? 1 : 0.45,
-                  cursor: canSave ? 'pointer' : 'not-allowed',
-                }}>
+                style={{ width: '100%', padding: 14, opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
                 {saving
                   ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
                   : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
               </button>
             </div>
-          </div>
+
+          </div>{/* end verification documents card */}
 
         </motion.div>
       </div>
