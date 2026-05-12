@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Stethoscope, Building2, MapPin, ArrowRight,
-  CheckCircle, AlertCircle, FileText, Upload, Camera
+  CheckCircle, AlertCircle, FileText, Upload, Camera, X
 } from 'lucide-react';
 import { authApi, doctorApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
@@ -52,6 +52,10 @@ export default function DoctorProfile() {
   const [docUploading, setDocUploading] = useState({});
   const [docErrors, setDocErrors] = useState({});
   const [docSuccess, setDocSuccess] = useState({});
+
+  // In-page document viewer modal
+  const [docViewer, setDocViewer] = useState(null); // { label, blobUrl, isPdf }
+  const [docViewerLoading, setDocViewerLoading] = useState(false);
 
   const formFilled = form.specialization.trim() && form.clinicName.trim() && form.clinicAddress.trim();
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
@@ -156,19 +160,24 @@ export default function DoctorProfile() {
     }
   }
 
-  /** Open a document in a new tab using an authenticated blob URL */
-  async function openDoc(url) {
-    // Open the window synchronously (before any await) so browsers don't block it as a popup
-    const win = window.open('', '_blank');
-    if (!win) { alert('Please allow popups for this site to view documents.'); return; }
+  /** Open a document in an in-page modal */
+  async function openDocModal(url, label) {
+    setDocViewerLoading(true);
+    setDocViewer({ label, blobUrl: null, isPdf: url.toLowerCase().endsWith('.pdf') });
     try {
       const blobUrl = await fetchAuthBlob(url);
-      win.location.href = blobUrl;
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+      setDocViewer({ label, blobUrl, isPdf: url.toLowerCase().endsWith('.pdf') });
     } catch {
-      win.close();
-      alert('Could not open document. Please try again.');
+      setDocViewer(null);
+      alert('Could not load document. Please try again.');
+    } finally {
+      setDocViewerLoading(false);
     }
+  }
+
+  function closeDocViewer() {
+    if (docViewer?.blobUrl) URL.revokeObjectURL(docViewer.blobUrl);
+    setDocViewer(null);
   }
 
   if (isLoading) return (
@@ -182,6 +191,39 @@ export default function DoctorProfile() {
 
   return (
     <AppShell user={user}>
+
+      {/* ── In-page document viewer modal ── */}
+      <AnimatePresence>
+        {(docViewer || docViewerLoading) && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={closeDocViewer}
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(11,16,32,0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#111827', borderRadius: 20, border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <FileText size={16} style={{ color: '#9B8CFF' }} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA' }}>{docViewer?.label || 'Loading…'}</span>
+                </div>
+                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(136,146,164,0.6)', padding: 4 }}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#0B1020' }}>
+                {docViewerLoading || !docViewer?.blobUrl ? (
+                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                ) : docViewer.isPdf ? (
+                  <iframe src={docViewer.blobUrl} title={docViewer.label} style={{ width: '100%', height: '75vh', border: 'none' }} />
+                ) : (
+                  <img src={docViewer.blobUrl} alt={docViewer.label} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: 8 }} />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div style={{ padding: '32px 24px', maxWidth: 800, margin: '0 auto' }}>
 
         {/* Header */}
@@ -391,7 +433,7 @@ export default function DoctorProfile() {
                         {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
                       </label>
                       {existing && !uploading && (
-                        <button type="button" onClick={() => openDoc(existing)}
+                        <button type="button" onClick={() => openDocModal(existing, label)}
                           style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
                           View
                         </button>

@@ -68,7 +68,7 @@ export default function PendingApproval() {
           </div>
 
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => navigate('/doctor/register')} className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13 }}>Edit Profile</button>
+            <button onClick={() => navigate('/doctor/profile')} className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13 }}>Edit Profile</button>
             <button onClick={handleLogout} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 600, background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', color: '#FCA5A5', cursor: 'pointer' }}>
               <LogOut size={14} /> Sign Out
             </button>

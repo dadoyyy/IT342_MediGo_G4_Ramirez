@@ -264,9 +264,11 @@ public class AppointmentService {
             throw new BadRequestException("Only PDF, JPG, and PNG files are accepted.");
         }
 
-        // Save file to disk
+        // Save file to disk using an absolute path
         try {
-            Path dir = Paths.get(uploadDir);
+            Path dir = Paths.get(uploadDir).isAbsolute()
+                    ? Paths.get(uploadDir)
+                    : Paths.get(System.getProperty("user.home"), ".medigo", "uploads", "doctor-docs");
             Files.createDirectories(dir);
             String storedName = UUID.randomUUID() + ext;
             Path dest = dir.resolve(storedName);

@@ -31,7 +31,10 @@ export default function AppShell({ children, user }) {
   const navItems = role === 'DOCTOR' ? doctorNav : patientNav;
 
   const doctorProfileCtx = useContext(DoctorProfileContext);
-  const isProfileComplete = role === 'DOCTOR' ? (doctorProfileCtx?.isProfileComplete ?? true) : true;
+  // Lock sidebar nav for doctors who haven't completed their profile OR aren't verified yet
+  const isProfileComplete = role === 'DOCTOR'
+    ? ((doctorProfileCtx?.isProfileComplete && doctorProfileCtx?.isVerified) ?? true)
+    : true;
 
   function handleLogout() {
     authApi.logout().catch(() => {});

@@ -10,6 +10,7 @@ export const DoctorProfileContext = createContext(null);
 
 export function DoctorProfileProvider({ children }) {
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -18,9 +19,12 @@ export function DoctorProfileProvider({ children }) {
         const res = await doctorApi.getMyProfile();
         const profile = res.data?.data ?? res.data;
         const specialization = profile?.specialization;
-        setIsProfileComplete(typeof specialization === 'string' && specialization.trim().length > 0);
+        const complete = typeof specialization === 'string' && specialization.trim().length > 0;
+        setIsProfileComplete(complete);
+        setIsVerified(!!profile?.verified);
       } catch {
         setIsProfileComplete(false);
+        setIsVerified(false);
       } finally {
         setIsLoading(false);
       }
@@ -30,10 +34,11 @@ export function DoctorProfileProvider({ children }) {
 
   function markProfileComplete() {
     setIsProfileComplete(true);
+    // verified stays false until admin approves
   }
 
   return (
-    <DoctorProfileContext.Provider value={{ isProfileComplete, isLoading, markProfileComplete }}>
+    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, isLoading, markProfileComplete }}>
       {children}
     </DoctorProfileContext.Provider>
   );
@@ -42,7 +47,7 @@ export function DoctorProfileProvider({ children }) {
 // ─── Guard ────────────────────────────────────────────────────────────────────
 
 export function ProfileCompletionGuard({ children }) {
-  const { isProfileComplete, isLoading } = useContext(DoctorProfileContext);
+  const { isProfileComplete, isVerified, isLoading } = useContext(DoctorProfileContext);
 
   if (isLoading) {
     return (
@@ -55,8 +60,14 @@ export function ProfileCompletionGuard({ children }) {
     );
   }
 
+  // Not filled in yet → go to profile setup
   if (!isProfileComplete) {
     return <Navigate to="/doctor/profile" replace />;
+  }
+
+  // Filled in but awaiting admin approval → go to pending page
+  if (!isVerified) {
+    return <Navigate to="/pending-approval" replace />;
   }
 
   return children;
