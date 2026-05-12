@@ -24,23 +24,29 @@ public class AdminInitializer implements ApplicationRunner {
     private final PasswordEncoder passwordEncoder;
 
     private static final String ADMIN_EMAIL    = "admin@medigo.com";
-    private static final String ADMIN_PASSWORD = "Admin@1234";
+    private static final String ADMIN_PASSWORD = "Ru09568223767-";
     private static final String ADMIN_NAME     = "MediGo Admin";
 
     @Override
     public void run(ApplicationArguments args) {
-        if (userRepository.existsByEmail(ADMIN_EMAIL)) {
-            return; // already exists — nothing to do
-        }
-
-        User admin = User.builder()
-                .email(ADMIN_EMAIL)
-                .passwordHash(passwordEncoder.encode(ADMIN_PASSWORD))
-                .fullName(ADMIN_NAME)
-                .role("ADMIN")
-                .build();
-
-        userRepository.save(admin);
-        System.out.println("✅ Admin account created: " + ADMIN_EMAIL);
+        userRepository.findByEmail(ADMIN_EMAIL).ifPresentOrElse(
+            existing -> {
+                // Always re-hash and save the current ADMIN_PASSWORD so a
+                // password change in code takes effect on the next restart.
+                existing.setPasswordHash(passwordEncoder.encode(ADMIN_PASSWORD));
+                userRepository.save(existing);
+                System.out.println("✅ Admin password synced: " + ADMIN_EMAIL);
+            },
+            () -> {
+                User admin = User.builder()
+                        .email(ADMIN_EMAIL)
+                        .passwordHash(passwordEncoder.encode(ADMIN_PASSWORD))
+                        .fullName(ADMIN_NAME)
+                        .role("ADMIN")
+                        .build();
+                userRepository.save(admin);
+                System.out.println("✅ Admin account created: " + ADMIN_EMAIL);
+            }
+        );
     }
 }
