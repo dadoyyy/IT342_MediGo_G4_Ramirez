@@ -6,6 +6,7 @@ import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
 import { DoctorProfileContext } from '../../features/doctor/context/DoctorProfileContext';
+import AuthImage from './AuthImage';
 
 const patientNav = [
   { icon: LayoutDashboard, label: 'Home',         path: '/home' },
@@ -35,6 +36,7 @@ export default function AppShell({ children, user }) {
   const isProfileComplete = role === 'DOCTOR'
     ? ((doctorProfileCtx?.isProfileComplete && doctorProfileCtx?.isVerified) ?? true)
     : true;
+  const profilePictureUrl = role === 'DOCTOR' ? (doctorProfileCtx?.profilePictureUrl ?? null) : null;
 
   function handleLogout() {
     authApi.logout().catch(() => {});
@@ -90,8 +92,13 @@ export default function AppShell({ children, user }) {
         <div style={{ height: 1, margin: '0 8px 8px', background: 'rgba(255,255,255,0.06)' }} />
         {/* User card */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#fff' }}>
-            {initials}
+          <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
+            <AuthImage
+              src={profilePictureUrl}
+              alt="avatar"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              fallback={<span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</span>}
+            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: '#F7F8FA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resolvedUser?.fullName || 'User'}</p>

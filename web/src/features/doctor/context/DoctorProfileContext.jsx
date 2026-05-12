@@ -11,6 +11,7 @@ export const DoctorProfileContext = createContext(null);
 export function DoctorProfileProvider({ children }) {
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,9 +23,11 @@ export function DoctorProfileProvider({ children }) {
         const complete = typeof specialization === 'string' && specialization.trim().length > 0;
         setIsProfileComplete(complete);
         setIsVerified(!!profile?.verified);
+        setProfilePictureUrl(profile?.profilePictureUrl || null);
       } catch {
         setIsProfileComplete(false);
         setIsVerified(false);
+        setProfilePictureUrl(null);
       } finally {
         setIsLoading(false);
       }
@@ -37,8 +40,12 @@ export function DoctorProfileProvider({ children }) {
     // verified stays false until admin approves
   }
 
+  function updateProfilePicture(url) {
+    setProfilePictureUrl(url);
+  }
+
   return (
-    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, isLoading, markProfileComplete }}>
+    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, profilePictureUrl, isLoading, markProfileComplete, updateProfilePicture }}>
       {children}
     </DoctorProfileContext.Provider>
   );

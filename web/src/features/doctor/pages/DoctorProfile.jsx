@@ -36,7 +36,7 @@ export default function DoctorProfile() {
   const navigate = useNavigate();
   const avatarInputRef = useRef(null);
 
-  const { isProfileComplete, isLoading, markProfileComplete } = useDoctorProfile();
+  const { isProfileComplete, isLoading, markProfileComplete, updateProfilePicture } = useDoctorProfile();
   const [user, setUser] = useState(null);
 
   const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
@@ -148,6 +148,10 @@ export default function DoctorProfile() {
         board_certificate: p.boardCertificateUrl ?? prev.board_certificate,
         government_id:     p.governmentIdUrl     ?? prev.government_id,
       }));
+      // Keep context in sync so sidebar avatar updates immediately
+      if (docType === 'profile_picture' && p.profilePictureUrl) {
+        updateProfilePicture(p.profilePictureUrl);
+      }
       setDocSuccess(prev => ({ ...prev, [docType]: true }));
       setTimeout(() => setDocSuccess(prev => ({ ...prev, [docType]: false })), 3000);
     } catch (err) {
@@ -214,7 +218,15 @@ export default function DoctorProfile() {
                 {docViewerLoading || !docViewer?.blobUrl ? (
                   <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
                 ) : docViewer.isPdf ? (
-                  <iframe src={docViewer.blobUrl} title={docViewer.label} style={{ width: '100%', height: '75vh', border: 'none' }} />
+                  <object
+                    data={docViewer.blobUrl}
+                    type="application/pdf"
+                    style={{ width: '100%', height: '75vh', border: 'none' }}>
+                    <p style={{ color: '#8892A4', textAlign: 'center', padding: 24 }}>
+                      PDF preview not supported in this browser.{' '}
+                      <a href={docViewer.blobUrl} download style={{ color: '#9B8CFF' }}>Download instead</a>
+                    </p>
+                  </object>
                 ) : (
                   <img src={docViewer.blobUrl} alt={docViewer.label} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: 8 }} />
                 )}

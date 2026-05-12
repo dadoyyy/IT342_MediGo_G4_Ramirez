@@ -170,7 +170,15 @@ export default function AdminVerification() {
                   <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
                 ) : docViewerBlobUrl ? (
                   isPdf ? (
-                    <iframe src={docViewerBlobUrl} title={docViewer.label} style={{ width: '100%', height: '75vh', border: 'none' }} />
+                    <object
+                      data={docViewerBlobUrl}
+                      type="application/pdf"
+                      style={{ width: '100%', height: '75vh', border: 'none' }}>
+                      <p style={{ color: '#8892A4', textAlign: 'center', padding: 24 }}>
+                        PDF preview not supported in this browser.{' '}
+                        <a href={docViewerBlobUrl} download style={{ color: '#9B8CFF' }}>Download instead</a>
+                      </p>
+                    </object>
                   ) : (
                     <img src={docViewerBlobUrl} alt={docViewer.label} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: 8 }} />
                   )
