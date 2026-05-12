@@ -45,6 +45,7 @@ public class SecurityConfig {
                                  "/api/v1/auth/logout", "/api/v1/auth/oauth2/complete").permitAll()
                         .requestMatchers("/api/v1/doctors/search", "/api/v1/appointments").authenticated()
                         .requestMatchers("/api/v1/doctors/me/profile").hasRole("DOCTOR")
+                        .requestMatchers("/api/v1/doctors/me/documents/**").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/appointments/*/status").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/appointments/*/cancel", "/api/v1/appointments/*").hasRole("PATIENT")
                         .anyRequest().authenticated())

@@ -54,6 +54,14 @@ export const doctorApi = {
   search: (query = '') => api.get('/doctors/search', { params: { q: query } }),
   getMyProfile: () => api.get('/doctors/me/profile'),
   upsertMyProfile: (payload) => api.put('/doctors/me/profile', payload),
+  uploadDocument: (docType, file) => {
+    const form = new FormData();
+    form.append('docType', docType);
+    form.append('file', file);
+    return api.post('/doctors/me/documents', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const appointmentApi = {

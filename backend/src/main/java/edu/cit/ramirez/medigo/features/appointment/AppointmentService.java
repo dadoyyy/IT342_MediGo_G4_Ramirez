@@ -12,11 +12,19 @@ import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ForbiddenActionException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +33,9 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
     private final AppointmentRepository appointmentRepository;
+
+    @Value("${app.upload.dir:uploads/doctor-docs}")
+    private String uploadDir;
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> searchDoctors(String query) {
@@ -214,6 +225,54 @@ public class AppointmentService {
         return toAppointmentDto(appointmentRepository.save(appointment));
     }
 
+    @Transactional
+    public DoctorProfileDto uploadDoctorDocument(String email, String docType, MultipartFile file) {
+        User doctor = findUserByEmail(email);
+        ensureRole(doctor, "DOCTOR");
+
+        DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found. Please complete your profile first."));
+
+        // Validate file
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File must not be empty.");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new BadRequestException("Invalid file name.");
+        }
+        String ext = originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf('.'))
+                : "";
+        List<String> allowed = List.of(".pdf", ".jpg", ".jpeg", ".png");
+        if (!allowed.contains(ext.toLowerCase(Locale.ROOT))) {
+            throw new BadRequestException("Only PDF, JPG, and PNG files are accepted.");
+        }
+
+        // Save file to disk
+        try {
+            Path dir = Paths.get(uploadDir);
+            Files.createDirectories(dir);
+            String storedName = UUID.randomUUID() + ext;
+            Path dest = dir.resolve(storedName);
+            Files.copy(file.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
+            String fileUrl = "/api/v1/doctors/me/documents/" + storedName;
+
+            switch (docType.toLowerCase(Locale.ROOT)) {
+                case "medical_license"    -> profile.setMedicalLicenseUrl(fileUrl);
+                case "prc_id"             -> profile.setPrcIdUrl(fileUrl);
+                case "board_certificate"  -> profile.setBoardCertificateUrl(fileUrl);
+                case "government_id"      -> profile.setGovernmentIdUrl(fileUrl);
+                default -> throw new BadRequestException(
+                        "Unknown document type. Valid types: medical_license, prc_id, board_certificate, government_id.");
+            }
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to store file. Please try again.");
+        }
+
+        return toDoctorProfileDto(doctorProfileRepository.save(profile));
+    }
+
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email.toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ResourceNotFoundException("User account not found."));
@@ -235,6 +294,10 @@ public class AppointmentService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .medicalLicenseUrl(profile.getMedicalLicenseUrl())
+                .prcIdUrl(profile.getPrcIdUrl())
+                .boardCertificateUrl(profile.getBoardCertificateUrl())
+                .governmentIdUrl(profile.getGovernmentIdUrl())
                 .build();
     }
 

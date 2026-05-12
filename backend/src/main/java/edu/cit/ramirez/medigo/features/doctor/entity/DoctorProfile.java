@@ -38,6 +38,19 @@ public class DoctorProfile {
     @Builder.Default
     private boolean verified = true;
 
+    // ── Document uploads ──────────────────────────────────────────────────────
+    @Column(name = "medical_license_url", length = 512)
+    private String medicalLicenseUrl;
+
+    @Column(name = "prc_id_url", length = 512)
+    private String prcIdUrl;
+
+    @Column(name = "board_certificate_url", length = 512)
+    private String boardCertificateUrl;
+
+    @Column(name = "government_id_url", length = 512)
+    private String governmentIdUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

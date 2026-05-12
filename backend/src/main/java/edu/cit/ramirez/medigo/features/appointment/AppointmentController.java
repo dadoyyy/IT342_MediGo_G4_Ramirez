@@ -6,9 +6,19 @@ import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileUpsertRequest;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
 
@@ -18,6 +28,9 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+
+    @Value("${app.upload.dir:uploads/doctor-docs}")
+    private String uploadDir;
 
     @GetMapping("/doctors/search")
     @ResponseStatus(HttpStatus.OK)
@@ -38,6 +51,40 @@ public class AppointmentController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<DoctorProfileDto> myDoctorProfile(Principal principal) {
         return ApiResponse.ok(appointmentService.getMyDoctorProfile(principal.getName()));
+    }
+
+    /** Upload a single document for the authenticated doctor.
+     *  docType must be one of: medical_license, prc_id, board_certificate, government_id */
+    @PostMapping(value = "/doctors/me/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<DoctorProfileDto> uploadDocument(
+            Principal principal,
+            @RequestParam("docType") String docType,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.ok(appointmentService.uploadDoctorDocument(principal.getName(), docType, file));
+    }
+
+    /** Serve an uploaded document file by filename. */
+    @GetMapping("/doctors/me/documents/{filename:.+}")
+    public ResponseEntity<Resource> serveDocument(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+            String contentType = "application/octet-stream";
+            String lower = filename.toLowerCase();
+            if (lower.endsWith(".pdf"))  contentType = "application/pdf";
+            else if (lower.endsWith(".png"))  contentType = "image/png";
+            else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) contentType = "image/jpeg";
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/appointments")
