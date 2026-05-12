@@ -312,7 +312,7 @@ export default function DoctorProfile() {
             </AnimatePresence>
 
             {/* ── Form ── */}
-            <form onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <form id="profile-form" onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
                 { name: 'specialization', label: 'SPECIALIZATION',        Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice, Pediatrics', textarea: false },
                 { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2,   ph: "e.g. St. Luke's Medical Center",                textarea: false },
@@ -338,33 +338,7 @@ export default function DoctorProfile() {
                 </div>
               ))}
 
-              {/* ── Save button — disabled until everything is done ── */}
-              <div style={{ paddingTop: 4 }}>
-                {!canSave && !saving && (
-                  <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
-                    {!formFilled && !allDocsUploaded
-                      ? 'Fill in all fields and upload all required documents to continue'
-                      : !formFilled
-                      ? 'Fill in all required fields to continue'
-                      : 'Upload all required documents to continue'}
-                  </p>
-                )}
-                <button
-                  type="submit"
-                  disabled={!canSave}
-                  className="mg-btn"
-                  style={{
-                    width: '100%', padding: 14,
-                    opacity: canSave ? 1 : 0.45,
-                    cursor: canSave ? 'pointer' : 'not-allowed',
-                  }}>
-                  {saving
-                    ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
-                    : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
-                </button>
-              </div>
             </form>
-          </div>
 
           {/* ── Verification Documents ── */}
           <div className="card" style={{ padding: 28, marginTop: 20 }}>
@@ -437,6 +411,33 @@ export default function DoctorProfile() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* ── Submit button — at the bottom after all documents ── */}
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              {!canSave && !saving && (
+                <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
+                  {!formFilled && !allDocsUploaded
+                    ? 'Fill in all profile fields and upload all required documents to continue'
+                    : !formFilled
+                    ? 'Fill in all required profile fields to continue'
+                    : 'Upload all required documents to continue'}
+                </p>
+              )}
+              <button
+                type="submit"
+                form="profile-form"
+                disabled={!canSave}
+                className="mg-btn"
+                style={{
+                  width: '100%', padding: 14,
+                  opacity: canSave ? 1 : 0.45,
+                  cursor: canSave ? 'pointer' : 'not-allowed',
+                }}>
+                {saving
+                  ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
+                  : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
+              </button>
             </div>
           </div>
 

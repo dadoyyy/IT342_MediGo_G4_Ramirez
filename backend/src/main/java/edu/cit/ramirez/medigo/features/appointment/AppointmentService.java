@@ -67,10 +67,15 @@ public class AppointmentService {
         User doctor = findUserByEmail(email);
         ensureRole(doctor, "DOCTOR");
 
-        DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found. Please complete your professional profile."));
-
-        return toDoctorProfileDto(profile);
+        // Return null-safe DTO for new doctors who haven't saved a profile yet
+        return doctorProfileRepository.findByDoctorId(doctor.getId())
+                .map(this::toDoctorProfileDto)
+                .orElseGet(() -> DoctorProfileDto.builder()
+                        .doctorId(doctor.getId())
+                        .doctorName(doctor.getFullName())
+                        .email(doctor.getEmail())
+                        .verified(false)
+                        .build());
     }
 
     @Transactional
@@ -231,7 +236,17 @@ public class AppointmentService {
         ensureRole(doctor, "DOCTOR");
 
         DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found. Please complete your profile first."));
+                .orElseGet(() -> {
+                    // Auto-create a blank profile so documents can be uploaded
+                    // before the doctor fills in and saves the profile form.
+                    DoctorProfile blank = DoctorProfile.builder()
+                            .doctor(doctor)
+                            .specialization("")
+                            .clinicName("")
+                            .clinicAddress("")
+                            .build();
+                    return doctorProfileRepository.save(blank);
+                });
 
         // Validate file
         if (file == null || file.isEmpty()) {
