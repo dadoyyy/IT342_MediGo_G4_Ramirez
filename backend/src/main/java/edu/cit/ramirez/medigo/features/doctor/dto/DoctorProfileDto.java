@@ -16,6 +16,7 @@ public class DoctorProfileDto {
     private String clinicName;
     private String clinicAddress;
     private boolean verified;
+    private String profilePictureUrl;
     private String medicalLicenseUrl;
     private String prcIdUrl;
     private String boardCertificateUrl;

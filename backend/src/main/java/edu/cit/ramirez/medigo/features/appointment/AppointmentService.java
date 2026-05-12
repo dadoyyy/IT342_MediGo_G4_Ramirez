@@ -259,12 +259,19 @@ public class AppointmentService {
             String fileUrl = "/api/v1/doctors/me/documents/" + storedName;
 
             switch (docType.toLowerCase(Locale.ROOT)) {
+                case "profile_picture" -> {
+                    List<String> imgOnly = List.of(".jpg", ".jpeg", ".png");
+                    if (!imgOnly.contains(ext.toLowerCase(Locale.ROOT))) {
+                        throw new BadRequestException("Profile picture must be a JPG or PNG image.");
+                    }
+                    profile.setProfilePictureUrl(fileUrl);
+                }
                 case "medical_license"    -> profile.setMedicalLicenseUrl(fileUrl);
                 case "prc_id"             -> profile.setPrcIdUrl(fileUrl);
                 case "board_certificate"  -> profile.setBoardCertificateUrl(fileUrl);
                 case "government_id"      -> profile.setGovernmentIdUrl(fileUrl);
                 default -> throw new BadRequestException(
-                        "Unknown document type. Valid types: medical_license, prc_id, board_certificate, government_id.");
+                        "Unknown document type. Valid types: profile_picture, medical_license, prc_id, board_certificate, government_id.");
             }
         } catch (IOException e) {
             throw new BadRequestException("Failed to store file. Please try again.");
@@ -294,6 +301,7 @@ public class AppointmentService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .profilePictureUrl(profile.getProfilePictureUrl())
                 .medicalLicenseUrl(profile.getMedicalLicenseUrl())
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())

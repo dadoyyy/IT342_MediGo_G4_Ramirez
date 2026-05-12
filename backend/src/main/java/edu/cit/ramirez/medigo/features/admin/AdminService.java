@@ -52,6 +52,7 @@ public class AdminService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .profilePictureUrl(profile.getProfilePictureUrl())
                 .medicalLicenseUrl(profile.getMedicalLicenseUrl())
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())

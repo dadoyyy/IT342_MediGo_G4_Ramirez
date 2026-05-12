@@ -39,6 +39,9 @@ public class DoctorProfile {
     private boolean verified = false;
 
     // ── Document uploads ──────────────────────────────────────────────────────
+    @Column(name = "profile_picture_url", length = 512)
+    private String profilePictureUrl;
+
     @Column(name = "medical_license_url", length = 512)
     private String medicalLicenseUrl;
 
