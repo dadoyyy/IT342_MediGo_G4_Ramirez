@@ -87,9 +87,13 @@ export const adminApi = {
 };
 
 /** Fetch any authenticated file URL and return a blob object URL.
- *  Use this for <img src> and document links that require JWT. */
+ *  The url should be a full path like /api/v1/doctors/me/documents/uuid.jpg
+ *  We strip the baseURL prefix so axios doesn't double it. */
 export function fetchAuthBlob(url) {
-  return api.get(url, { responseType: 'blob' }).then(r => URL.createObjectURL(r.data));
+  // Strip the /api/v1 prefix since the axios instance already has it as baseURL
+  const base = '/api/v1';
+  const relativeUrl = url.startsWith(base) ? url.slice(base.length) : url;
+  return api.get(relativeUrl, { responseType: 'blob' }).then(r => URL.createObjectURL(r.data));
 }
 
 export default api;

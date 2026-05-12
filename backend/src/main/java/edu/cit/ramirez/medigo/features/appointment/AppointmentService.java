@@ -259,9 +259,17 @@ public class AppointmentService {
         String ext = originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf('.'))
                 : "";
-        List<String> allowed = List.of(".pdf", ".jpg", ".jpeg", ".png");
+
+        // Profile picture: images only. All other documents: PDF only.
+        boolean isProfilePic = "profile_picture".equalsIgnoreCase(docType);
+        List<String> allowed = isProfilePic
+                ? List.of(".jpg", ".jpeg", ".png")
+                : List.of(".pdf");
         if (!allowed.contains(ext.toLowerCase(Locale.ROOT))) {
-            throw new BadRequestException("Only PDF, JPG, and PNG files are accepted.");
+            String msg = isProfilePic
+                    ? "Profile picture must be a JPG or PNG image."
+                    : "Documents must be uploaded as PDF files.";
+            throw new BadRequestException(msg);
         }
 
         // Save file to disk using an absolute path
@@ -276,13 +284,7 @@ public class AppointmentService {
             String fileUrl = "/api/v1/doctors/me/documents/" + storedName;
 
             switch (docType.toLowerCase(Locale.ROOT)) {
-                case "profile_picture" -> {
-                    List<String> imgOnly = List.of(".jpg", ".jpeg", ".png");
-                    if (!imgOnly.contains(ext.toLowerCase(Locale.ROOT))) {
-                        throw new BadRequestException("Profile picture must be a JPG or PNG image.");
-                    }
-                    profile.setProfilePictureUrl(fileUrl);
-                }
+                case "profile_picture"    -> profile.setProfilePictureUrl(fileUrl);
                 case "medical_license"    -> profile.setMedicalLicenseUrl(fileUrl);
                 case "prc_id"             -> profile.setPrcIdUrl(fileUrl);
                 case "board_certificate"  -> profile.setBoardCertificateUrl(fileUrl);

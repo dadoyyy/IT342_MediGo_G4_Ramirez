@@ -24,11 +24,11 @@ function validate(form) {
 const REQUIRED_DOCS = ['profile_picture', 'medical_license', 'prc_id', 'board_certificate', 'government_id'];
 
 const DOC_META = {
-  profile_picture:   { label: 'Profile Picture',      hint: 'A clear photo of yourself',                   accept: '.jpg,.jpeg,.png' },
-  medical_license:   { label: 'Medical License',      hint: 'PRC-issued medical license',                  accept: '.pdf,.jpg,.jpeg,.png' },
-  prc_id:            { label: 'PRC ID',               hint: 'Professional Regulation Commission ID',       accept: '.pdf,.jpg,.jpeg,.png' },
-  board_certificate: { label: 'Board Certificate',    hint: 'Certificate of board examination',            accept: '.pdf,.jpg,.jpeg,.png' },
-  government_id:     { label: 'Government-Issued ID', hint: "Passport, driver's license, or national ID",  accept: '.pdf,.jpg,.jpeg,.png' },
+  profile_picture:   { label: 'Profile Picture',      hint: 'A clear photo of yourself (PNG or JPG)',      accept: '.jpg,.jpeg,.png' },
+  medical_license:   { label: 'Medical License',      hint: 'PRC-issued medical license (PDF only)',       accept: '.pdf' },
+  prc_id:            { label: 'PRC ID',               hint: 'Professional Regulation Commission ID (PDF)', accept: '.pdf' },
+  board_certificate: { label: 'Board Certificate',    hint: 'Certificate of board examination (PDF only)', accept: '.pdf' },
+  government_id:     { label: 'Government-Issued ID', hint: 'Passport, driver\'s license, or national ID (PDF)', accept: '.pdf' },
 };
 
 /* ── Component ──────────────────────────────────────────────────────────── */
