@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, Plus, Stethoscope } from 'lucide-react';
 import { authApi, appointmentApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import { authSession } from '../../auth/authSession';
 
 const STATUS_META = {
   PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', cls: 'badge-pending' },
@@ -29,7 +30,7 @@ export default function MyAppointments() {
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
-    authApi.me().then(r => setUser(r.data?.data ?? r.data)).catch(() => {});
+    authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {});
     appointmentApi.listMine().then(r => {
       const list = r.data?.data ?? r.data;
       setAppointments(Array.isArray(list) ? list : []);

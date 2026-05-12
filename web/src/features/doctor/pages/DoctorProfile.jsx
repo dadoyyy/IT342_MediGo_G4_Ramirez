@@ -10,6 +10,7 @@ import { authApi, doctorApi, appointmentApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import axios from 'axios';
 import { useDoctorProfile } from '../context/DoctorProfileContext';
+import { authSession } from '../../auth/authSession';
 
 /* ── Validation ─────────────────────────────────────────────────────────── */
 function validate(form) {
@@ -78,6 +79,7 @@ export default function DoctorProfile() {
         const meRes = await authApi.me();
         const u = meRes.data?.data ?? meRes.data;
         setUser(u);
+        authSession.setUser(u);
 
         // Also load existing document URLs if profile is already complete
         const profileRes = await doctorApi.getMyProfile().catch(() => null);
@@ -138,9 +140,9 @@ export default function DoctorProfile() {
       });
       setSaveSuccess(true);
       markProfileComplete();
-      // Auto-switch to schedule after first save
+      // After first save, go to pending-approval (admin must verify before schedule access)
       if (!isProfileComplete) {
-        setTimeout(() => setTab('schedule'), 1200);
+        setTimeout(() => navigate('/pending-approval', { replace: true }), 1200);
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {

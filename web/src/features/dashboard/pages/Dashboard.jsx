@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
+import { authSession } from '../../auth/authSession';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Dashboard() {
       try {
         const res = await authApi.me();
         const user = res.data?.data ?? res.data;
+        authSession.setUser(user);
 
         if (user?.role === 'PATIENT') {
           navigate('/home', { replace: true });
@@ -19,19 +21,22 @@ export default function Dashboard() {
         }
 
         if (user?.role === 'DOCTOR') {
-          // Check if doctor has already set up their profile
           try {
             const profileRes = await doctorApi.getMyProfile();
             const profile = profileRes.data?.data ?? profileRes.data;
             if (profile?.specialization) {
-              // Profile complete — go to schedule
-              navigate('/doctor/schedule', { replace: true });
+              // Profile filled in — check verification status
+              if (profile.verified) {
+                navigate('/doctor/schedule', { replace: true });
+              } else {
+                // Profile submitted but awaiting admin approval
+                navigate('/pending-approval', { replace: true });
+              }
             } else {
-              // Profile incomplete — go to profile setup
+              // No profile yet — go to profile setup
               navigate('/doctor/profile', { replace: true });
             }
           } catch {
-            // No profile yet — go to profile setup
             navigate('/doctor/profile', { replace: true });
           }
           return;

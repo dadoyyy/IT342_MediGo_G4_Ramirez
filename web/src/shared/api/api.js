@@ -79,4 +79,10 @@ export const chatApi = {
   sendMessage: (payload) => api.post('/chat/messages', payload),
 };
 
+export const adminApi = {
+  getPendingDoctors: () => api.get('/admin/doctors/pending'),
+  approveDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/approve`),
+  rejectDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/reject`),
+};
+
 export default api;

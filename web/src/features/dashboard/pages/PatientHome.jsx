@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Search, MapPin, BadgeCheck, ArrowRight } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import { authSession } from '../../auth/authSession';
 
 const SPECIALTIES = ['All', 'General Practice', 'Cardiology', 'Dermatology', 'Pediatrics', 'Orthopedics', 'Neurology'];
 const ACCENTS = ['#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6'];
@@ -20,7 +21,7 @@ export default function PatientHome() {
   const [searching, setSearching] = useState(false);
   const [activeSpecialty, setActiveSpecialty] = useState('All');
 
-  useEffect(() => { authApi.me().then(r => setUser(r.data?.data ?? r.data)).catch(() => {}); }, []);
+  useEffect(() => { authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {}); }, []);
 
   const searchDoctors = useCallback(async (q) => {
     setSearching(true);

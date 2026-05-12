@@ -23,7 +23,11 @@ export default function AppShell({ children, user }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const role = user?.role || 'PATIENT';
+  // Use the passed-in user, falling back to the cached user from localStorage.
+  // This means nav items render immediately on page load/refresh without waiting
+  // for the authApi.me() call to complete.
+  const resolvedUser = user ?? authSession.getUser();
+  const role = resolvedUser?.role || 'PATIENT';
   const navItems = role === 'DOCTOR' ? doctorNav : patientNav;
 
   const doctorProfileCtx = useContext(DoctorProfileContext);
@@ -36,8 +40,8 @@ export default function AppShell({ children, user }) {
     navigate('/login', { replace: true });
   }
 
-  const initials = user?.fullName
-    ? user.fullName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = resolvedUser?.fullName
+    ? resolvedUser.fullName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     : '?';
 
   /* Sidebar JSX — rendered as plain JSX, NOT as a nested component */
@@ -61,9 +65,7 @@ export default function AppShell({ children, user }) {
 
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* Don't render nav items until user role is known — prevents the
-            patient nav flashing briefly before the doctor nav loads on refresh */}
-        {user && navItems.map(({ icon: Icon, label, path, gated }) => {
+        {navItems.map(({ icon: Icon, label, path, gated }) => {
           const locked = role === 'DOCTOR' && gated && !isProfileComplete;
           const active = !locked && location.pathname === path;
           return (
@@ -89,7 +91,7 @@ export default function AppShell({ children, user }) {
             {initials}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#F7F8FA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.fullName || 'User'}</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: '#F7F8FA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resolvedUser?.fullName || 'User'}</p>
             <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{role}</p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Clock, CheckCircle, XCircle, Activity } from 'lucide-react';
 import { authApi, appointmentApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import { authSession } from '../../auth/authSession';
 
 const STATUS_META = {
   PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', cls: 'badge-pending' },
@@ -32,7 +33,9 @@ export default function DoctorSchedule() {
     async function load() {
       try {
         const [meRes, apptRes] = await Promise.all([authApi.me(), appointmentApi.listMine()]);
-        setUser(meRes.data?.data ?? meRes.data);
+        const u = meRes.data?.data ?? meRes.data;
+        setUser(u);
+        authSession.setUser(u);
         const list = apptRes.data?.data ?? apptRes.data;
         setAppointments(Array.isArray(list) ? list : []);
       } catch {} finally { setLoading(false); }
