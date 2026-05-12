@@ -11,13 +11,24 @@ import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ForbiddenActionException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
@@ -25,6 +36,14 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
     private final AppointmentRepository appointmentRepository;
+
+    @Value("${app.upload.dir:uploads/doctor-docs}")
+    private String uploadDir;
+
+    @PostConstruct
+    public void logUploadDir() {
+        log.info("📁 Upload directory: {}", Paths.get(uploadDir).toAbsolutePath());
+    }
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> searchDoctors(String query) {
@@ -45,7 +64,7 @@ public class AppointmentService {
         profile.setSpecialization(request.getSpecialization().trim());
         profile.setClinicName(request.getClinicName().trim());
         profile.setClinicAddress(request.getClinicAddress().trim());
-        profile.setVerified(true);
+        // Do NOT set verified here — admin must approve via /admin/doctors/{id}/approve
 
         DoctorProfile saved = doctorProfileRepository.save(profile);
         return toDoctorProfileDto(saved);
@@ -56,10 +75,15 @@ public class AppointmentService {
         User doctor = findUserByEmail(email);
         ensureRole(doctor, "DOCTOR");
 
-        DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found. Please complete your professional profile."));
-
-        return toDoctorProfileDto(profile);
+        // Return null-safe DTO for new doctors who haven't saved a profile yet
+        return doctorProfileRepository.findByDoctorId(doctor.getId())
+                .map(this::toDoctorProfileDto)
+                .orElseGet(() -> DoctorProfileDto.builder()
+                        .doctorId(doctor.getId())
+                        .doctorName(doctor.getFullName())
+                        .email(doctor.getEmail())
+                        .verified(false)
+                        .build());
     }
 
     @Transactional
@@ -214,6 +238,78 @@ public class AppointmentService {
         return toAppointmentDto(appointmentRepository.save(appointment));
     }
 
+    @Transactional
+    public DoctorProfileDto uploadDoctorDocument(String email, String docType, MultipartFile file) {
+        User doctor = findUserByEmail(email);
+        ensureRole(doctor, "DOCTOR");
+
+        DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
+                .orElseGet(() -> {
+                    // Auto-create a blank profile so documents can be uploaded
+                    // before the doctor fills in and saves the profile form.
+                    DoctorProfile blank = DoctorProfile.builder()
+                            .doctor(doctor)
+                            .specialization("")
+                            .clinicName("")
+                            .clinicAddress("")
+                            .build();
+                    return doctorProfileRepository.save(blank);
+                });
+
+        // Verified doctors cannot replace their approved documents (profile picture is still allowed)
+        if (profile.isVerified() && !"profile_picture".equalsIgnoreCase(docType)) {
+            throw new BadRequestException("Your profile has been verified. Verification documents can no longer be replaced.");
+        }
+
+        // Validate file
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File must not be empty.");
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new BadRequestException("Invalid file name.");
+        }
+        String ext = originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf('.'))
+                : "";
+
+        // Profile picture: images only. All other documents: PDF only.
+        boolean isProfilePic = "profile_picture".equalsIgnoreCase(docType);
+        List<String> allowed = isProfilePic
+                ? List.of(".jpg", ".jpeg", ".png")
+                : List.of(".pdf");
+        if (!allowed.contains(ext.toLowerCase(Locale.ROOT))) {
+            String msg = isProfilePic
+                    ? "Profile picture must be a JPG or PNG image."
+                    : "Documents must be uploaded as PDF files.";
+            throw new BadRequestException(msg);
+        }
+
+        // Save file to disk using the configured upload directory
+        try {
+            Path dir = Paths.get(uploadDir);
+            Files.createDirectories(dir);
+            String storedName = UUID.randomUUID() + ext;
+            Path dest = dir.resolve(storedName);
+            Files.copy(file.getInputStream(), dest, StandardCopyOption.REPLACE_EXISTING);
+            String fileUrl = "/api/v1/doctors/me/documents/" + storedName;
+
+            switch (docType.toLowerCase(Locale.ROOT)) {
+                case "profile_picture"    -> profile.setProfilePictureUrl(fileUrl);
+                case "medical_license"    -> profile.setMedicalLicenseUrl(fileUrl);
+                case "prc_id"             -> profile.setPrcIdUrl(fileUrl);
+                case "board_certificate"  -> profile.setBoardCertificateUrl(fileUrl);
+                case "government_id"      -> profile.setGovernmentIdUrl(fileUrl);
+                default -> throw new BadRequestException(
+                        "Unknown document type. Valid types: profile_picture, medical_license, prc_id, board_certificate, government_id.");
+            }
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to store file. Please try again.");
+        }
+
+        return toDoctorProfileDto(doctorProfileRepository.save(profile));
+    }
+
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email.toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ResourceNotFoundException("User account not found."));
@@ -235,6 +331,12 @@ public class AppointmentService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .rejectionReason(profile.getRejectionReason())
+                .profilePictureUrl(profile.getProfilePictureUrl())
+                .medicalLicenseUrl(profile.getMedicalLicenseUrl())
+                .prcIdUrl(profile.getPrcIdUrl())
+                .boardCertificateUrl(profile.getBoardCertificateUrl())
+                .governmentIdUrl(profile.getGovernmentIdUrl())
                 .build();
     }
 

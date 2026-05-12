@@ -26,6 +26,11 @@ public class ChatService {
     private final AppointmentRepository appointmentRepository;
     private final ChatMessageRepository chatMessageRepository;
 
+    /**
+     * Returns the list of users the current user is allowed to chat with.
+     * A conversation is allowed only when a CONFIRMED or COMPLETED appointment
+     * exists between the patient and the doctor.
+     */
     @Transactional(readOnly = true)
     public List<ChatContactDto> getContacts(String email, String query) {
         User current = findUserByEmail(email);
@@ -33,7 +38,7 @@ public class ChatService {
 
         return userRepository.findAll().stream()
                 .filter(u -> !u.getId().equals(current.getId()))
-                .filter(u -> isAllowedConversation(current, u))
+                .filter(u -> hasSuccessfulAppointment(current, u))
                 .filter(u -> q.isBlank()
                         || u.getFullName().toLowerCase(Locale.ROOT).contains(q)
                         || u.getEmail().toLowerCase(Locale.ROOT).contains(q))
@@ -47,8 +52,9 @@ public class ChatService {
         User other = userRepository.findById(otherUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chat contact not found."));
 
-        if (!isAllowedConversation(current, other)) {
-            throw new ForbiddenActionException("You are not allowed to chat with this user role.");
+        if (!hasSuccessfulAppointment(current, other)) {
+            throw new ForbiddenActionException(
+                    "You can only message users with whom you have a confirmed or completed appointment.");
         }
 
         return chatMessageRepository.findConversation(current.getId(), other.getId()).stream()
@@ -62,8 +68,9 @@ public class ChatService {
         User receiver = userRepository.findById(request.getReceiverId())
                 .orElseThrow(() -> new ResourceNotFoundException("Receiver not found."));
 
-        if (!isAllowedConversation(sender, receiver)) {
-            throw new ForbiddenActionException("You are not allowed to send messages to this role.");
+        if (!hasSuccessfulAppointment(sender, receiver)) {
+            throw new ForbiddenActionException(
+                    "You can only send messages to users with whom you have a confirmed or completed appointment.");
         }
 
         Appointment appointment = null;
@@ -71,10 +78,11 @@ public class ChatService {
             appointment = appointmentRepository.findById(request.getAppointmentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Appointment not found."));
 
-            boolean participantsMatch = (appointment.getPatient().getId().equals(sender.getId())
-                    && appointment.getDoctor().getId().equals(receiver.getId()))
+            boolean participantsMatch =
+                    (appointment.getPatient().getId().equals(sender.getId())
+                            && appointment.getDoctor().getId().equals(receiver.getId()))
                     || (appointment.getPatient().getId().equals(receiver.getId())
-                    && appointment.getDoctor().getId().equals(sender.getId()));
+                            && appointment.getDoctor().getId().equals(sender.getId()));
 
             if (!participantsMatch) {
                 throw new BadRequestException("Appointment does not belong to this conversation.");
@@ -91,19 +99,29 @@ public class ChatService {
         return toMessageDto(saved);
     }
 
-    private boolean isAllowedConversation(User sender, User receiver) {
-        String senderRole = sender.getRole().toUpperCase(Locale.ROOT);
-        String receiverRole = receiver.getRole().toUpperCase(Locale.ROOT);
+    /**
+     * A conversation is permitted when:
+     * - One user is a PATIENT and the other is a DOCTOR (or vice-versa), AND
+     * - At least one CONFIRMED or COMPLETED appointment exists between them.
+     *
+     * Admins are not allowed to participate in patient-doctor chats.
+     */
+    private boolean hasSuccessfulAppointment(User a, User b) {
+        String roleA = a.getRole().toUpperCase(Locale.ROOT);
+        String roleB = b.getRole().toUpperCase(Locale.ROOT);
 
-        if ("PATIENT".equals(senderRole)) {
-            return "DOCTOR".equals(receiverRole);
-        }
+        // Only patient ↔ doctor conversations are allowed
+        boolean isPatientDoctor =
+                ("PATIENT".equals(roleA) && "DOCTOR".equals(roleB))
+                || ("DOCTOR".equals(roleA) && "PATIENT".equals(roleB));
 
-        if ("DOCTOR".equals(senderRole)) {
-            return "DOCTOR".equals(receiverRole) || "PATIENT".equals(receiverRole);
-        }
+        if (!isPatientDoctor) return false;
 
-        return false;
+        // Determine which user is the patient and which is the doctor
+        Long patientId = "PATIENT".equals(roleA) ? a.getId() : b.getId();
+        Long doctorId  = "DOCTOR".equals(roleA)  ? a.getId() : b.getId();
+
+        return appointmentRepository.existsSuccessfulAppointmentBetween(patientId, doctorId);
     }
 
     private User findUserByEmail(String email) {
@@ -112,9 +130,17 @@ public class ChatService {
     }
 
     private ChatContactDto toContactDto(User user) {
+        String fullName = user.getFullName() == null ? "" : user.getFullName().trim();
+        int spaceIdx = fullName.indexOf(' ');
+        String firstName = spaceIdx > 0 ? fullName.substring(0, spaceIdx) : fullName;
+        String lastName  = spaceIdx > 0 ? fullName.substring(spaceIdx + 1) : "";
+
         return ChatContactDto.builder()
+                .userId(user.getId())   // frontend uses userId
                 .id(user.getId())
-                .fullName(user.getFullName())
+                .fullName(fullName)
+                .firstName(firstName)
+                .lastName(lastName)
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();

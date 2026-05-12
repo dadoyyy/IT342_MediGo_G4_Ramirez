@@ -21,7 +21,9 @@ import ChatInterface from './features/chat/pages/ChatInterface';
 // ── Doctor feature ────────────────────────────────────────────────────────
 import DoctorDetail       from './features/doctor/pages/DoctorDetail';
 import DoctorRegistration from './features/doctor/pages/DoctorRegistration';
+import DoctorProfile      from './features/doctor/pages/DoctorProfile';
 import PendingApproval    from './features/doctor/pages/PendingApproval';
+import { DoctorProfileProvider, ProfileCompletionGuard } from './features/doctor/context/DoctorProfileContext';
 
 // ── Admin feature ─────────────────────────────────────────────────────────
 import AdminVerification from './features/admin/pages/AdminVerification';
@@ -37,6 +39,7 @@ function App() {
         <Route path="/"                element={<Navigate to="/login" replace />} />
         <Route path="/register"        element={<Register />} />
         <Route path="/doctor/register" element={<DoctorRegistration />} />
+        <Route path="/doctor/profile"  element={<ProtectedRoute><DoctorProfileProvider><DoctorProfile /></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/login"           element={<Login />} />
         <Route path="/dashboard"       element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/home"            element={<ProtectedRoute><PatientHome /></ProtectedRoute>} />
@@ -44,8 +47,8 @@ function App() {
         <Route path="/appointments"    element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
-        <Route path="/chat"            element={<ProtectedRoute><ChatInterface /></ProtectedRoute>} />
-        <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorSchedule /></ProtectedRoute>} />
+        <Route path="/chat"            element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><ChatInterface /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
+        <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorSchedule /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/select-role" element={<SelectRole />} />
         <Route path="*"                element={<Navigate to="/login" replace />} />

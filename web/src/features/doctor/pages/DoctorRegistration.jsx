@@ -1,1 +1,127 @@
-export { default } from '../../../pages/DoctorRegistration';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Stethoscope, Building2, MapPin, ArrowRight } from 'lucide-react';
+import { doctorApi } from '../../../shared/api/api';
+import { authSession } from '../../auth/authSession';
+import axios from 'axios';
+
+function validate(form) {
+  const e = {};
+  if (!form.specialization.trim()) e.specialization = 'Specialization is required.';
+  if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
+  if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
+  return e;
+}
+
+export default function DoctorRegistration() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [apiError, setApiError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    if (!authSession.getToken()) { navigate('/login', { replace: true }); return; }
+    doctorApi.getMyProfile()
+      .then(res => {
+        const p = res.data?.data ?? res.data;
+        if (p) setForm({ specialization: p.specialization || '', clinicName: p.clinicName || '', clinicAddress: p.clinicAddress || '' });
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, [navigate]);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(p => ({ ...p, [name]: value }));
+    setFieldErrors(p => ({ ...p, [name]: undefined }));
+    setApiError('');
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const errors = validate(form);
+    if (Object.keys(errors).length) { setFieldErrors(errors); return; }
+    setLoading(true); setApiError('');
+    try {
+      await doctorApi.upsertMyProfile({ specialization: form.specialization.trim(), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
+      navigate('/doctor/profile', { replace: true });
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data)
+        setApiError(err.response.data?.error?.message || err.response.data?.message || 'Submission failed.');
+      else setApiError('Unable to connect. Please try again.');
+    } finally { setLoading(false); }
+  }
+
+  if (checking) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', padding: '48px 24px', background: '#0B1020', position: 'relative' }}>
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div className="blob-1 absolute rounded-full" style={{ width: 400, height: 400, top: -100, right: -100, background: 'radial-gradient(circle, rgba(155,140,255,0.1) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      </div>
+
+      <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 18px rgba(46,196,182,0.35)' }}>
+            <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
+            <p style={{ fontSize: 9, color: 'rgba(136,146,164,0.45)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+          className="glass" style={{ borderRadius: 24, padding: 32 }}>
+          <div style={{ marginBottom: 32 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#F7F8FA', marginBottom: 8 }}>Doctor Profile</h1>
+            <p style={{ fontSize: 14, color: '#8892A4' }}>Complete your professional profile to start accepting appointments.</p>
+          </div>
+
+          {apiError && (
+            <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+              <span>⚠</span><span>{apiError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {[
+              { name: 'specialization', label: 'SPECIALIZATION', Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice', textarea: false },
+              { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
+              { name: 'clinicAddress',  label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
+            ].map(({ name, label, Icon, ph, textarea }) => (
+              <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>
+                  {label} <span style={{ color: '#FCA5A5' }}>*</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} />
+                  {textarea ? (
+                    <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
+                      className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
+                  ) : (
+                    <input name={name} type="text" value={form[name]} onChange={handleChange} placeholder={ph}
+                      className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
+                  )}
+                </div>
+                {fieldErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{fieldErrors[name]}</p>}
+              </div>
+            ))}
+
+            <button type="submit" disabled={loading} className="mg-btn w-full" style={{ padding: 15, marginTop: 4 }}>
+              {loading ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Submitting…</> : <>Save Profile <ArrowRight size={15} /></>}
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

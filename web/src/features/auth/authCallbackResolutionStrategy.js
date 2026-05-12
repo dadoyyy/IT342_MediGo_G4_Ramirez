@@ -21,7 +21,7 @@ const strategies = [
     supports: (ctx) => Boolean(ctx.pending),
     resolve: (ctx) => ({
       type: 'PENDING_ROLE',
-      path: `/auth/select-role?pending=${encodeURIComponent(ctx.pending)}`,
+      path: `/auth/select-role?pendingToken=${encodeURIComponent(ctx.pending)}`,
     }),
   },
   {
