@@ -36,7 +36,7 @@ export default function DoctorProfile() {
   const navigate = useNavigate();
   const avatarInputRef = useRef(null);
 
-  const { isProfileComplete, isLoading, markProfileComplete, updateProfilePicture } = useDoctorProfile();
+  const { isProfileComplete, isVerified, isLoading, markProfileComplete, updateProfilePicture } = useDoctorProfile();
   const [user, setUser] = useState(null);
 
   const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
@@ -398,9 +398,18 @@ export default function DoctorProfile() {
           {/* ── Verification Documents card ── */}
           <div className="card" style={{ padding: 28 }}>
             <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>Verification Documents</p>
-              <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>
-                All 4 documents are required before you can submit. Accepted formats: PDF, JPG, PNG (max 10 MB each).
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#F7F8FA', margin: 0, flex: 1 }}>Verification Documents</p>
+                {isVerified && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 99, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.25)', color: '#5EEAD4' }}>
+                    <CheckCircle size={11} /> Verified & Locked
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: 13, color: '#8892A4', margin: '6px 0 0' }}>
+                {isVerified
+                  ? 'Your documents have been verified and approved. They cannot be replaced.'
+                  : 'All 4 documents are required before you can submit. Accepted format: PDF only.'}
               </p>
             </div>
 
@@ -417,33 +426,51 @@ export default function DoctorProfile() {
                       <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.05em' }}>
                         {label.toUpperCase()}
                       </label>
-                      <span style={{ fontSize: 10, color: '#FCA5A5' }}>*</span>
+                      {!isVerified && <span style={{ fontSize: 10, color: '#FCA5A5' }}>*</span>}
                       {existing && <CheckCircle size={11} style={{ color: '#2EC4B6', marginLeft: 2 }} />}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <label style={{
-                        flex: 1, display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '10px 14px', borderRadius: 10,
-                        cursor: uploading ? 'not-allowed' : 'pointer',
-                        background: existing ? 'rgba(46,196,182,0.06)' : 'rgba(255,255,255,0.03)',
-                        border: existing ? '1px solid rgba(46,196,182,0.25)' : '1px dashed rgba(255,255,255,0.12)',
-                        transition: 'all 0.2s',
-                      }}>
-                        <input type="file" accept={accept} style={{ display: 'none' }}
-                          disabled={uploading}
-                          onChange={e => { const f = e.target.files?.[0]; if (f) handleDocUpload(key, f); e.target.value = ''; }} />
-                        {uploading
-                          ? <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
-                          : existing
-                          ? <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
-                          : <Upload size={15} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: existing ? '#5EEAD4' : 'rgba(136,146,164,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {uploading ? 'Uploading…' : existing ? 'Uploaded — click to replace' : hint}
+                      {isVerified ? (
+                        /* Locked read-only row */
+                        <div style={{
+                          flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 14px', borderRadius: 10,
+                          background: 'rgba(46,196,182,0.04)',
+                          border: '1px solid rgba(46,196,182,0.15)',
+                          opacity: 0.8,
+                        }}>
+                          <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
+                          <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: '#5EEAD4', flex: 1 }}>
+                            Submitted &amp; verified
                           </p>
+                          <FileText size={13} style={{ color: 'rgba(46,196,182,0.4)', flexShrink: 0 }} />
                         </div>
-                        {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
-                      </label>
+                      ) : (
+                        /* Editable upload row */
+                        <label style={{
+                          flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 14px', borderRadius: 10,
+                          cursor: uploading ? 'not-allowed' : 'pointer',
+                          background: existing ? 'rgba(46,196,182,0.06)' : 'rgba(255,255,255,0.03)',
+                          border: existing ? '1px solid rgba(46,196,182,0.25)' : '1px dashed rgba(255,255,255,0.12)',
+                          transition: 'all 0.2s',
+                        }}>
+                          <input type="file" accept={accept} style={{ display: 'none' }}
+                            disabled={uploading}
+                            onChange={e => { const f = e.target.files?.[0]; if (f) handleDocUpload(key, f); e.target.value = ''; }} />
+                          {uploading
+                            ? <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                            : existing
+                            ? <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
+                            : <Upload size={15} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: existing ? '#5EEAD4' : 'rgba(136,146,164,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {uploading ? 'Uploading…' : existing ? 'Uploaded — click to replace' : hint}
+                            </p>
+                          </div>
+                          {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
+                        </label>
+                      )}
                       {existing && !uploading && (
                         <button type="button" onClick={() => openDocModal(existing, label)}
                           style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
@@ -462,28 +489,30 @@ export default function DoctorProfile() {
               })}
             </div>
 
-            {/* Submit button — at the very bottom, after all documents */}
-            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-              {!canSave && !saving && (
-                <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
-                  {!formFilled && !allDocsUploaded
-                    ? 'Fill in all profile fields and upload all required documents to continue'
-                    : !formFilled
-                    ? 'Fill in all required profile fields to continue'
-                    : 'Upload all required documents to continue'}
-                </p>
-              )}
-              <button
-                type="submit"
-                form="profile-form"
-                disabled={!canSave}
-                className="mg-btn"
-                style={{ width: '100%', padding: 14, opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
-                {saving
-                  ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
-                  : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
-              </button>
-            </div>
+            {/* Submit button — only shown when not yet verified */}
+            {!isVerified && (
+              <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                {!canSave && !saving && (
+                  <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
+                    {!formFilled && !allDocsUploaded
+                      ? 'Fill in all profile fields and upload all required documents to continue'
+                      : !formFilled
+                      ? 'Fill in all required profile fields to continue'
+                      : 'Upload all required documents to continue'}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  form="profile-form"
+                  disabled={!canSave}
+                  className="mg-btn"
+                  style={{ width: '100%', padding: 14, opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
+                  {saving
+                    ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
+                    : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
+                </button>
+              </div>
+            )}
 
           </div>{/* end verification documents card */}
 

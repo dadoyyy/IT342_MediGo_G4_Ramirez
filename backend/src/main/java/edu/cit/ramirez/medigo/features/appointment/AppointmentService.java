@@ -256,6 +256,11 @@ public class AppointmentService {
                     return doctorProfileRepository.save(blank);
                 });
 
+        // Verified doctors cannot replace their approved documents (profile picture is still allowed)
+        if (profile.isVerified() && !"profile_picture".equalsIgnoreCase(docType)) {
+            throw new BadRequestException("Your profile has been verified. Verification documents can no longer be replaced.");
+        }
+
         // Validate file
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("File must not be empty.");
