@@ -11,7 +11,9 @@ import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ForbiddenActionException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AppointmentService {
@@ -36,6 +39,11 @@ public class AppointmentService {
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
     private String uploadDir;
+
+    @PostConstruct
+    public void logUploadDir() {
+        log.info("📁 Upload directory: {}", Paths.get(uploadDir).toAbsolutePath());
+    }
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> searchDoctors(String query) {
@@ -272,11 +280,9 @@ public class AppointmentService {
             throw new BadRequestException(msg);
         }
 
-        // Save file to disk using an absolute path
+        // Save file to disk using the configured upload directory
         try {
-            Path dir = Paths.get(uploadDir).isAbsolute()
-                    ? Paths.get(uploadDir)
-                    : Paths.get(System.getProperty("user.home"), ".medigo", "uploads", "doctor-docs");
+            Path dir = Paths.get(uploadDir);
             Files.createDirectories(dir);
             String storedName = UUID.randomUUID() + ext;
             Path dest = dir.resolve(storedName);

@@ -68,10 +68,7 @@ public class AppointmentController {
     @GetMapping("/doctors/me/documents/{filename:.+}")
     public ResponseEntity<Resource> serveDocument(@PathVariable String filename) {
         try {
-            Path dir = Paths.get(uploadDir).isAbsolute()
-                    ? Paths.get(uploadDir)
-                    : Paths.get(System.getProperty("user.home"), ".medigo", "uploads", "doctor-docs");
-            Path filePath = dir.resolve(filename).normalize();
+            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if (!resource.exists() || !resource.isReadable()) {
                 return ResponseEntity.notFound().build();

@@ -55,9 +55,8 @@ public class AdminService {
 
     /** Serve a document file for admin review — bypasses the DOCTOR-only endpoint. */
     public Resource serveDocument(String filename) throws MalformedURLException {
-        Path dir = Paths.get(uploadDir).isAbsolute()
-                ? Paths.get(uploadDir)
-                : Paths.get(System.getProperty("user.home"), ".medigo", "uploads", "doctor-docs");
+        // Resolve the upload directory — use the configured path directly
+        Path dir = Paths.get(uploadDir);
         Path filePath = dir.resolve(filename).normalize();
         Resource resource = new UrlResource(filePath.toUri());
         if (!resource.exists() || !resource.isReadable()) {

@@ -1,6 +1,7 @@
 package edu.cit.ramirez.medigo.features.admin;
 
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
+import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -58,13 +59,15 @@ public class AdminController {
             Resource resource = adminService.serveDocument(filename);
             String contentType = "application/octet-stream";
             String lower = filename.toLowerCase();
-            if (lower.endsWith(".pdf"))                          contentType = "application/pdf";
-            else if (lower.endsWith(".png"))                     contentType = "image/png";
-            else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) contentType = "image/jpeg";
+            if (lower.endsWith(".pdf"))                                   contentType = "application/pdf";
+            else if (lower.endsWith(".png"))                              contentType = "image/png";
+            else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))   contentType = "image/jpeg";
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                     .body(resource);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
         }
