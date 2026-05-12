@@ -316,6 +316,7 @@ public class AppointmentService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .rejectionReason(profile.getRejectionReason())
                 .profilePictureUrl(profile.getProfilePictureUrl())
                 .medicalLicenseUrl(profile.getMedicalLicenseUrl())
                 .prcIdUrl(profile.getPrcIdUrl())

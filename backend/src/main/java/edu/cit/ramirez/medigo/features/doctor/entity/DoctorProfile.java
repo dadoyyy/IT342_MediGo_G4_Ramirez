@@ -38,6 +38,9 @@ public class DoctorProfile {
     @Builder.Default
     private boolean verified = false;
 
+    @Column(name = "rejection_reason", length = 1000)
+    private String rejectionReason;
+
     // ── Document uploads ──────────────────────────────────────────────────────
     @Column(name = "profile_picture_url", length = 512)
     private String profilePictureUrl;

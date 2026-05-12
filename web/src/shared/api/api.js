@@ -82,7 +82,14 @@ export const chatApi = {
 export const adminApi = {
   getPendingDoctors: () => api.get('/admin/doctors/pending'),
   approveDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/approve`),
-  rejectDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/reject`),
+  rejectDoctor: (doctorId, reason) => api.put(`/admin/doctors/${doctorId}/reject`, { reason }),
+  serveDocument: (filename) => api.get(`/admin/documents/${filename}`, { responseType: 'blob' }),
 };
+
+/** Fetch any authenticated file URL and return a blob object URL.
+ *  Use this for <img src> and document links that require JWT. */
+export function fetchAuthBlob(url) {
+  return api.get(url, { responseType: 'blob' }).then(r => URL.createObjectURL(r.data));
+}
 
 export default api;

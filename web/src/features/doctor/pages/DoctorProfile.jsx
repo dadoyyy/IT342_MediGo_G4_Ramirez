@@ -5,8 +5,9 @@ import {
   Stethoscope, Building2, MapPin, ArrowRight,
   CheckCircle, AlertCircle, FileText, Upload, Camera
 } from 'lucide-react';
-import { authApi, doctorApi } from '../../../shared/api/api';
+import { authApi, doctorApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import AuthImage from '../../../shared/ui/AuthImage';
 import axios from 'axios';
 import { useDoctorProfile } from '../context/DoctorProfileContext';
 import { authSession } from '../../auth/authSession';
@@ -155,6 +156,18 @@ export default function DoctorProfile() {
     }
   }
 
+  /** Open a document in a new tab using an authenticated blob URL */
+  async function openDoc(url) {
+    try {
+      const blobUrl = await fetchAuthBlob(url);
+      window.open(blobUrl, '_blank');
+      // Revoke after a short delay to allow the tab to load
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    } catch {
+      alert('Could not open document. Please try again.');
+    }
+  }
+
   if (isLoading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
       <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
@@ -234,7 +247,12 @@ export default function DoctorProfile() {
                     transition: 'all 0.2s',
                   }}>
                   {avatarUrl
-                    ? <img src={avatarUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <AuthImage
+                        src={avatarUrl}
+                        alt="Profile"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        fallback={<span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>}
+                      />
                     : <span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>}
                   <div style={{
                     position: 'absolute', inset: 0, borderRadius: 18,
@@ -370,10 +388,10 @@ export default function DoctorProfile() {
                         {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
                       </label>
                       {existing && !uploading && (
-                        <a href={existing} target="_blank" rel="noopener noreferrer"
-                          style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                        <button type="button" onClick={() => openDoc(existing)}
+                          style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
                           View
-                        </a>
+                        </button>
                       )}
                     </div>
                     {err && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>⚠ {err}</p>}

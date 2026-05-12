@@ -6,9 +6,15 @@ import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -16,6 +22,9 @@ import java.util.List;
 public class AdminService {
 
     private final DoctorProfileRepository doctorProfileRepository;
+
+    @Value("${app.upload.dir:uploads/doctor-docs}")
+    private String uploadDir;
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> getPendingDoctors() {
@@ -29,17 +38,29 @@ public class AdminService {
         DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
         profile.setVerified(true);
+        profile.setRejectionReason(null);
         return toDto(doctorProfileRepository.save(profile));
     }
 
     @Transactional
-    public DoctorProfileDto rejectDoctor(Long doctorId) {
+    public DoctorProfileDto rejectDoctor(Long doctorId, String reason) {
         DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
         profile.setVerified(false);
-        // Optionally delete the profile so the doctor can re-submit
+        profile.setRejectionReason(reason != null ? reason.trim() : null);
+        // Delete the profile so the doctor can re-submit with corrected documents
         doctorProfileRepository.delete(profile);
         return toDto(profile);
+    }
+
+    /** Serve a document file for admin review — bypasses the DOCTOR-only endpoint. */
+    public Resource serveDocument(String filename) throws MalformedURLException {
+        Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new ResourceNotFoundException("File not found: " + filename);
+        }
+        return resource;
     }
 
     private DoctorProfileDto toDto(DoctorProfile profile) {
@@ -52,6 +73,7 @@ public class AdminService {
                 .clinicName(profile.getClinicName())
                 .clinicAddress(profile.getClinicAddress())
                 .verified(profile.isVerified())
+                .rejectionReason(profile.getRejectionReason())
                 .profilePictureUrl(profile.getProfilePictureUrl())
                 .medicalLicenseUrl(profile.getMedicalLicenseUrl())
                 .prcIdUrl(profile.getPrcIdUrl())
