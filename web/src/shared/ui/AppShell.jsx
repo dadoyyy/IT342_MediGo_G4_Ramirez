@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, Bell, ChevronRight, UserCircle } from 'lucide-react';
 import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
+import { DoctorProfileContext } from '../../features/doctor/context/DoctorProfileContext';
 
 const patientNav = [
   { icon: LayoutDashboard, label: 'Home',         path: '/home' },
@@ -12,9 +13,9 @@ const patientNav = [
   { icon: MessageSquare,   label: 'Messages',     path: '/chat' },
 ];
 const doctorNav = [
+  { icon: Calendar,      label: 'My Schedule', path: '/doctor/schedule', gated: true },
+  { icon: MessageSquare, label: 'Messages',    path: '/chat',            gated: true },
   { icon: UserCircle,    label: 'My Profile',  path: '/doctor/profile' },
-  { icon: Calendar,      label: 'My Schedule', path: '/doctor/schedule' },
-  { icon: MessageSquare, label: 'Messages',    path: '/chat' },
 ];
 
 export default function AppShell({ children, user }) {
@@ -24,6 +25,9 @@ export default function AppShell({ children, user }) {
 
   const role = user?.role || 'PATIENT';
   const navItems = role === 'DOCTOR' ? doctorNav : patientNav;
+
+  const doctorProfileCtx = useContext(DoctorProfileContext);
+  const isProfileComplete = role === 'DOCTOR' ? (doctorProfileCtx?.isProfileComplete ?? true) : true;
 
   function handleLogout() {
     authApi.logout().catch(() => {});
@@ -57,11 +61,16 @@ export default function AppShell({ children, user }) {
 
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {navItems.map(({ icon: Icon, label, path }) => {
-          const active = location.pathname === path;
+        {/* Don't render nav items until user role is known — prevents the
+            patient nav flashing briefly before the doctor nav loads on refresh */}
+        {user && navItems.map(({ icon: Icon, label, path, gated }) => {
+          const locked = role === 'DOCTOR' && gated && !isProfileComplete;
+          const active = !locked && location.pathname === path;
           return (
-            <button key={path} onClick={() => { navigate(path); setMobileOpen(false); }}
-              className={`nav-item ${active ? 'active' : ''}`}>
+            <button key={path}
+              onClick={locked ? undefined : () => { navigate(path); setMobileOpen(false); }}
+              className={`nav-item ${active ? 'active' : ''}`}
+              style={locked ? { opacity: 0.35, cursor: 'not-allowed', pointerEvents: 'none' } : undefined}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#2EC4B6' : 'rgba(136,146,164,0.2)', boxShadow: active ? '0 0 8px rgba(46,196,182,0.6)' : 'none', transition: 'all 0.2s' }} />
               <Icon size={15} />
               <span>{label}</span>
