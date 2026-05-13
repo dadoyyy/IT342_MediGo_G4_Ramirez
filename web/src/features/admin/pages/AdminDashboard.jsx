@@ -164,7 +164,7 @@ export default function AdminDashboard() {
         ctx.stroke();
       });
 
-      chartDataRef.current = { points };
+      chartDataRef.current = { points, width: logicalWidth };
     };
 
     draw();
@@ -288,8 +288,8 @@ export default function AdminDashboard() {
                         position: 'absolute',
                         left: hoveredPoint.x,
                         top: hoveredPoint.y - 45,
-                        transform: hoveredPoint.x > 500 ? 'translateX(-100%)' : hoveredPoint.x < 100 ? 'translateX(0)' : 'translateX(-50%)',
-                        marginLeft: hoveredPoint.x > 500 ? -10 : hoveredPoint.x < 100 ? 10 : 0,
+                        transform: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
+                        marginLeft: hoveredPoint.x > (chartDataRef.current.width - 150) ? -12 : hoveredPoint.x < 150 ? 12 : 0,
                         background: '#111827',
                         border: '1px solid rgba(46,196,182,0.3)',
                         padding: '8px 12px',

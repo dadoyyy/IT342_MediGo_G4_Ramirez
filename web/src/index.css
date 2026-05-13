@@ -542,19 +542,23 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
   margin-bottom: 16px;
 }
 .chart-scrollbar::-webkit-scrollbar {
-  height: 8px;
+  height: 10px;
 }
 .chart-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255,255,255,0.02);
+  border-radius: 99px;
 }
 .chart-scrollbar::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: rgba(155,140,255,0.15);
   border-radius: 99px;
-  transition: background 0.2s;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 .chart-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(155,140,255,0.4);
+  background: rgba(155,140,255,0.45);
+  background-clip: padding-box;
 }
 .chart-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(155,140,255,0.7);
+  background: rgba(155,140,255,0.7) !important;
+  background-clip: padding-box;
 }
