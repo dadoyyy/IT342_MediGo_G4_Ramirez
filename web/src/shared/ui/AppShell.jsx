@@ -19,7 +19,6 @@ const doctorNav = [
   { icon: LayoutDashboard, label: 'Dashboard',    path: '/doctor/dashboard', gated: true },
   { icon: Calendar,        label: 'My Schedule',  path: '/doctor/schedule',  gated: true },
   { icon: MessageSquare,   label: 'Messages',     path: '/chat',             gated: true },
-  { icon: UserCircle,      label: 'My Profile',   path: '/doctor/profile' },
 ];
 
 export default function AppShell({ children, user }) {
@@ -177,7 +176,7 @@ export default function AppShell({ children, user }) {
 
       {/* Nav label */}
       <div style={{ padding: '0 20px 8px' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(136,146,164,0.35)', letterSpacing: '0.08em' }}>NAVIGATION</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(136,146,164,0.35)', letterSpacing: '0.08em' }}>GENERAL</span>
       </div>
 
       {/* Nav items */}
