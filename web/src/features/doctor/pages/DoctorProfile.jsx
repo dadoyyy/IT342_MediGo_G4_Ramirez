@@ -237,7 +237,7 @@ export default function DoctorProfile() {
         )}
       </AnimatePresence>
 
-      <div style={{ padding: '32px 24px', maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
@@ -262,7 +262,8 @@ export default function DoctorProfile() {
           </p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}
+          style={{ display: 'grid', gridTemplateColumns: isProfileComplete ? 'repeat(auto-fit, minmax(380px, 1fr))' : '1fr', gap: 20, alignItems: 'start' }}>
 
           {/* Progress bar */}
           {!isProfileComplete && (
@@ -409,7 +410,6 @@ export default function DoctorProfile() {
             </form>
 
           </div>{/* end profile info card */}
-
           {/* ── Verification Documents card ── */}
           <div className="card" style={{ padding: 28 }}>
             <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
