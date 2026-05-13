@@ -9,6 +9,7 @@ import { authApi, adminApi, fetchAuthBlob } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
 import { authEvents } from '../../auth/authEventBus';
 import AuthImage from '../../../shared/ui/AuthImage';
+import AppShell from '../../../shared/ui/AppShell';
 
 const DOC_KEYS = [
   { key: 'medicalLicenseUrl',   label: 'Medical License' },
@@ -123,17 +124,11 @@ export default function AdminVerification() {
     setDocViewerBlobUrl(null);
   }
 
-  function handleLogout() {
-    authApi.logout().catch(() => {});
-    authSession.clearSession();
-    authEvents.emit(authEvents.names.logout);
-    navigate('/login', { replace: true });
-  }
-
   const isPdf = docViewer?.url?.toLowerCase().endsWith('.pdf');
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0B1020' }}>
+    <AppShell user={user}>
+      <div style={{ padding: '28px 28px 40px' }}>
 
       {/* Toast */}
       <AnimatePresence>
@@ -261,25 +256,6 @@ export default function AdminVerification() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Header */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 10, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(11,16,32,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
-            <Stethoscope size={16} color="#fff" strokeWidth={2.5} />
-          </div>
-          <span style={{ fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
-          <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF' }}>Admin</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {user && <span style={{ fontSize: 13, color: '#8892A4' }} className="hidden sm:block">{user.fullName}</span>}
-          <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(136,146,164,0.5)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <LogOut size={14} /> Sign out
-          </button>
-        </div>
-      </header>
-
-      <main style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)' }}>
@@ -391,7 +367,7 @@ export default function AdminVerification() {
             })}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }
