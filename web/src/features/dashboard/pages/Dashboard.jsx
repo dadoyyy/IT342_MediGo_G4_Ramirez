@@ -27,7 +27,7 @@ export default function Dashboard() {
             if (profile?.specialization) {
               // Profile filled in — check verification status
               if (profile.verified) {
-                navigate('/doctor/schedule', { replace: true });
+                navigate('/doctor/dashboard', { replace: true });
               } else {
                 // Profile submitted but awaiting admin approval
                 navigate('/pending-approval', { replace: true });

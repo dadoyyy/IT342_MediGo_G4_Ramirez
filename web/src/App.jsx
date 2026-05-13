@@ -22,6 +22,7 @@ import ChatInterface from './features/chat/pages/ChatInterface';
 import DoctorDetail       from './features/doctor/pages/DoctorDetail';
 import DoctorRegistration from './features/doctor/pages/DoctorRegistration';
 import DoctorProfile      from './features/doctor/pages/DoctorProfile';
+import DoctorDashboard    from './features/doctor/pages/DoctorDashboard';
 import PendingApproval    from './features/doctor/pages/PendingApproval';
 import { DoctorProfileProvider, ProfileCompletionGuard } from './features/doctor/context/DoctorProfileContext';
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/pending-approval" element={<PendingApproval />} />
         <Route path="/admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
         <Route path="/chat"            element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><ChatInterface /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
+        <Route path="/doctor/dashboard" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorDashboard /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorSchedule /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/select-role" element={<SelectRole />} />
