@@ -28,7 +28,10 @@ import PendingApproval    from './features/doctor/pages/PendingApproval';
 import { DoctorProfileProvider, ProfileCompletionGuard } from './features/doctor/context/DoctorProfileContext';
 
 // ── Admin feature ─────────────────────────────────────────────────────────
+import AdminDashboard    from './features/admin/pages/AdminDashboard';
 import AdminVerification from './features/admin/pages/AdminVerification';
+import AdminDoctors      from './features/admin/pages/AdminDoctors';
+import AdminPatients     from './features/admin/pages/AdminPatients';
 
 function ProtectedRoute({ children }) {
   return authSession.getToken() ? children : <Navigate to="/login" replace />;
@@ -48,7 +51,10 @@ function App() {
         <Route path="/doctor/:doctorId" element={<ProtectedRoute><DoctorDetail /></ProtectedRoute>} />
         <Route path="/appointments"    element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
         <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
+        <Route path="/admin/doctors" element={<ProtectedRoute><AdminDoctors /></ProtectedRoute>} />
+        <Route path="/admin/patients" element={<ProtectedRoute><AdminPatients /></ProtectedRoute>} />
         <Route path="/chat"            element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><ChatInterface /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/doctor/dashboard" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorDashboard /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/doctor/appointments" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorAppointments /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />

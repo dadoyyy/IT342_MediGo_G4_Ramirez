@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown, ClipboardList } from 'lucide-react';
+import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown, ClipboardList, ShieldCheck, Users } from 'lucide-react';
 import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
@@ -21,6 +21,12 @@ const doctorNav = [
   { icon: Calendar,        label: 'My Schedule',  path: '/doctor/schedule',      gated: true },
   { icon: MessageSquare,   label: 'Messages',     path: '/chat',                 gated: true },
 ];
+const adminNav = [
+  { icon: LayoutDashboard, label: 'Dashboard',           path: '/admin/dashboard' },
+  { icon: ShieldCheck,     label: 'Doctor Verification', path: '/admin/verification' },
+  { icon: Stethoscope,     label: 'Doctors',             path: '/admin/doctors' },
+  { icon: Users,           label: 'Patients',            path: '/admin/patients' },
+];
 
 export default function AppShell({ children, user }) {
   const navigate = useNavigate();
@@ -35,7 +41,7 @@ export default function AppShell({ children, user }) {
   // for the authApi.me() call to complete.
   const resolvedUser = user ?? authSession.getUser();
   const role = resolvedUser?.role || 'PATIENT';
-  const navItems = role === 'DOCTOR' ? doctorNav : patientNav;
+  const navItems = role === 'ADMIN' ? adminNav : role === 'DOCTOR' ? doctorNav : patientNav;
 
   const doctorProfileCtx = useContext(DoctorProfileContext);
   // Lock sidebar nav for doctors who haven't completed their profile OR aren't verified yet
