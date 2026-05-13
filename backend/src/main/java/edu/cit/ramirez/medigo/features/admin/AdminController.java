@@ -30,7 +30,7 @@ public class AdminController {
 
     @GetMapping("/doctors")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<List<edu.cit.ramirez.medigo.features.user.dto.UserDto>> getAllDoctors() {
+    public ApiResponse<List<DoctorProfileDto>> getAllDoctors() {
         return ApiResponse.ok(adminService.getAllDoctors());
     }
 

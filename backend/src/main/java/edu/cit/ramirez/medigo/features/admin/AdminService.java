@@ -36,9 +36,19 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<edu.cit.ramirez.medigo.features.user.dto.UserDto> getAllDoctors() {
+    public List<DoctorProfileDto> getAllDoctors() {
         return userRepository.findByRoleOrderByIdDesc("DOCTOR").stream()
-                .map(this::toUserDto)
+                .map(user -> {
+                    DoctorProfile profile = doctorProfileRepository.findByDoctorId(user.getId()).orElse(null);
+                    if (profile != null) return toDto(profile);
+                    // Fallback for doctors without profiles yet
+                    return DoctorProfileDto.builder()
+                            .doctorId(user.getId())
+                            .doctorName(user.getFullName())
+                            .email(user.getEmail())
+                            .verified(false)
+                            .build();
+                })
                 .toList();
     }
 
