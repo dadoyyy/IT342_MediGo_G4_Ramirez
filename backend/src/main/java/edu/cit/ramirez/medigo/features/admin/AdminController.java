@@ -22,6 +22,24 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @GetMapping("/analytics")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto> getAnalytics() {
+        return ApiResponse.ok(adminService.getAnalytics());
+    }
+
+    @GetMapping("/doctors")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<edu.cit.ramirez.medigo.features.user.dto.UserDto>> getAllDoctors() {
+        return ApiResponse.ok(adminService.getAllDoctors());
+    }
+
+    @GetMapping("/patients")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<edu.cit.ramirez.medigo.features.user.dto.UserDto>> getAllPatients() {
+        return ApiResponse.ok(adminService.getAllPatients());
+    }
+
     /** Returns all doctor profiles that are not yet verified (pending approval). */
     @GetMapping("/doctors/pending")
     @ResponseStatus(HttpStatus.OK)

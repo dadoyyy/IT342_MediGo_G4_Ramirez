@@ -22,9 +22,32 @@ import java.util.List;
 public class AdminService {
 
     private final DoctorProfileRepository doctorProfileRepository;
+    private final edu.cit.ramirez.medigo.features.user.UserRepository userRepository;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
     private String uploadDir;
+
+    @Transactional(readOnly = true)
+    public edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto getAnalytics() {
+        long totalDoctors = userRepository.countByRole("DOCTOR");
+        long totalPatients = userRepository.countByRole("PATIENT");
+        long pending = doctorProfileRepository.findByVerifiedFalse().size();
+        return new edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto(totalDoctors, totalPatients, pending);
+    }
+
+    @Transactional(readOnly = true)
+    public List<edu.cit.ramirez.medigo.features.user.dto.UserDto> getAllDoctors() {
+        return userRepository.findByRoleOrderByIdDesc("DOCTOR").stream()
+                .map(this::toUserDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<edu.cit.ramirez.medigo.features.user.dto.UserDto> getAllPatients() {
+        return userRepository.findByRoleOrderByIdDesc("PATIENT").stream()
+                .map(this::toUserDto)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> getPendingDoctors() {
@@ -63,6 +86,16 @@ public class AdminService {
             throw new ResourceNotFoundException("File not found: " + filename);
         }
         return resource;
+    }
+
+    private edu.cit.ramirez.medigo.features.user.dto.UserDto toUserDto(User user) {
+        return edu.cit.ramirez.medigo.features.user.dto.UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 
     private DoctorProfileDto toDto(DoctorProfile profile) {

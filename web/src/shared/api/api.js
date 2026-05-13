@@ -80,6 +80,9 @@ export const chatApi = {
 };
 
 export const adminApi = {
+  getAnalytics: () => api.get('/admin/analytics'),
+  getAllDoctors: () => api.get('/admin/doctors'),
+  getAllPatients: () => api.get('/admin/patients'),
   getPendingDoctors: () => api.get('/admin/doctors/pending'),
   approveDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/approve`),
   rejectDoctor: (doctorId, reason) => api.put(`/admin/doctors/${doctorId}/reject`, { reason }),
