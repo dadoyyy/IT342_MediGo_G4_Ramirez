@@ -13,6 +13,8 @@ export default function AdminDashboard() {
   // For the chart
   const [allUsers, setAllUsers] = useState([]);
   const canvasRef = useRef(null);
+  const chartDataRef = useRef({ points: [] });
+  const [hoveredPoint, setHoveredPoint] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -147,9 +149,11 @@ export default function AdminDashboard() {
       ctx.fillStyle = grad;
       ctx.fill();
 
-      labels.forEach((_, i) => {
+      const points = [];
+      labels.forEach((label, i) => {
         const x = padding.left + i * xStep;
         const y = logicalHeight - padding.bottom - (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
+        points.push({ x, y, label, value: data[i] });
 
         ctx.beginPath();
         ctx.arc(x, y, 4, 0, Math.PI * 2);
@@ -159,6 +163,8 @@ export default function AdminDashboard() {
         ctx.strokeStyle = '#2EC4B6';
         ctx.stroke();
       });
+
+      chartDataRef.current = { points };
     };
 
     draw();
@@ -168,7 +174,37 @@ export default function AdminDashboard() {
     });
     resizeObserver.observe(wrapper);
 
-    return () => resizeObserver.disconnect();
+    // Mouse events for tooltip
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const { points } = chartDataRef.current;
+      let hovered = null;
+      for (const p of points) {
+        const dx = mouseX - p.x;
+        const dy = mouseY - p.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 15) {
+          hovered = p;
+          break;
+        }
+      }
+      setHoveredPoint(hovered);
+    }
+    
+    function handleMouseLeave() {
+      setHoveredPoint(null);
+    }
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      resizeObserver.disconnect();
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+    };
   }, [loading, allUsers]);
 
   return (
@@ -239,8 +275,36 @@ export default function AdminDashboard() {
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#F7F8FA', margin: '0 0 4px' }}>User Registrations</h2>
                 <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
               </div>
-              <div style={{ width: '100%', overflowX: 'auto' }}>
-                <canvas ref={canvasRef} style={{ display: 'block' }} />
+              <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
+                <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
+                
+                {hoveredPoint && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      position: 'absolute',
+                      left: hoveredPoint.x,
+                      top: hoveredPoint.y - 45,
+                      transform: 'translateX(-50%)',
+                      background: '#111827',
+                      border: '1px solid rgba(46,196,182,0.3)',
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      pointerEvents: 'none',
+                      color: '#F7F8FA',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                      whiteSpace: 'nowrap',
+                      zIndex: 10
+                    }}
+                  >
+                    <span style={{ color: '#8892A4', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
+                    {hoveredPoint.value} Registrations
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </>
