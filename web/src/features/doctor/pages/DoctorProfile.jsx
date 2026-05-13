@@ -8,6 +8,7 @@ import {
 import { authApi, doctorApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import AuthImage from '../../../shared/ui/AuthImage';
+import SpecializationSelect from '../../../shared/ui/SpecializationSelect';
 import axios from 'axios';
 import { useDoctorProfile } from '../context/DoctorProfileContext';
 import { authSession } from '../../auth/authSession';
@@ -15,7 +16,7 @@ import { authSession } from '../../auth/authSession';
 /* ── Validation ─────────────────────────────────────────────────────────── */
 function validate(form) {
   const e = {};
-  if (!form.specialization.trim()) e.specialization = 'Specialization is required.';
+  if (!form.specialization || form.specialization.length === 0) e.specialization = 'At least one specialization is required.';
   if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
   if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
   return e;
@@ -39,7 +40,7 @@ export default function DoctorProfile() {
   const { isProfileComplete, isVerified, isLoading, markProfileComplete, updateProfilePicture } = useDoctorProfile();
   const [user, setUser] = useState(null);
 
-  const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
+  const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -57,7 +58,7 @@ export default function DoctorProfile() {
   const [docViewer, setDocViewer] = useState(null); // { label, blobUrl, isPdf }
   const [docViewerLoading, setDocViewerLoading] = useState(false);
 
-  const formFilled = form.specialization.trim() && form.clinicName.trim() && form.clinicAddress.trim();
+  const formFilled = form.specialization.length > 0 && form.clinicName.trim() && form.clinicAddress.trim();
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
   const canSave = !!(formFilled && allDocsUploaded && !saving);
 
@@ -77,7 +78,7 @@ export default function DoctorProfile() {
           const p = profileRes.data?.data ?? profileRes.data;
           if (p) {
             setForm(f => ({
-              specialization: p.specialization || f.specialization,
+              specialization: p.specialization ? p.specialization.split(',').map(s => s.trim()).filter(Boolean) : f.specialization,
               clinicName:     p.clinicName     || f.clinicName,
               clinicAddress:  p.clinicAddress  || f.clinicAddress,
             }));
@@ -113,7 +114,7 @@ export default function DoctorProfile() {
     setSaving(true); setApiError(''); setSaveSuccess(false);
     try {
       await doctorApi.upsertMyProfile({
-        specialization: form.specialization.trim(),
+        specialization: form.specialization.join(', '),
         clinicName:     form.clinicName.trim(),
         clinicAddress:  form.clinicAddress.trim(),
       });
@@ -367,8 +368,22 @@ export default function DoctorProfile() {
 
             {/* Form — id so the external submit button can target it */}
             <form id="profile-form" onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {/* Specialization dropdown */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.05em' }}>
+                  SPECIALIZATION(S) <span style={{ color: '#FCA5A5' }}>*</span>
+                </label>
+                <SpecializationSelect
+                  value={form.specialization}
+                  onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); setApiError(''); setSaveSuccess(false); }}
+                  error={!!fieldErrors.specialization}
+                  placeholder="Select your specializations"
+                />
+                {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{fieldErrors.specialization}</p>}
+              </div>
+
+              {/* Clinic fields */}
               {[
-                { name: 'specialization', label: 'SPECIALIZATION',        Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice, Pediatrics', textarea: false },
                 { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2,   ph: "e.g. St. Luke's Medical Center",                textarea: false },
                 { name: 'clinicAddress',  label: 'CLINIC ADDRESS',         Icon: MapPin,      ph: 'Full address of your clinic or hospital',        textarea: true  },
               ].map(({ name, label, Icon, ph, textarea }) => (

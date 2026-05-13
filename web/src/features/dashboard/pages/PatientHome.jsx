@@ -5,9 +5,11 @@ import { Search, MapPin, BadgeCheck, ArrowRight } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import { authSession } from '../../auth/authSession';
+import MEDICAL_SPECIALIZATIONS from '../../../shared/constants/medicalSpecializations';
 
-const SPECIALTIES = ['All', 'General Practice', 'Cardiology', 'Dermatology', 'Pediatrics', 'Orthopedics', 'Neurology'];
-const ACCENTS = ['#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6', '#9B8CFF', '#FF7A59', '#2EC4B6'];
+const SPECIALTIES = ['All', ...MEDICAL_SPECIALIZATIONS];
+const ACCENT_PALETTE = ['#2EC4B6', '#9B8CFF', '#FF7A59'];
+const ACCENTS = SPECIALTIES.map((_, i) => ACCENT_PALETTE[i % ACCENT_PALETTE.length]);
 
 const container = { animate: { transition: { staggerChildren: 0.06 } } };
 const cardItem = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
@@ -71,12 +73,12 @@ export default function PatientHome() {
 
         {/* Specialty pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}
-          style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
+          style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', marginBottom: 32, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin', scrollbarColor: 'rgba(136,146,164,0.15) transparent' }}>
           {SPECIALTIES.map(s => (
             <button key={s} onClick={() => setActiveSpecialty(s)}
               style={activeSpecialty === s
-                ? { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(46,196,182,0.3)', transition: 'all 0.2s' }
-                : { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(136,146,164,0.75)', cursor: 'pointer', transition: 'all 0.2s' }
+                ? { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(46,196,182,0.3)', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
+                : { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(136,146,164,0.75)', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
               }>
               {s}
             </button>

@@ -12,7 +12,7 @@ import lombok.*;
 public class DoctorProfileUpsertRequest {
 
     @NotBlank(message = "Specialization is required")
-    @Size(max = 120, message = "Specialization must not exceed 120 characters")
+    @Size(max = 500, message = "Specialization must not exceed 500 characters")
     private String specialization;
 
     @NotBlank(message = "Clinic name is required")

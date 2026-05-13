@@ -25,7 +25,7 @@ public class DoctorProfile {
     @JoinColumn(name = "doctor_id", nullable = false, unique = true)
     private User doctor;
 
-    @Column(name = "specialization", nullable = false, length = 120)
+    @Column(name = "specialization", nullable = false, length = 500)
     private String specialization;
 
     @Column(name = "clinic_name", nullable = false, length = 150)

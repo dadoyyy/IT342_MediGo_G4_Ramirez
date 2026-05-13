@@ -1,12 +1,14 @@
 import { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, Bell, ChevronRight, UserCircle } from 'lucide-react';
+import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle } from 'lucide-react';
 import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
 import { DoctorProfileContext } from '../../features/doctor/context/DoctorProfileContext';
 import AuthImage from './AuthImage';
+import NotificationDropdown from './NotificationDropdown';
+import useNotifications from '../hooks/useNotifications';
 
 const patientNav = [
   { icon: LayoutDashboard, label: 'Home',         path: '/home' },
@@ -37,6 +39,10 @@ export default function AppShell({ children, user }) {
     ? ((doctorProfileCtx?.isProfileComplete && doctorProfileCtx?.isVerified) ?? true)
     : true;
   const profilePictureUrl = role === 'DOCTOR' ? (doctorProfileCtx?.profilePictureUrl ?? null) : null;
+  const profileVersion = doctorProfileCtx?.profileVersion ?? 0;
+
+  // Notifications
+  const { notifications, unreadCount, loading: notifLoading, markRead, markAllRead } = useNotifications(resolvedUser);
 
   function handleLogout() {
     authApi.logout().catch(() => {});
@@ -57,9 +63,19 @@ export default function AppShell({ children, user }) {
         <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 18px rgba(46,196,182,0.35)' }}>
           <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
           <p style={{ fontSize: 9, color: 'rgba(136,146,164,0.4)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+        </div>
+        {/* Desktop notification bell in sidebar header */}
+        <div className="hidden lg:block">
+          <NotificationDropdown
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkRead={markRead}
+            onMarkAllRead={markAllRead}
+            loading={notifLoading}
+          />
         </div>
       </div>
 
@@ -94,6 +110,7 @@ export default function AppShell({ children, user }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
             <AuthImage
+              key={profileVersion}
               src={profilePictureUrl}
               alt="avatar"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -165,9 +182,14 @@ export default function AppShell({ children, user }) {
             </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
           </div>
-          <button style={{ color: 'rgba(136,146,164,0.5)', background: 'none', border: 'none', padding: 4 }}>
-            <Bell size={18} />
-          </button>
+          {/* Mobile notification bell */}
+          <NotificationDropdown
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkRead={markRead}
+            onMarkAllRead={markAllRead}
+            loading={notifLoading}
+          />
         </header>
 
         <main style={{ flex: 1, overflowY: 'auto', background: '#0B1020' }}>

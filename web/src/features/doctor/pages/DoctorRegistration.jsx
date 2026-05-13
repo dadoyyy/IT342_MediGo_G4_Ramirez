@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { Stethoscope, Building2, MapPin, ArrowRight } from 'lucide-react';
 import { doctorApi } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
+import SpecializationSelect from '../../../shared/ui/SpecializationSelect';
 import axios from 'axios';
 
 function validate(form) {
   const e = {};
-  if (!form.specialization.trim()) e.specialization = 'Specialization is required.';
+  if (!form.specialization || form.specialization.length === 0) e.specialization = 'At least one specialization is required.';
   if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
   if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
   return e;
@@ -16,7 +17,7 @@ function validate(form) {
 
 export default function DoctorRegistration() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ specialization: '', clinicName: '', clinicAddress: '' });
+  const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,11 @@ export default function DoctorRegistration() {
     doctorApi.getMyProfile()
       .then(res => {
         const p = res.data?.data ?? res.data;
-        if (p) setForm({ specialization: p.specialization || '', clinicName: p.clinicName || '', clinicAddress: p.clinicAddress || '' });
+        if (p) setForm({
+          specialization: p.specialization ? p.specialization.split(',').map(s => s.trim()).filter(Boolean) : [],
+          clinicName: p.clinicName || '',
+          clinicAddress: p.clinicAddress || '',
+        });
       })
       .catch(() => {})
       .finally(() => setChecking(false));
@@ -46,7 +51,7 @@ export default function DoctorRegistration() {
     if (Object.keys(errors).length) { setFieldErrors(errors); return; }
     setLoading(true); setApiError('');
     try {
-      await doctorApi.upsertMyProfile({ specialization: form.specialization.trim(), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
+      await doctorApi.upsertMyProfile({ specialization: form.specialization.join(', '), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
       navigate('/doctor/profile', { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data)
@@ -93,8 +98,22 @@ export default function DoctorRegistration() {
           )}
 
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Specialization dropdown */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>
+                SPECIALIZATION(S) <span style={{ color: '#FCA5A5' }}>*</span>
+              </label>
+              <SpecializationSelect
+                value={form.specialization}
+                onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); setApiError(''); }}
+                error={!!fieldErrors.specialization}
+                placeholder="Select your specializations"
+              />
+              {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{fieldErrors.specialization}</p>}
+            </div>
+
+            {/* Clinic fields */}
             {[
-              { name: 'specialization', label: 'SPECIALIZATION', Icon: Stethoscope, ph: 'e.g. Cardiology, General Practice', textarea: false },
               { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
               { name: 'clinicAddress',  label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
             ].map(({ name, label, Icon, ph, textarea }) => (

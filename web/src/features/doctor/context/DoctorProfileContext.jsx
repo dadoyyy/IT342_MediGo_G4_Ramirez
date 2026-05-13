@@ -13,25 +13,27 @@ export function DoctorProfileProvider({ children }) {
   const [isVerified, setIsVerified] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileVersion, setProfileVersion] = useState(0);
+
+  async function fetchProfile() {
+    try {
+      const res = await doctorApi.getMyProfile();
+      const profile = res.data?.data ?? res.data;
+      const specialization = profile?.specialization;
+      const complete = typeof specialization === 'string' && specialization.trim().length > 0;
+      setIsProfileComplete(complete);
+      setIsVerified(!!profile?.verified);
+      setProfilePictureUrl(profile?.profilePictureUrl || null);
+    } catch {
+      setIsProfileComplete(false);
+      setIsVerified(false);
+      setProfilePictureUrl(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const res = await doctorApi.getMyProfile();
-        const profile = res.data?.data ?? res.data;
-        const specialization = profile?.specialization;
-        const complete = typeof specialization === 'string' && specialization.trim().length > 0;
-        setIsProfileComplete(complete);
-        setIsVerified(!!profile?.verified);
-        setProfilePictureUrl(profile?.profilePictureUrl || null);
-      } catch {
-        setIsProfileComplete(false);
-        setIsVerified(false);
-        setProfilePictureUrl(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     fetchProfile();
   }, []);
 
@@ -42,10 +44,15 @@ export function DoctorProfileProvider({ children }) {
 
   function updateProfilePicture(url) {
     setProfilePictureUrl(url);
+    setProfileVersion(v => v + 1);
+  }
+
+  function refreshProfile() {
+    return fetchProfile();
   }
 
   return (
-    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, profilePictureUrl, isLoading, markProfileComplete, updateProfilePicture }}>
+    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, profilePictureUrl, profileVersion, isLoading, markProfileComplete, updateProfilePicture, refreshProfile }}>
       {children}
     </DoctorProfileContext.Provider>
   );
