@@ -47,102 +47,128 @@ export default function AdminDashboard() {
     if (loading || !canvasRef.current || allUsers.length === 0) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const { width, height } = canvas;
-    const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+    const wrapper = canvas.parentElement;
 
-    // Group by month
-    const monthlyCounts = {};
-    const now = new Date();
-    // Initialize last 6 months
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const label = d.toLocaleString('default', { month: 'short' });
-      monthlyCounts[label] = 0;
-    }
-
-    allUsers.forEach(u => {
-      if (!u.createdAt) return;
-      const d = new Date(u.createdAt);
-      // Only count if within last 6 months
-      const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth();
-      if (diffMonths >= 0 && diffMonths <= 5) {
-        const label = d.toLocaleString('default', { month: 'short' });
-        if (monthlyCounts[label] !== undefined) {
-          monthlyCounts[label]++;
-        }
-      }
-    });
-
-    const labels = Object.keys(monthlyCounts);
-    const data = Object.values(monthlyCounts);
-    const maxVal = Math.max(...data, 10); // at least 10 for Y axis scale
-
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw grid & Y axis
-    ctx.strokeStyle = 'rgba(136,146,164,0.1)';
-    ctx.fillStyle = 'rgba(136,146,164,0.6)';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-
-    const ySteps = 4;
-    for (let i = 0; i <= ySteps; i++) {
-      const val = Math.round(maxVal * (i / ySteps));
-      const y = height - padding.bottom - (i / ySteps) * (height - padding.top - padding.bottom);
+    const draw = () => {
+      // Setup high-DPI canvas
+      const rect = wrapper.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
       
+      // Minimum width to prevent squishing
+      const logicalWidth = Math.max(rect.width, 600);
+      const logicalHeight = 300;
+
+      canvas.width = logicalWidth * dpr;
+      canvas.height = logicalHeight * dpr;
+      canvas.style.width = `${logicalWidth}px`;
+      canvas.style.height = `${logicalHeight}px`;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+
+      // Group by month
+      const monthlyCounts = {};
+      const now = new Date();
+      // Initialize last 6 months
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const label = d.toLocaleString('default', { month: 'short' });
+        monthlyCounts[label] = 0;
+      }
+
+      allUsers.forEach(u => {
+        if (!u.createdAt) return;
+        const d = new Date(u.createdAt);
+        // Only count if within last 6 months
+        const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth();
+        if (diffMonths >= 0 && diffMonths <= 5) {
+          const label = d.toLocaleString('default', { month: 'short' });
+          if (monthlyCounts[label] !== undefined) {
+            monthlyCounts[label]++;
+          }
+        }
+      });
+
+      const labels = Object.keys(monthlyCounts);
+      const data = Object.values(monthlyCounts);
+      const maxVal = Math.max(...data, 10); // at least 10 for Y axis scale
+
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+
+      // Draw grid & Y axis
+      ctx.strokeStyle = 'rgba(136,146,164,0.1)';
+      ctx.fillStyle = 'rgba(136,146,164,0.6)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const val = Math.round(maxVal * (i / ySteps));
+        const y = logicalHeight - padding.bottom - (i / ySteps) * (logicalHeight - padding.top - padding.bottom);
+        
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(logicalWidth - padding.right, y);
+        ctx.stroke();
+
+        ctx.fillText(val.toString(), padding.left - 8, y);
+      }
+
+      // Draw X axis & Line
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const xStep = (logicalWidth - padding.left - padding.right) / (labels.length - 1 || 1);
+
       ctx.beginPath();
-      ctx.moveTo(padding.left, y);
-      ctx.lineTo(width - padding.right, y);
-      ctx.stroke();
+      labels.forEach((label, i) => {
+        const x = padding.left + i * xStep;
+        const y = logicalHeight - padding.bottom - (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
 
-      ctx.fillText(val.toString(), padding.left - 8, y);
-    }
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
 
-    // Draw X axis & Line
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    const xStep = (width - padding.left - padding.right) / (labels.length - 1 || 1);
+        ctx.fillText(label, x, logicalHeight - padding.bottom + 8);
+      });
 
-    ctx.beginPath();
-    labels.forEach((label, i) => {
-      const x = padding.left + i * xStep;
-      const y = height - padding.bottom - (data[i] / maxVal) * (height - padding.top - padding.bottom);
-
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-
-      ctx.fillText(label, x, height - padding.bottom + 8);
-    });
-
-    ctx.strokeStyle = '#2EC4B6';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Draw points and fill
-    const grad = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
-    grad.addColorStop(0, 'rgba(46,196,182,0.2)');
-    grad.addColorStop(1, 'rgba(46,196,182,0)');
-    
-    ctx.lineTo(width - padding.right, height - padding.bottom);
-    ctx.lineTo(padding.left, height - padding.bottom);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    labels.forEach((_, i) => {
-      const x = padding.left + i * xStep;
-      const y = height - padding.bottom - (data[i] / maxVal) * (height - padding.top - padding.bottom);
-
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#0B1020';
-      ctx.fill();
-      ctx.lineWidth = 2;
       ctx.strokeStyle = '#2EC4B6';
+      ctx.lineWidth = 3;
       ctx.stroke();
-    });
 
+      // Draw points and fill
+      const grad = ctx.createLinearGradient(0, padding.top, 0, logicalHeight - padding.bottom);
+      grad.addColorStop(0, 'rgba(46,196,182,0.2)');
+      grad.addColorStop(1, 'rgba(46,196,182,0)');
+      
+      ctx.lineTo(logicalWidth - padding.right, logicalHeight - padding.bottom);
+      ctx.lineTo(padding.left, logicalHeight - padding.bottom);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      labels.forEach((_, i) => {
+        const x = padding.left + i * xStep;
+        const y = logicalHeight - padding.bottom - (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#0B1020';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#2EC4B6';
+        ctx.stroke();
+      });
+    };
+
+    draw();
+
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(draw);
+    });
+    resizeObserver.observe(wrapper);
+
+    return () => resizeObserver.disconnect();
   }, [loading, allUsers]);
 
   return (
@@ -214,7 +240,7 @@ export default function AdminDashboard() {
                 <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
               </div>
               <div style={{ width: '100%', overflowX: 'auto' }}>
-                <canvas ref={canvasRef} width={800} height={300} style={{ width: '100%', minWidth: 600, height: 300, display: 'block' }} />
+                <canvas ref={canvasRef} style={{ display: 'block' }} />
               </div>
             </motion.div>
           </>

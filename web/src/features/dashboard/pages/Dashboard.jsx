@@ -43,7 +43,7 @@ export default function Dashboard() {
         }
 
         if (user?.role === 'ADMIN') {
-          navigate('/admin/verification', { replace: true });
+          navigate('/admin/dashboard', { replace: true });
           return;
         }
       } catch {
