@@ -158,7 +158,7 @@ export default function DoctorSchedule() {
 
         {/* Summary stats */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
           <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
             <p style={{ fontSize: 28, fontWeight: 700, color: '#2EC4B6', margin: '0 0 2px' }}>{activeDays}</p>
             <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.6)', margin: 0 }}>Active Days</p>

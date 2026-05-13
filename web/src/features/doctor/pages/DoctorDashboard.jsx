@@ -303,7 +303,7 @@ export default function DoctorDashboard() {
           <>
             {/* Stat cards */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
               {statCards.map((s, i) => (
                 <motion.div key={s.label}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -366,7 +366,7 @@ export default function DoctorDashboard() {
                   No patient data yet
                 </p>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10 }}>
                   {recentPatients.map((p, i) => (
                     <div key={p.name + i} style={{
                       display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
