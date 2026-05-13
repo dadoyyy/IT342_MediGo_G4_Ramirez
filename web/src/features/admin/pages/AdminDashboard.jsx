@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#F7F8FA', margin: '0 0 4px' }}>User Registrations</h2>
                 <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
               </div>
-              <div style={{ width: '100%', overflowX: 'auto' }}>
+              <div className="chart-scrollbar" style={{ width: '100%', overflowX: 'auto' }}>
                 <div style={{ position: 'relative', minWidth: 600, paddingRight: 32 }}>
                   <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
                   
