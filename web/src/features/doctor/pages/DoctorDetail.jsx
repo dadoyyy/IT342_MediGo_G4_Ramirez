@@ -101,7 +101,7 @@ export default function DoctorDetail() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+      <main style={{ padding: '28px 28px 40px' }}>
         {/* Doctor card */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           className="card" style={{ padding: 24, marginBottom: 20 }}>

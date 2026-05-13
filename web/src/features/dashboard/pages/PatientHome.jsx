@@ -49,7 +49,7 @@ export default function PatientHome() {
 
   return (
     <AppShell user={user}>
-      <div style={{ padding: '32px 24px', maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>

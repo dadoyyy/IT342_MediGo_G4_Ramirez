@@ -51,7 +51,7 @@ export default function MyAppointments() {
 
   return (
     <AppShell user={user}>
-      <div style={{ padding: '32px 24px', maxWidth: 760, margin: '0 auto' }}>
+      <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
