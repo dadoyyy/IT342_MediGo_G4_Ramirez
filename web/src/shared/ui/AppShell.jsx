@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown } from 'lucide-react';
+import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown, ClipboardList } from 'lucide-react';
 import { authApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
@@ -16,9 +16,10 @@ const patientNav = [
   { icon: MessageSquare,   label: 'Messages',     path: '/chat' },
 ];
 const doctorNav = [
-  { icon: LayoutDashboard, label: 'Dashboard',    path: '/doctor/dashboard', gated: true },
-  { icon: Calendar,        label: 'My Schedule',  path: '/doctor/schedule',  gated: true },
-  { icon: MessageSquare,   label: 'Messages',     path: '/chat',             gated: true },
+  { icon: LayoutDashboard, label: 'Dashboard',    path: '/doctor/dashboard',     gated: true },
+  { icon: ClipboardList,   label: 'Appointments', path: '/doctor/appointments',  gated: true },
+  { icon: Calendar,        label: 'My Schedule',  path: '/doctor/schedule',      gated: true },
+  { icon: MessageSquare,   label: 'Messages',     path: '/chat',                 gated: true },
 ];
 
 export default function AppShell({ children, user }) {

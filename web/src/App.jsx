@@ -23,6 +23,7 @@ import DoctorDetail       from './features/doctor/pages/DoctorDetail';
 import DoctorRegistration from './features/doctor/pages/DoctorRegistration';
 import DoctorProfile      from './features/doctor/pages/DoctorProfile';
 import DoctorDashboard    from './features/doctor/pages/DoctorDashboard';
+import DoctorAppointments from './features/doctor/pages/DoctorAppointments';
 import PendingApproval    from './features/doctor/pages/PendingApproval';
 import { DoctorProfileProvider, ProfileCompletionGuard } from './features/doctor/context/DoctorProfileContext';
 
@@ -50,6 +51,7 @@ function App() {
         <Route path="/admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
         <Route path="/chat"            element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><ChatInterface /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/doctor/dashboard" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorDashboard /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
+        <Route path="/doctor/appointments" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorAppointments /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorSchedule /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/auth/select-role" element={<SelectRole />} />
