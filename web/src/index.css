@@ -545,17 +545,17 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
   height: 10px;
 }
 .chart-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.02);
-  border-radius: 99px;
+  background: transparent;
 }
 .chart-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(155,140,255,0.15);
+  background: transparent;
   border-radius: 99px;
   border: 2px solid transparent;
   background-clip: padding-box;
+  transition: background 0.2s ease;
 }
 .chart-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(155,140,255,0.45);
+  background: rgba(155,140,255,0.4);
   background-clip: padding-box;
 }
 .chart-scrollbar::-webkit-scrollbar-thumb:hover {
