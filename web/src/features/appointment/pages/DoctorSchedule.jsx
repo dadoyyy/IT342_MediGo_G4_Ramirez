@@ -115,17 +115,16 @@ export default function DoctorSchedule() {
 
   const activeDays = schedule.filter(d => d.enabled).length;
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
-    </div>
-  );
-
   return (
     <AppShell user={user}>
       <div style={{ padding: '28px 28px 40px' }}>
-
-        {/* Header */}
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+          </div>
+        ) : (
+          <>
+            {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
@@ -304,6 +303,8 @@ export default function DoctorSchedule() {
             </motion.div>
           ))}
         </div>
+          </>
+        )}
       </div>
     </AppShell>
   );
