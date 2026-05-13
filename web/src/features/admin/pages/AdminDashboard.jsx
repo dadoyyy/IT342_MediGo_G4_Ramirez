@@ -275,36 +275,39 @@ export default function AdminDashboard() {
                 <h2 style={{ fontSize: 16, fontWeight: 600, color: '#F7F8FA', margin: '0 0 4px' }}>User Registrations</h2>
                 <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
               </div>
-              <div style={{ width: '100%', overflowX: 'auto', position: 'relative' }}>
-                <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
-                
-                {hoveredPoint && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    style={{
-                      position: 'absolute',
-                      left: hoveredPoint.x,
-                      top: hoveredPoint.y - 45,
-                      transform: 'translateX(-50%)',
-                      background: '#111827',
-                      border: '1px solid rgba(46,196,182,0.3)',
-                      padding: '8px 12px',
-                      borderRadius: 8,
-                      pointerEvents: 'none',
-                      color: '#F7F8FA',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-                      whiteSpace: 'nowrap',
-                      zIndex: 10
-                    }}
-                  >
-                    <span style={{ color: '#8892A4', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
-                    {hoveredPoint.value} Registrations
-                  </motion.div>
-                )}
+              <div style={{ width: '100%', overflowX: 'auto' }}>
+                <div style={{ position: 'relative', minWidth: 600, paddingRight: 32 }}>
+                  <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
+                  
+                  {hoveredPoint && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      style={{
+                        position: 'absolute',
+                        left: hoveredPoint.x,
+                        top: hoveredPoint.y - 45,
+                        transform: hoveredPoint.x > 500 ? 'translateX(-100%)' : hoveredPoint.x < 100 ? 'translateX(0)' : 'translateX(-50%)',
+                        marginLeft: hoveredPoint.x > 500 ? -10 : hoveredPoint.x < 100 ? 10 : 0,
+                        background: '#111827',
+                        border: '1px solid rgba(46,196,182,0.3)',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        pointerEvents: 'none',
+                        color: '#F7F8FA',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                        whiteSpace: 'nowrap',
+                        zIndex: 10
+                      }}
+                    >
+                      <span style={{ color: '#8892A4', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
+                      {hoveredPoint.value} Registrations
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </>
