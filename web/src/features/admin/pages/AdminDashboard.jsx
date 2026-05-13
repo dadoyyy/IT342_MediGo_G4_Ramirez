@@ -56,8 +56,8 @@ export default function AdminDashboard() {
       const rect = wrapper.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       
-      // Minimum width to prevent squishing
-      const logicalWidth = Math.max(rect.width, 600);
+      // Minimum width to ensure it always scrolls nicely
+      const logicalWidth = Math.max(rect.width, 1000);
       const logicalHeight = 300;
 
       canvas.width = logicalWidth * dpr;
@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                 <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
               </div>
               <div className="chart-scrollbar" style={{ width: '100%', overflowX: 'auto' }}>
-                <div style={{ position: 'relative', minWidth: 600, paddingRight: 32 }}>
+                <div style={{ position: 'relative', minWidth: 1000, paddingRight: 32 }}>
                   <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
                   
                   {hoveredPoint && (
