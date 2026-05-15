@@ -143,10 +143,6 @@ export default function DoctorDashboard() {
   return (
     <AppShell user={user}>
       <div style={{ padding: '28px 28px 40px' }}>
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Dashboard</h1>
-          <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Welcome back, Dr. {user?.fullName?.split(' ')[0] || ''} — here's your performance overview</p>
-        </motion.div>
 
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
@@ -154,6 +150,12 @@ export default function DoctorDashboard() {
           </div>
         ) : (
           <>
+            {/* Header */}
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
+              <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Here's an overview of your practice and patient activity</p>
+            </motion.div>
+
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
               style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
               {statCards.map((s, i) => (
