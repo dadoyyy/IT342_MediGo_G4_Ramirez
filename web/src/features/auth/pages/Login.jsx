@@ -18,16 +18,16 @@ function validate(f) {
 }
 
 const STATS = [
-  { icon: Users,       value: '12,400+', label: 'Patients',     color: '#2EC4B6' },
-  { icon: Stethoscope, value: '840+',    label: 'Doctors',      color: '#9B8CFF' },
-  { icon: Calendar,    value: '98K+',    label: 'Appointments', color: '#FF7A59' },
-  { icon: TrendingUp,  value: '99.9%',   label: 'Uptime',       color: '#2EC4B6' },
+  { icon: Users,       value: '12,400+', label: 'Patients',     color: '#EF233C' },
+  { icon: Stethoscope, value: '840+',    label: 'Doctors',      color: '#8D99AE' },
+  { icon: Calendar,    value: '98K+',    label: 'Appointments', color: '#D90429' },
+  { icon: TrendingUp,  value: '99.9%',   label: 'Uptime',       color: '#EF233C' },
 ];
 
 const PREVIEW_CARDS = [
-  { label: 'Next Appointment', value: 'Dr. Sarah Chen',  sub: 'Cardiology · Today 2:30 PM', color: '#2EC4B6' },
-  { label: 'Prescription',     value: 'Metformin 500mg', sub: 'Ready for pickup',            color: '#9B8CFF' },
-  { label: 'Lab Results',      value: 'Blood Panel',     sub: 'Complete · View report',      color: '#FF7A59' },
+  { label: 'Next Appointment', value: 'Dr. Sarah Chen',  sub: 'Cardiology · Today 2:30 PM', color: '#EF233C' },
+  { label: 'Prescription',     value: 'Metformin 500mg', sub: 'Ready for pickup',            color: '#8D99AE' },
+  { label: 'Lab Results',      value: 'Blood Panel',     sub: 'Complete · View report',      color: '#D90429' },
 ];
 
 export default function Login() {
@@ -64,32 +64,32 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', overflow: 'hidden', background: '#0B1020' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', overflow: 'hidden', background: '#2B2D42' }}>
 
       {/* ── LEFT PANEL ── */}
       <div className="hidden lg:flex" style={{
         width: '55%', flexShrink: 0, position: 'relative', overflow: 'hidden',
         flexDirection: 'column', justifyContent: 'space-between',
-        padding: '48px', background: 'linear-gradient(145deg, #0B1020 0%, #0E1628 45%, #111827 100%)',
+        padding: '48px', background: 'linear-gradient(145deg, #2B2D42 0%, #1E1F33 45%, #2B2D42 100%)',
       }}>
         {/* Ambient orbs — behind everything */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-          <div className="blob-1" style={{ position: 'absolute', width: 560, height: 560, top: -180, left: -180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(46,196,182,0.14) 0%, transparent 70%)', filter: 'blur(50px)' }} />
-          <div className="blob-2" style={{ position: 'absolute', width: 480, height: 480, bottom: -120, right: -120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(155,140,255,0.14) 0%, transparent 70%)', filter: 'blur(55px)' }} />
-          <div className="blob-3" style={{ position: 'absolute', width: 320, height: 320, top: '42%', left: '38%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,117,89,0.07) 0%, transparent 70%)', filter: 'blur(65px)' }} />
+          <div className="blob-1" style={{ position: 'absolute', width: 560, height: 560, top: -180, left: -180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.12) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+          <div className="blob-2" style={{ position: 'absolute', width: 480, height: 480, bottom: -120, right: -120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,4,41,0.1) 0%, transparent 70%)', filter: 'blur(55px)' }} />
+          <div className="blob-3" style={{ position: 'absolute', width: 320, height: 320, top: '42%', left: '38%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(141,153,174,0.06) 0%, transparent 70%)', filter: 'blur(65px)' }} />
           {/* Dot grid */}
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
         </div>
 
         {/* Logo */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 24px rgba(46,196,182,0.4)' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 24px rgba(239,35,60,0.4)' }}>
             <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
           </div>
           <div>
-            <p style={{ fontSize: 20, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2, margin: 0 }}>MediGo</p>
-            <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.6)', letterSpacing: '0.1em', margin: 0 }}>HEALTHCARE PLATFORM</p>
+            <p style={{ fontSize: 20, fontWeight: 700, color: '#EDF2F4', lineHeight: 1.2, margin: 0 }}>MediGo</p>
+            <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.6)', letterSpacing: '0.1em', margin: 0 }}>HEALTHCARE PLATFORM</p>
           </div>
         </motion.div>
 
@@ -99,15 +99,15 @@ export default function Login() {
 
           {/* Headline */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 99, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)', width: 'fit-content' }}>
-              <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#2EC4B6', display: 'inline-block' }} />
-              <span style={{ fontSize: 12, color: '#5EEAD4', fontWeight: 500 }}>Healthcare Platform · 2026</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 99, background: 'rgba(239,35,60,0.1)', border: '1px solid rgba(239,35,60,0.2)', width: 'fit-content' }}>
+              <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF233C', display: 'inline-block' }} />
+              <span style={{ fontSize: 12, color: '#EF233C', fontWeight: 500 }}>Healthcare Platform · 2026</span>
             </div>
-            <h1 style={{ fontSize: 46, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0, color: '#F7F8FA' }}>
+            <h1 style={{ fontSize: 46, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0, color: '#EDF2F4' }}>
               Your health,<br />
               <span className="gradient-text">reimagined.</span>
             </h1>
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: 'rgba(136,146,164,0.75)', margin: 0, maxWidth: 380 }}>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: 'rgba(141,153,174,0.75)', margin: 0, maxWidth: 380 }}>
               Connect with verified specialists, manage appointments intelligently, and take control of your healthcare journey.
             </p>
           </div>
@@ -117,10 +117,10 @@ export default function Login() {
             <svg viewBox="0 0 200 40" style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
               <defs>
                 <linearGradient id="hbg" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="rgba(46,196,182,0)" />
-                  <stop offset="25%" stopColor="#2EC4B6" />
-                  <stop offset="75%" stopColor="#9B8CFF" />
-                  <stop offset="100%" stopColor="rgba(155,140,255,0)" />
+                  <stop offset="0%" stopColor="rgba(239,35,60,0)" />
+                  <stop offset="25%" stopColor="#EF233C" />
+                  <stop offset="75%" stopColor="#D90429" />
+                  <stop offset="100%" stopColor="rgba(217,4,41,0)" />
                 </linearGradient>
               </defs>
               <motion.path
@@ -140,13 +140,13 @@ export default function Login() {
               <motion.div key={c.label}
                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.12 }}
-                className="float-y glass"
+                className="float-y glass-dark"
                 style={{ borderRadius: 16, padding: '12px 16px', animationDelay: `${i * 1.5}s` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: c.color, boxShadow: `0 0 8px ${c.color}` }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#F7F8FA', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.value}</p>
-                    <p style={{ fontSize: 11, color: 'rgba(136,146,164,0.6)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.sub}</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: '#EDF2F4', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.value}</p>
+                    <p style={{ fontSize: 11, color: 'rgba(141,153,174,0.6)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.sub}</p>
                   </div>
                   <span style={{ fontSize: 11, color: c.color, fontWeight: 500, flexShrink: 0 }}>{c.label}</span>
                 </div>
@@ -160,38 +160,38 @@ export default function Login() {
           style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           {STATS.map(({ icon: Icon, value, label, color }) => (
             <div key={label} style={{ textAlign: 'center' }}>
-              <Icon size={13} style={{ color: 'rgba(136,146,164,0.4)', display: 'block', margin: '0 auto 6px' }} />
+              <Icon size={13} style={{ color: 'rgba(141,153,174,0.4)', display: 'block', margin: '0 auto 6px' }} />
               <p style={{ fontSize: 14, fontWeight: 700, color, margin: 0 }}>{value}</p>
-              <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.45)', margin: '2px 0 0' }}>{label}</p>
+              <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.45)', margin: '2px 0 0' }}>{label}</p>
             </div>
           ))}
         </motion.div>
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', position: 'relative', background: 'linear-gradient(180deg, #0E1628 0%, #0B1020 100%)' }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(155,140,255,0.05) 0%, transparent 70%)' }} />
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', position: 'relative', background: '#EDF2F4' }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(239,35,60,0.03) 0%, transparent 70%)' }} />
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           style={{ width: '100%', maxWidth: 360, position: 'relative', zIndex: 1 }}>
 
           {/* Mobile logo */}
           <div className="lg:hidden" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)' }}>
               <Stethoscope size={16} color="#fff" strokeWidth={2.5} />
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42' }}>MediGo</span>
           </div>
 
           <div style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 26, fontWeight: 700, color: '#F7F8FA', margin: '0 0 6px' }}>Welcome back</h2>
-            <p style={{ fontSize: 14, color: '#8892A4', margin: 0 }}>Sign in to your account to continue</p>
+            <h2 style={{ fontSize: 26, fontWeight: 700, color: '#2B2D42', margin: '0 0 6px' }}>Welcome back</h2>
+            <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Sign in to your account to continue</p>
           </div>
 
           <AnimatePresence>
             {apiErr && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+                style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', fontSize: 13, color: '#D90429' }}>
                 <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
                 <span>{apiErr}</span>
               </motion.div>
@@ -211,36 +211,36 @@ export default function Login() {
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-            <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>or sign in with email</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.1)' }} />
+            <span style={{ fontSize: 12, color: '#8D99AE' }}>or sign in with email</span>
+            <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.1)' }} />
           </div>
 
           <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.8)', letterSpacing: '0.05em' }}>EMAIL ADDRESS</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>EMAIL ADDRESS</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.4)' }} />
+                <Mail size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                 <input name="email" type="email" value={form.email} onChange={onChange}
                   autoComplete="email" placeholder="you@example.com"
                   className={`mg-input ${errs.email ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
               </div>
-              {errs.email && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{errs.email}</p>}
+              {errs.email && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{errs.email}</p>}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.8)', letterSpacing: '0.05em' }}>PASSWORD</label>
+              <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>PASSWORD</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.4)' }} />
+                <Lock size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                 <input name="password" type={showPw ? 'text' : 'password'} value={form.password} onChange={onChange}
                   autoComplete="current-password" placeholder="••••••••"
                   className={`mg-input ${errs.password ? 'error' : ''}`} style={{ paddingLeft: 44, paddingRight: 48 }} />
                 <button type="button" onClick={() => setShowPw(v => !v)} tabIndex={-1}
-                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(136,146,164,0.4)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
                   {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {errs.password && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{errs.password}</p>}
+              {errs.password && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{errs.password}</p>}
             </div>
 
             <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 4 }}>
@@ -250,9 +250,9 @@ export default function Login() {
             </button>
           </form>
 
-          <p style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: 'rgba(136,146,164,0.55)' }}>
+          <p style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: '#8D99AE' }}>
             Don't have an account?{' '}
-            <Link to="/register" style={{ color: '#2EC4B6', fontWeight: 600 }}>Create one</Link>
+            <Link to="/register" style={{ color: '#EF233C', fontWeight: 600 }}>Create one</Link>
           </p>
         </motion.div>
       </div>
