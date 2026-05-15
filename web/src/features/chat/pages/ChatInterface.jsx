@@ -93,7 +93,8 @@ export default function ChatInterface() {
         {/* Contacts sidebar */}
         <aside style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRight: '1px solid rgba(43,45,66,0.08)' }}>
           <div style={{ padding: 16, borderBottom: '1px solid rgba(43,45,66,0.08)' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42', marginBottom: 12 }}>Messages</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', marginBottom: 4 }}>Your conversations</p>
+            <p style={{ fontSize: 11, color: '#8D99AE', marginBottom: 12 }}>Chat with your healthcare contacts</p>
             <div style={{ position: 'relative' }}>
               <Search size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(43,45,66,0.4)' }} />
               <input type="text" value={contactQuery} onChange={e => setContactQuery(e.target.value)}

@@ -77,11 +77,11 @@ export default function NotificationDropdown({
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: open ? 'rgba(239,35,60,0.1)' : 'rgba(43,45,66,0.04)',
-          border: `1px solid ${open ? 'rgba(239,35,60,0.2)' : 'rgba(43,45,66,0.08)'}`,
+          background: open ? 'rgba(239,35,60,0.15)' : 'rgba(255,255,255,0.06)',
+          border: `1px solid ${open ? 'rgba(239,35,60,0.3)' : 'rgba(255,255,255,0.1)'}`,
           cursor: 'pointer',
           transition: 'all 0.2s',
-          color: open ? '#EF233C' : 'rgba(43,45,66,0.6)',
+          color: open ? '#EF233C' : 'rgba(237,242,244,0.6)',
         }}
       >
         <Bell size={16} />
@@ -103,7 +103,7 @@ export default function NotificationDropdown({
               fontWeight: 700,
               background: 'linear-gradient(135deg, #EF233C, #D90429)',
               color: '#fff',
-              border: '2px solid #EDF2F4',
+              border: '2px solid #2B2D42',
               lineHeight: 1,
               boxShadow: '0 2px 8px rgba(239,35,60,0.4)',
             }}

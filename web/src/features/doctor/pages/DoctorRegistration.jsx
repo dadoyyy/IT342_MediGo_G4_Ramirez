@@ -87,8 +87,8 @@ export default function DoctorRegistration() {
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
           style={{ borderRadius: 24, padding: 32, background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(16px)' }}>
           <div style={{ marginBottom: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', marginBottom: 8 }}>Doctor Profile</h1>
-            <p style={{ fontSize: 14, color: '#6B7280' }}>Complete your professional profile to start accepting appointments.</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', marginBottom: 8 }}>Set up your practice</h1>
+            <p style={{ fontSize: 14, color: '#6B7280' }}>Complete your professional profile to start accepting patient appointments.</p>
           </div>
 
           {apiError && (

@@ -119,7 +119,7 @@ export default function AppShell({ children, user }) {
             </div>
             <span className="top-navbar-profile-name">{displayName}</span>
             <ChevronDown size={14} style={{
-              color: '#8D99AE',
+              color: 'rgba(237,242,244,0.5)',
               transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />
