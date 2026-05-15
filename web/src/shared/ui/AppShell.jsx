@@ -105,7 +105,7 @@ export default function AppShell({ children, user }) {
           >
             <div style={{
               width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-              background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)',
+              background: 'linear-gradient(135deg, #EF233C, #D90429)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 11, fontWeight: 700, color: '#fff',
             }}>
@@ -119,7 +119,7 @@ export default function AppShell({ children, user }) {
             </div>
             <span className="top-navbar-profile-name">{displayName}</span>
             <ChevronDown size={14} style={{
-              color: 'rgba(136,146,164,0.5)',
+              color: '#8D99AE',
               transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />
@@ -136,9 +136,9 @@ export default function AppShell({ children, user }) {
                 className="top-navbar-dropdown"
               >
                 {/* User info header */}
-                <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#F7F8FA', margin: '0 0 2px' }}>{displayName}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(136,146,164,0.5)', margin: 0 }}>{role === 'DOCTOR' ? 'Doctor' : role === 'ADMIN' ? 'Admin' : 'Patient'}</p>
+                <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#2B2D42', margin: '0 0 2px' }}>{displayName}</p>
+                  <p style={{ fontSize: 11, color: '#8D99AE', margin: 0 }}>{role === 'DOCTOR' ? 'Doctor' : role === 'ADMIN' ? 'Admin' : 'Patient'}</p>
                 </div>
                 <div style={{ padding: '6px 8px' }}>
                   {role === 'DOCTOR' && (
@@ -153,7 +153,7 @@ export default function AppShell({ children, user }) {
                   <button
                     onClick={confirmLogout}
                     className="top-navbar-dropdown-item"
-                    style={{ color: 'rgba(252,165,165,0.75)' }}
+                    style={{ color: '#D90429' }}
                   >
                     <LogOut size={14} />
                     <span>Sign Out</span>
@@ -172,18 +172,18 @@ export default function AppShell({ children, user }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '24px 20px 16px', marginBottom: 8 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 18px rgba(46,196,182,0.35)' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 18px rgba(239,35,60,0.35)' }}>
           <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
-          <p style={{ fontSize: 9, color: 'rgba(136,146,164,0.4)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#EDF2F4', lineHeight: 1.2 }}>MediGo</p>
+          <p style={{ fontSize: 9, color: 'rgba(141,153,174,0.5)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
         </div>
       </div>
 
       {/* Nav label */}
       <div style={{ padding: '0 20px 8px' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(136,146,164,0.35)', letterSpacing: '0.08em' }}>GENERAL</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(141,153,174,0.4)', letterSpacing: '0.08em' }}>GENERAL</span>
       </div>
 
       {/* Nav items */}
@@ -196,10 +196,10 @@ export default function AppShell({ children, user }) {
               onClick={locked ? undefined : () => { navigate(path); setMobileOpen(false); }}
               className={`nav-item ${active ? 'active' : ''}`}
               style={locked ? { opacity: 0.35, cursor: 'not-allowed', pointerEvents: 'none' } : undefined}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#2EC4B6' : 'rgba(136,146,164,0.2)', boxShadow: active ? '0 0 8px rgba(46,196,182,0.6)' : 'none', transition: 'all 0.2s' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#EF233C' : 'rgba(141,153,174,0.25)', boxShadow: active ? '0 0 8px rgba(239,35,60,0.5)' : 'none', transition: 'all 0.2s' }} />
               <Icon size={15} />
               <span>{label}</span>
-              {active && <ChevronRight size={11} style={{ marginLeft: 'auto', color: '#5EEAD4' }} />}
+              {active && <ChevronRight size={11} style={{ marginLeft: 'auto', color: '#EF233C' }} />}
             </button>
           );
         })}
@@ -208,24 +208,24 @@ export default function AppShell({ children, user }) {
       {/* Bottom — just a subtle branding line */}
       <div style={{ padding: '0 12px 24px' }}>
         <div style={{ height: 1, margin: '0 8px 8px', background: 'rgba(255,255,255,0.06)' }} />
-        <p style={{ fontSize: 10, color: 'rgba(136,146,164,0.2)', textAlign: 'center', margin: 0 }}>MediGo v1.0</p>
+        <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.25)', textAlign: 'center', margin: 0 }}>MediGo v1.0</p>
       </div>
     </div>
   );
 
   const sidebarStyle = {
-    background: 'linear-gradient(180deg, #111827 0%, #0D1526 100%)',
+    background: 'linear-gradient(180deg, #2B2D42 0%, #1E1F33 100%)',
     borderRight: '1px solid rgba(255,255,255,0.05)',
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#0B1020' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#EDF2F4' }}>
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 flex-shrink-0 relative" style={sidebarStyle}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute rounded-full"
-            style={{ width: 160, height: 160, top: 50, left: -30, background: 'radial-gradient(circle, rgba(46,196,182,0.07) 0%, transparent 70%)', filter: 'blur(30px)' }} />
+            style={{ width: 160, height: 160, top: 50, left: -30, background: 'radial-gradient(circle, rgba(239,35,60,0.07) 0%, transparent 70%)', filter: 'blur(30px)' }} />
         </div>
         {sidebarJSX}
       </aside>
@@ -238,7 +238,7 @@ export default function AppShell({ children, user }) {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
               className="lg:hidden fixed inset-0 z-40"
-              style={{ background: 'rgba(11,16,32,0.8)', backdropFilter: 'blur(6px)' }} />
+              style={{ background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(6px)' }} />
             <motion.aside key="drawer"
               initial={{ x: -240 }} animate={{ x: 0 }} exit={{ x: -240 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
@@ -254,15 +254,15 @@ export default function AppShell({ children, user }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Mobile topbar */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 flex-shrink-0"
-          style={{ background: 'rgba(17,24,39,0.9)', borderBottom: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(12px)' }}>
-          <button onClick={() => setMobileOpen(true)} style={{ color: '#8892A4', background: 'none', border: 'none', padding: 4 }}>
+          style={{ background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(43,45,66,0.06)', backdropFilter: 'blur(12px)' }}>
+          <button onClick={() => setMobileOpen(true)} style={{ color: '#8D99AE', background: 'none', border: 'none', padding: 4 }}>
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
-            <div style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)' }}>
               <Stethoscope size={14} color="#fff" strokeWidth={2.5} />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA' }}>MediGo</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42' }}>MediGo</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <NotificationDropdown
@@ -278,7 +278,7 @@ export default function AppShell({ children, user }) {
             >
               <div style={{
                 width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
-                background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)',
+                background: 'linear-gradient(135deg, #EF233C, #D90429)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 10, fontWeight: 700, color: '#fff',
               }}>
@@ -297,7 +297,7 @@ export default function AppShell({ children, user }) {
         {/* Desktop top navbar */}
         <div className="hidden lg:block">{topNavbar}</div>
 
-        <main style={{ flex: 1, overflowY: 'auto', background: '#0B1020' }}>
+        <main style={{ flex: 1, overflowY: 'auto', background: '#EDF2F4' }}>
           {children}
         </main>
       </div>
@@ -319,12 +319,12 @@ export default function AppShell({ children, user }) {
               onClick={e => e.stopPropagation()}
             >
               <div className="logout-modal-icon">
-                <LogOut size={24} style={{ color: '#FCA5A5' }} />
+                <LogOut size={24} style={{ color: '#D90429' }} />
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#F7F8FA', margin: '0 0 6px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', margin: '0 0 6px', textAlign: 'center' }}>
                 Sign Out?
               </h3>
-              <p style={{ fontSize: 13, color: '#8892A4', margin: '0 0 24px', textAlign: 'center', lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 24px', textAlign: 'center', lineHeight: 1.5 }}>
                 Are you sure you want to sign out of your account? You'll need to log in again to access your data.
               </p>
               <div style={{ display: 'flex', gap: 10, width: '100%' }}>
@@ -339,8 +339,8 @@ export default function AppShell({ children, user }) {
                   onClick={handleLogout}
                   style={{
                     flex: 1, padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600,
-                    background: 'rgba(252,165,165,0.12)', border: '1px solid rgba(252,165,165,0.25)',
-                    color: '#FCA5A5', cursor: 'pointer', transition: 'all 0.2s',
+                    background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.2)',
+                    color: '#D90429', cursor: 'pointer', transition: 'all 0.2s',
                     fontFamily: 'inherit',
                   }}
                 >
