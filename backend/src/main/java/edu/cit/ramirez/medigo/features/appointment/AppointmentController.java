@@ -3,6 +3,8 @@ package edu.cit.ramirez.medigo.features.appointment;
 import edu.cit.ramirez.medigo.features.appointment.dto.*;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileUpsertRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestCreateRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,21 @@ public class AppointmentController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<DoctorProfileDto> myDoctorProfile(Principal principal) {
         return ApiResponse.ok(appointmentService.getMyDoctorProfile(principal.getName()));
+    }
+
+    @PostMapping("/doctors/me/specialization-change-requests")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> requestSpecializationChange(
+            Principal principal,
+            @Valid @RequestBody DoctorSpecializationChangeRequestCreateRequest body) {
+        return ApiResponse.ok(appointmentService.requestSpecializationChange(principal.getName(), body));
+    }
+
+    @GetMapping("/doctors/me/specialization-change-requests")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<DoctorSpecializationChangeRequestDto>> mySpecializationChangeRequests(
+            Principal principal) {
+        return ApiResponse.ok(appointmentService.getMySpecializationChangeRequests(principal.getName()));
     }
 
     /** Upload a single document for the authenticated doctor.

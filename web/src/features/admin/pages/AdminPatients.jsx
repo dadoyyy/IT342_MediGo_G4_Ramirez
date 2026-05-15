@@ -37,7 +37,7 @@ export default function AdminPatients() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Your patient community</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}</h1>
             <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>{patients.length} patient{patients.length !== 1 ? 's' : ''} registered on the platform</p>
           </div>
           <div style={{ position: 'relative', width: '100%', maxWidth: 300 }}>

@@ -7,11 +7,12 @@ import { authSession } from '../authSession';
 import { authResponseAdapter } from '../authResponseAdapter';
 import { authEvents } from '../authEventBus';
 import axios from 'axios';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PW_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
-function validate(f) {
+function validate(f, addToast) {
   const e = {};
   if (!f.firstName.trim()) e.firstName = 'Required.';
   if (!f.lastName.trim()) e.lastName = 'Required.';
@@ -21,6 +22,10 @@ function validate(f) {
   else if (f.password.length < 8) e.password = 'Min. 8 characters.';
   else if (!PW_RE.test(f.password)) e.password = 'Must include uppercase, lowercase, number & special character.';
   if (f.password !== f.confirmPassword) e.confirmPassword = 'Passwords do not match.';
+
+  if (Object.keys(e).length > 0) {
+    addToast('Please correct the errors in the form.', 'error');
+  }
   return e;
 }
 
@@ -51,11 +56,11 @@ const ROLES = [
 
 export default function Register() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [step, setStep] = useState('role');
   const [role, setRole] = useState('');
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
   const [errs, setErrs] = useState({});
-  const [apiErr, setApiErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [showCf, setShowCf] = useState(false);
@@ -64,7 +69,6 @@ export default function Register() {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
     setErrs(p => ({ ...p, [name]: undefined }));
-    setApiErr('');
   }
 
   function handleRoleSelect(r) {
@@ -74,9 +78,9 @@ export default function Register() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    const v = validate(form);
+    const v = validate(form, addToast);
     if (Object.keys(v).length) { setErrs(v); return; }
-    setLoading(true); setApiErr('');
+    setLoading(true);
     try {
       const res = await authApi.register({
         firstname: form.firstName.trim(),
@@ -90,22 +94,25 @@ export default function Register() {
         authSession.setToken(token);
         authEvents.emit(authEvents.names.login, { source: 'register' });
       }
+      addToast('Account created successfully! Welcome to MediGo.', 'success');
       if (role === 'DOCTOR') {
         navigate('/doctor/profile', { replace: true });
       } else {
         navigate('/login', { state: { registered: true } });
       }
     } catch (err) {
+      let msg = 'Registration failed.';
       if (axios.isAxiosError(err) && err.response?.data) {
         const errData = err.response.data?.error;
         if (errData?.details && typeof errData.details === 'object') {
-          setApiErr(Object.values(errData.details).join(' · '));
+          msg = Object.values(errData.details).join(' · ');
         } else {
-          setApiErr(errData?.message || err.response.data?.message || 'Registration failed.');
+          msg = errData?.message || err.response.data?.message || 'Registration failed.';
         }
       } else {
-        setApiErr('Unable to connect. Please check your network.');
+        msg = 'Unable to connect. Please check your network.';
       }
+      addToast(msg, 'error');
     } finally { setLoading(false); }
   }
 
@@ -260,25 +267,8 @@ export default function Register() {
                     </h2>
                     <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Provide your professional details</p>
                   </div>
-                  {/* Badge */}
-                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 99, background: `rgba(${selectedRole?.rgb},0.1)`, border: `1px solid rgba(${selectedRole?.rgb},0.2)`, flexShrink: 0 }}>
-                    {selectedRole && <selectedRole.icon size={14} style={{ color: selectedRole.color }} />}
-                    <span style={{ fontSize: 12, fontWeight: 700, color: selectedRole?.color }}>{selectedRole?.id}</span>
-                  </div>
+
                 </div>
-
-                <AnimatePresence>
-                  {apiErr && (
-                    <motion.div initial={{ opacity: 0, height: 0, marginBottom: 0 }} animate={{ opacity: 1, height: 'auto', marginBottom: 24 }} exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      style={{ overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, borderRadius: 12, padding: '14px 16px', background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.15)', color: '#D90429' }}>
-                        <span style={{ fontSize: 16, flexShrink: 0, marginTop: 2 }}>⚠</span>
-                        <span style={{ fontSize: 14, fontWeight: 500 }}>{apiErr}</span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
                 <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     {[['firstName','First Name','John','given-name'],['lastName','Last Name','Doe','family-name']].map(([name,label,ph,ac]) => (

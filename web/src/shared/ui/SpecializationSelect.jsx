@@ -15,6 +15,7 @@ export default function SpecializationSelect({
   value = [],
   onChange,
   error = false,
+  disabled = false,
   placeholder = 'Select specializations',
 }) {
   const [open, setOpen] = useState(false);
@@ -69,21 +70,24 @@ export default function SpecializationSelect({
       {/* Trigger button */}
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { if (!disabled) setOpen(o => !o); }}
         className={`mg-input ${error ? 'error' : ''}`}
+        disabled={disabled}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 8,
           paddingLeft: 44,
           paddingRight: 14,
-          cursor: 'pointer',
           textAlign: 'left',
           width: '100%',
           minHeight: 44,
           height: 'auto',
           flexWrap: 'wrap',
-          color: selected.length > 0 ? '#F7F8FA' : 'rgba(136,146,164,0.45)',
+          color: selected.length > 0 ? '#2B2D42' : 'rgba(141,153,174,0.7)',
+          background: disabled ? 'rgba(141,153,174,0.08)' : undefined,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.8 : 1,
         }}
       >
         <Stethoscope
@@ -93,7 +97,7 @@ export default function SpecializationSelect({
             left: 16,
             top: selected.length > 1 ? 14 : '50%',
             transform: selected.length > 1 ? 'none' : 'translateY(-50%)',
-            color: 'rgba(136,146,164,0.35)',
+            color: 'rgba(141,153,174,0.6)',
           }}
         />
 
@@ -114,9 +118,9 @@ export default function SpecializationSelect({
                   borderRadius: 8,
                   fontSize: 11,
                   fontWeight: 600,
-                  background: 'rgba(46,196,182,0.12)',
-                  border: '1px solid rgba(46,196,182,0.25)',
-                  color: '#5EEAD4',
+                  background: 'rgba(239,35,60,0.12)',
+                  border: '1px solid rgba(239,35,60,0.25)',
+                  color: '#EF233C',
                   lineHeight: 1.3,
                 }}
               >
@@ -134,12 +138,12 @@ export default function SpecializationSelect({
                     height: 14,
                     borderRadius: 4,
                     cursor: 'pointer',
-                    background: 'rgba(46,196,182,0.15)',
+                    background: 'rgba(239,35,60,0.12)',
                     transition: 'background 0.15s',
                     flexShrink: 0,
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(252,165,165,0.2)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(46,196,182,0.15)'}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,35,60,0.2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,35,60,0.12)'}
                 >
                   <X size={8} />
                 </span>
@@ -151,7 +155,7 @@ export default function SpecializationSelect({
         <ChevronDown
           size={14}
           style={{
-            color: 'rgba(136,146,164,0.4)',
+            color: 'rgba(141,153,174,0.7)',
             transition: 'transform 0.2s',
             transform: open ? 'rotate(180deg)' : 'none',
             flexShrink: 0,
@@ -160,7 +164,7 @@ export default function SpecializationSelect({
       </button>
 
       {/* Dropdown */}
-      {open && (
+      {open && !disabled && (
         <div
           style={{
             position: 'absolute',
@@ -168,10 +172,10 @@ export default function SpecializationSelect({
             left: 0,
             right: 0,
             zIndex: 100,
-            background: '#111827',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: '#FFFFFF',
+            border: '1px solid rgba(43,45,66,0.1)',
             borderRadius: 14,
-            boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 24px rgba(46,196,182,0.06)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.08), 0 0 24px rgba(239,35,60,0.08)',
             overflow: 'hidden',
             animation: 'fadeSlideDown 0.18s ease',
           }}
@@ -183,10 +187,10 @@ export default function SpecializationSelect({
               alignItems: 'center',
               gap: 8,
               padding: '10px 14px',
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              borderBottom: '1px solid rgba(43,45,66,0.08)',
             }}
           >
-            <Search size={13} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />
+            <Search size={13} style={{ color: 'rgba(141,153,174,0.7)', flexShrink: 0 }} />
             <input
               ref={searchRef}
               type="text"
@@ -198,7 +202,7 @@ export default function SpecializationSelect({
                 background: 'none',
                 border: 'none',
                 outline: 'none',
-                color: '#F7F8FA',
+                color: '#2B2D42',
                 fontSize: 13,
                 padding: 0,
               }}
@@ -217,7 +221,7 @@ export default function SpecializationSelect({
               overflowY: 'auto',
               padding: '4px 0',
               scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(136,146,164,0.15) transparent',
+              scrollbarColor: 'rgba(141,153,174,0.3) transparent',
             }}
           >
             {filtered.length === 0 ? (
@@ -226,7 +230,7 @@ export default function SpecializationSelect({
                   padding: '16px 14px',
                   textAlign: 'center',
                   fontSize: 13,
-                  color: 'rgba(136,146,164,0.45)',
+                  color: 'rgba(141,153,174,0.7)',
                 }}
               >
                 No specializations found
@@ -247,9 +251,9 @@ export default function SpecializationSelect({
                       padding: '9px 14px',
                       fontSize: 13,
                       fontWeight: isSelected ? 600 : 400,
-                      color: isSelected ? '#2EC4B6' : '#E5E7EB',
+                      color: isSelected ? '#EF233C' : '#2B2D42',
                       background: isSelected
-                        ? 'rgba(46,196,182,0.08)'
+                        ? 'rgba(239,35,60,0.08)'
                         : 'transparent',
                       border: 'none',
                       cursor: 'pointer',
@@ -257,11 +261,11 @@ export default function SpecializationSelect({
                       transition: 'background 0.15s',
                     }}
                     onMouseEnter={e => {
-                      if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                      if (!isSelected) e.currentTarget.style.background = 'rgba(43,45,66,0.04)';
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.background = isSelected
-                        ? 'rgba(46,196,182,0.08)'
+                        ? 'rgba(239,35,60,0.08)'
                         : 'transparent';
                     }}
                   >
@@ -275,13 +279,13 @@ export default function SpecializationSelect({
                         justifyContent: 'center',
                         flexShrink: 0,
                         background: isSelected
-                          ? 'rgba(46,196,182,0.15)'
-                          : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${isSelected ? 'rgba(46,196,182,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                          ? 'rgba(239,35,60,0.15)'
+                          : 'rgba(43,45,66,0.05)',
+                        border: `1px solid ${isSelected ? 'rgba(239,35,60,0.3)' : 'rgba(43,45,66,0.08)'}`,
                         transition: 'all 0.15s',
                       }}
                     >
-                      {isSelected && <Check size={10} style={{ color: '#2EC4B6' }} />}
+                      {isSelected && <Check size={10} style={{ color: '#EF233C' }} />}
                     </div>
                     <span>{spec}</span>
                   </button>

@@ -1,14 +1,15 @@
 import { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown, ClipboardList, ShieldCheck, Users } from 'lucide-react';
-import { authApi } from '../api/api';
+import { Stethoscope, LayoutDashboard, Calendar, MessageSquare, LogOut, Menu, ChevronRight, UserCircle, ChevronDown, ClipboardList, ShieldCheck, Users, FileText } from 'lucide-react';
+import { authApi, adminApi, chatApi } from '../api/api';
 import { authSession } from '../../features/auth/authSession';
 import { authEvents } from '../../features/auth/authEventBus';
 import { DoctorProfileContext } from '../../features/doctor/context/DoctorProfileContext';
 import AuthImage from './AuthImage';
 import NotificationDropdown from './NotificationDropdown';
 import useNotifications from '../hooks/useNotifications';
+import { useToast } from './ToastProvider';
 
 const patientNav = [
   { icon: LayoutDashboard, label: 'Home',         path: '/home' },
@@ -24,6 +25,7 @@ const doctorNav = [
 const adminNav = [
   { icon: LayoutDashboard, label: 'Dashboard',           path: '/admin/dashboard' },
   { icon: ShieldCheck,     label: 'Doctor Verification', path: '/admin/verification' },
+  { icon: FileText,        label: 'Specialization Requests', path: '/admin/specialization-requests' },
   { icon: Stethoscope,     label: 'Doctors',             path: '/admin/doctors' },
   { icon: Users,           label: 'Patients',            path: '/admin/patients' },
 ];
@@ -34,7 +36,17 @@ export default function AppShell({ children, user }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [hasNewChat, setHasNewChat] = useState(false);
+  const [hasAdminPending, setHasAdminPending] = useState(false);
+  const [adminPendingCount, setAdminPendingCount] = useState(0);
+  const [hasAdminDoctorsNew, setHasAdminDoctorsNew] = useState(false);
+  const [hasAdminPatientsNew, setHasAdminPatientsNew] = useState(false);
+  const [hasAdminSpecReqNew, setHasAdminSpecReqNew] = useState(false);
+  const [adminDoctorsCount, setAdminDoctorsCount] = useState(0);
+  const [adminPatientsCount, setAdminPatientsCount] = useState(0);
+  const [adminSpecReqCount, setAdminSpecReqCount] = useState(0);
   const profileDropdownRef = useRef(null);
+  const { addToast } = useToast();
 
   // Use the passed-in user, falling back to the cached user from localStorage.
   // This means nav items render immediately on page load/refresh without waiting
@@ -53,6 +65,145 @@ export default function AppShell({ children, user }) {
 
   // Notifications
   const { notifications, unreadCount, loading: notifLoading, markRead, markAllRead } = useNotifications(resolvedUser);
+  const unreadNotifications = notifications.filter(n => !n.read);
+  const hasAppointmentUpdates = unreadNotifications.some(n => (n.type || '').includes('appointment'));
+  const userId = resolvedUser?.id;
+  const adminPendingSeenKey = userId ? `medigo_admin_pending_seen:${userId}` : null;
+  const adminDoctorsSeenKey = userId ? `medigo_admin_doctors_seen:${userId}` : null;
+  const adminPatientsSeenKey = userId ? `medigo_admin_patients_seen:${userId}` : null;
+  const adminSpecReqSeenKey = userId ? `medigo_admin_spec_requests_seen:${userId}` : null;
+  const navPulseMap = {
+    '/appointments': hasAppointmentUpdates,
+    '/doctor/appointments': hasAppointmentUpdates,
+    '/doctor/schedule': hasAppointmentUpdates,
+    '/chat': hasNewChat,
+    '/admin/verification': hasAdminPending,
+    '/admin/specialization-requests': hasAdminSpecReqNew,
+    '/admin/doctors': hasAdminDoctorsNew,
+    '/admin/patients': hasAdminPatientsNew,
+  };
+
+  useEffect(() => {
+    if (!userId || role === 'ADMIN') return undefined;
+
+    let active = true;
+    async function checkChat() {
+      try {
+        const res = await chatApi.unreadCount();
+        const count = res.data?.data ?? res.data;
+        if (active) setHasNewChat(Number(count) > 0);
+      } catch {
+        if (active) setHasNewChat(false);
+      }
+    }
+
+    checkChat();
+    const interval = setInterval(checkChat, 30_000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [userId, role]);
+
+  useEffect(() => {
+    if (!userId || role !== 'ADMIN') return undefined;
+
+    let active = true;
+    async function checkAdmin() {
+      try {
+        const [pendingRes, doctorsRes, patientsRes, specReqRes] = await Promise.all([
+          adminApi.getPendingDoctors(),
+          adminApi.getAllDoctors(),
+          adminApi.getAllPatients(),
+          adminApi.getSpecializationChangeRequests('PENDING'),
+        ]);
+
+        const pendingList = pendingRes.data?.data ?? pendingRes.data;
+        const doctorsList = doctorsRes.data?.data ?? doctorsRes.data;
+        const patientsList = patientsRes.data?.data ?? patientsRes.data;
+        const specReqList = specReqRes.data?.data ?? specReqRes.data;
+        const pendingCount = Array.isArray(pendingList) ? pendingList.length : 0;
+        const doctorsCount = Array.isArray(doctorsList) ? doctorsList.length : 0;
+        const patientsCount = Array.isArray(patientsList) ? patientsList.length : 0;
+        const specReqCount = Array.isArray(specReqList) ? specReqList.length : 0;
+        if (!active) return;
+
+        setAdminPendingCount(pendingCount);
+        setAdminDoctorsCount(doctorsCount);
+        setAdminPatientsCount(patientsCount);
+        setAdminSpecReqCount(specReqCount);
+
+        if (adminPendingSeenKey && localStorage.getItem(adminPendingSeenKey) === null) {
+          localStorage.setItem(adminPendingSeenKey, String(pendingCount));
+        }
+        if (adminDoctorsSeenKey && localStorage.getItem(adminDoctorsSeenKey) === null) {
+          localStorage.setItem(adminDoctorsSeenKey, String(doctorsCount));
+        }
+        if (adminPatientsSeenKey && localStorage.getItem(adminPatientsSeenKey) === null) {
+          localStorage.setItem(adminPatientsSeenKey, String(patientsCount));
+        }
+        if (adminSpecReqSeenKey && localStorage.getItem(adminSpecReqSeenKey) === null) {
+          localStorage.setItem(adminSpecReqSeenKey, String(specReqCount));
+        }
+
+        const pendingSeen = adminPendingSeenKey ? Number(localStorage.getItem(adminPendingSeenKey) || 0) : 0;
+        const doctorsSeen = adminDoctorsSeenKey ? Number(localStorage.getItem(adminDoctorsSeenKey) || 0) : 0;
+        const patientsSeen = adminPatientsSeenKey ? Number(localStorage.getItem(adminPatientsSeenKey) || 0) : 0;
+        const specReqSeen = adminSpecReqSeenKey ? Number(localStorage.getItem(adminSpecReqSeenKey) || 0) : 0;
+
+        setHasAdminPending(pendingCount > pendingSeen);
+        setHasAdminDoctorsNew(doctorsCount > doctorsSeen);
+        setHasAdminPatientsNew(patientsCount > patientsSeen);
+        setHasAdminSpecReqNew(specReqCount > specReqSeen);
+      } catch {
+        if (active) {
+          setHasAdminPending(false);
+          setHasAdminDoctorsNew(false);
+          setHasAdminPatientsNew(false);
+          setHasAdminSpecReqNew(false);
+        }
+      }
+    }
+
+    checkAdmin();
+    const interval = setInterval(checkAdmin, 30_000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [userId, role, adminPendingSeenKey, adminDoctorsSeenKey, adminPatientsSeenKey, adminSpecReqSeenKey]);
+
+  useEffect(() => {
+    if (role !== 'ADMIN') return;
+    if (location.pathname !== '/admin/verification') return;
+    if (!adminPendingSeenKey) return;
+    localStorage.setItem(adminPendingSeenKey, String(adminPendingCount));
+    setHasAdminPending(false);
+  }, [role, location.pathname, adminPendingSeenKey, adminPendingCount]);
+
+  useEffect(() => {
+    if (role !== 'ADMIN') return;
+    if (location.pathname !== '/admin/doctors') return;
+    if (!adminDoctorsSeenKey) return;
+    localStorage.setItem(adminDoctorsSeenKey, String(adminDoctorsCount));
+    setHasAdminDoctorsNew(false);
+  }, [role, location.pathname, adminDoctorsSeenKey, adminDoctorsCount]);
+
+  useEffect(() => {
+    if (role !== 'ADMIN') return;
+    if (location.pathname !== '/admin/patients') return;
+    if (!adminPatientsSeenKey) return;
+    localStorage.setItem(adminPatientsSeenKey, String(adminPatientsCount));
+    setHasAdminPatientsNew(false);
+  }, [role, location.pathname, adminPatientsSeenKey, adminPatientsCount]);
+
+  useEffect(() => {
+    if (role !== 'ADMIN') return;
+    if (location.pathname !== '/admin/specialization-requests') return;
+    if (!adminSpecReqSeenKey) return;
+    localStorage.setItem(adminSpecReqSeenKey, String(adminSpecReqCount));
+    setHasAdminSpecReqNew(false);
+  }, [role, location.pathname, adminSpecReqSeenKey, adminSpecReqCount]);
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -69,6 +220,7 @@ export default function AppShell({ children, user }) {
     authApi.logout().catch(() => {});
     authSession.clearSession();
     authEvents.emit(authEvents.names.logout);
+    addToast('You have been signed out successfully.', 'info');
     navigate('/login', { replace: true });
   }
 
@@ -191,6 +343,7 @@ export default function AppShell({ children, user }) {
         {navItems.map(({ icon: Icon, label, path, gated }) => {
           const locked = role === 'DOCTOR' && gated && !isProfileComplete;
           const active = !locked && location.pathname === path;
+          const showPulse = !locked && Boolean(navPulseMap[path]);
           return (
             <button key={path}
               onClick={locked ? undefined : () => { navigate(path); setMobileOpen(false); }}
@@ -199,7 +352,10 @@ export default function AppShell({ children, user }) {
               <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#EF233C' : 'rgba(141,153,174,0.25)', boxShadow: active ? '0 0 8px rgba(239,35,60,0.5)' : 'none', transition: 'all 0.2s' }} />
               <Icon size={15} />
               <span>{label}</span>
-              {active && <ChevronRight size={11} style={{ marginLeft: 'auto', color: '#EF233C' }} />}
+              <span className="nav-item-right">
+                {showPulse && <span className="nav-pulse pulse-dot" aria-hidden="true" />}
+                {active && <ChevronRight size={11} style={{ color: '#EF233C' }} />}
+              </span>
             </button>
           );
         })}

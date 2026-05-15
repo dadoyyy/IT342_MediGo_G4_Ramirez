@@ -7,6 +7,7 @@ import axios from 'axios';
 import { authSession } from '../authSession';
 import { authResponseAdapter } from '../authResponseAdapter';
 import { authEvents } from '../authEventBus';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validate(f) {
@@ -32,9 +33,9 @@ const PREVIEW_CARDS = [
 
 export default function Login() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [form, setForm] = useState({ email: '', password: '' });
   const [errs, setErrs] = useState({});
-  const [apiErr, setApiErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
@@ -42,24 +43,25 @@ export default function Login() {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
     setErrs(p => ({ ...p, [name]: undefined }));
-    setApiErr('');
   }
 
   async function onSubmit(e) {
     e.preventDefault();
     const v = validate(form);
     if (Object.keys(v).length) { setErrs(v); return; }
-    setLoading(true); setApiErr('');
+    setLoading(true);
     try {
       const res = await authApi.login({ email: form.email.trim(), password: form.password });
       const token = authResponseAdapter.extractToken(res);
       authSession.setToken(token);
       authEvents.emit(authEvents.names.login, { source: 'login' });
+      addToast('Welcome back! You have successfully signed in.', 'success');
       navigate('/dashboard', { state: { justLoggedIn: true } });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data)
-        setApiErr(authResponseAdapter.extractApiErrorMessage(err, 'Invalid credentials.'));
-      else setApiErr('Unable to connect. Please try again.');
+      const msg = (axios.isAxiosError(err) && err.response?.data)
+        ? authResponseAdapter.extractApiErrorMessage(err, 'Invalid credentials.')
+        : 'Unable to connect. Please try again.';
+      addToast(msg, 'error');
     } finally { setLoading(false); }
   }
 
@@ -163,18 +165,6 @@ export default function Login() {
             <h2 style={{ fontSize: 30, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Welcome back</h2>
             <p style={{ fontSize: 15, color: '#6B7280', margin: 0, fontWeight: 400 }}>Enter your credentials to access your portal</p>
           </div>
-
-          <AnimatePresence>
-            {apiErr && (
-              <motion.div initial={{ opacity: 0, height: 0, marginBottom: 0 }} animate={{ opacity: 1, height: 'auto', marginBottom: 24 }} exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                style={{ overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, borderRadius: 12, padding: '14px 16px', background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.15)', color: '#D90429' }}>
-                  <span style={{ fontSize: 16, flexShrink: 0, marginTop: 2 }}>⚠</span>
-                  <span style={{ fontSize: 14, fontWeight: 500 }}>{apiErr}</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Google SSO */}
           <button type="button" onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}

@@ -340,6 +340,20 @@ html, body, #root {
   border-left: 3px solid #EF233C;
   color: #EDF2F4;
 }
+.nav-item-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #EF233C;
+  box-shadow: 0 0 10px rgba(239,35,60,0.5);
+}
 
 /* ─── Status badges ────────────────────────────────────────────────────────── */
 .badge {

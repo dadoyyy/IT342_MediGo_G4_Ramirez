@@ -1,9 +1,14 @@
 package edu.cit.ramirez.medigo.features.admin;
 
 import edu.cit.ramirez.medigo.features.doctor.DoctorProfileRepository;
+import edu.cit.ramirez.medigo.features.doctor.DoctorSpecializationChangeRequestRepository;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorSpecializationChangeRequest;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorSpecializationChangeStatus;
 import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.entity.User;
+import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +27,7 @@ import java.util.List;
 public class AdminService {
 
     private final DoctorProfileRepository doctorProfileRepository;
+    private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final edu.cit.ramirez.medigo.features.user.UserRepository userRepository;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
@@ -64,6 +70,56 @@ public class AdminService {
         return doctorProfileRepository.findByVerifiedFalse().stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DoctorSpecializationChangeRequestDto> getSpecializationChangeRequests(String status) {
+        if (status == null || status.isBlank()) {
+            return doctorChangeRequestRepository.findAllByOrderByCreatedAtDesc().stream()
+                    .map(this::toChangeRequestDto)
+                    .toList();
+        }
+        DoctorSpecializationChangeStatus parsed;
+        try {
+            parsed = DoctorSpecializationChangeStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Invalid status. Use PENDING, APPROVED, or REJECTED.");
+        }
+        return doctorChangeRequestRepository.findByStatusOrderByCreatedAtDesc(parsed).stream()
+                .map(this::toChangeRequestDto)
+                .toList();
+    }
+
+    @Transactional
+    public DoctorSpecializationChangeRequestDto approveSpecializationChange(Long requestId, String note) {
+        DoctorSpecializationChangeRequest request = doctorChangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Change request not found."));
+        if (request.getStatus() != DoctorSpecializationChangeStatus.PENDING) {
+            throw new BadRequestException("Change request is no longer pending.");
+        }
+
+        DoctorProfile profile = doctorProfileRepository.findByDoctorId(request.getDoctor().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
+        profile.setSpecialization(request.getRequestedSpecialization());
+        doctorProfileRepository.save(profile);
+
+        request.setStatus(DoctorSpecializationChangeStatus.APPROVED);
+        request.setAdminNote(note != null ? note.trim() : null);
+        request.setDecidedAt(java.time.Instant.now());
+        return toChangeRequestDto(doctorChangeRequestRepository.save(request));
+    }
+
+    @Transactional
+    public DoctorSpecializationChangeRequestDto rejectSpecializationChange(Long requestId, String note) {
+        DoctorSpecializationChangeRequest request = doctorChangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Change request not found."));
+        if (request.getStatus() != DoctorSpecializationChangeStatus.PENDING) {
+            throw new BadRequestException("Change request is no longer pending.");
+        }
+        request.setStatus(DoctorSpecializationChangeStatus.REJECTED);
+        request.setAdminNote(note != null ? note.trim() : null);
+        request.setDecidedAt(java.time.Instant.now());
+        return toChangeRequestDto(doctorChangeRequestRepository.save(request));
     }
 
     @Transactional
@@ -124,6 +180,23 @@ public class AdminService {
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())
                 .governmentIdUrl(profile.getGovernmentIdUrl())
+                .build();
+    }
+
+    private DoctorSpecializationChangeRequestDto toChangeRequestDto(DoctorSpecializationChangeRequest request) {
+        User doctor = request.getDoctor();
+        return DoctorSpecializationChangeRequestDto.builder()
+                .id(request.getId())
+                .doctorId(doctor.getId())
+                .doctorName(doctor.getFullName())
+                .email(doctor.getEmail())
+                .currentSpecialization(request.getCurrentSpecialization())
+                .requestedSpecialization(request.getRequestedSpecialization())
+                .reason(request.getReason())
+                .status(request.getStatus())
+                .adminNote(request.getAdminNote())
+                .createdAt(request.getCreatedAt())
+                .decidedAt(request.getDecidedAt())
                 .build();
     }
 }

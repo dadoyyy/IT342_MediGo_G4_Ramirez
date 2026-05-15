@@ -2,10 +2,12 @@ package edu.cit.ramirez.medigo.features.chat;
 
 import edu.cit.ramirez.medigo.features.chat.entity.ChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -22,4 +24,34 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             ORDER BY m.sentAt ASC
             """)
     List<ChatMessage> findConversation(@Param("userA") Long userA, @Param("userB") Long userB);
+
+    @Query("""
+            SELECT MAX(m.sentAt)
+            FROM ChatMessage m
+            WHERE m.receiver.id = :receiverId
+              AND m.readAt IS NULL
+            """)
+    Instant findLatestUnread(@Param("receiverId") Long receiverId);
+
+    @Query("""
+            SELECT COUNT(m)
+            FROM ChatMessage m
+            WHERE m.receiver.id = :receiverId
+              AND m.readAt IS NULL
+            """)
+    long countUnread(@Param("receiverId") Long receiverId);
+
+    @Modifying
+    @Query("""
+            UPDATE ChatMessage m
+            SET m.readAt = :readAt
+            WHERE m.receiver.id = :receiverId
+              AND m.sender.id = :senderId
+              AND m.readAt IS NULL
+            """)
+    int markConversationRead(
+            @Param("receiverId") Long receiverId,
+            @Param("senderId") Long senderId,
+            @Param("readAt") Instant readAt
+    );
 }

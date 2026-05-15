@@ -57,7 +57,7 @@ export default function MyAppointments() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Your upcoming visits</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}</h1>
             <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Track, manage, and stay on top of all your medical appointments</p>
           </div>
           <button onClick={() => navigate('/home')} className="mg-btn" style={{ padding: '10px 16px', fontSize: 13 }}>

@@ -54,6 +54,8 @@ export const doctorApi = {
   search: (query = '') => api.get('/doctors/search', { params: { q: query } }),
   getMyProfile: () => api.get('/doctors/me/profile'),
   upsertMyProfile: (payload) => api.put('/doctors/me/profile', payload),
+  listMySpecializationChangeRequests: () => api.get('/doctors/me/specialization-change-requests'),
+  requestSpecializationChange: (payload) => api.post('/doctors/me/specialization-change-requests', payload),
   uploadDocument: (docType, file) => {
     const form = new FormData();
     form.append('docType', docType);
@@ -77,6 +79,8 @@ export const chatApi = {
   contacts: (query = '') => api.get('/chat/contacts', { params: { q: query } }),
   conversation: (otherUserId) => api.get(`/chat/conversations/${otherUserId}`),
   sendMessage: (payload) => api.post('/chat/messages', payload),
+  latestIncoming: () => api.get('/chat/unread/latest'),
+  unreadCount: () => api.get('/chat/unread/count'),
 };
 
 export const adminApi = {
@@ -84,6 +88,9 @@ export const adminApi = {
   getAllDoctors: () => api.get('/admin/doctors'),
   getAllPatients: () => api.get('/admin/patients'),
   getPendingDoctors: () => api.get('/admin/doctors/pending'),
+  getSpecializationChangeRequests: (status) => api.get('/admin/specialization-change-requests', { params: status ? { status } : {} }),
+  approveSpecializationChange: (requestId, note) => api.put(`/admin/specialization-change-requests/${requestId}/approve`, note ? { note } : {}),
+  rejectSpecializationChange: (requestId, note) => api.put(`/admin/specialization-change-requests/${requestId}/reject`, note ? { note } : {}),
   approveDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/approve`),
   rejectDoctor: (doctorId, reason) => api.put(`/admin/doctors/${doctorId}/reject`, { reason }),
   serveDocument: (filename) => api.get(`/admin/documents/${filename}`, { responseType: 'blob' }),

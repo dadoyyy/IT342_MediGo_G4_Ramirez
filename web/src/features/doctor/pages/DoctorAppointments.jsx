@@ -72,7 +72,7 @@ export default function DoctorAppointments() {
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Manage your appointment requests</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
           <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Review incoming requests, confirm visits, and track your appointment history</p>
         </motion.div>
 

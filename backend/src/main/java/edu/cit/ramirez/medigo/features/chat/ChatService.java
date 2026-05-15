@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,7 +47,7 @@ public class ChatService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+        @Transactional
     public List<ChatMessageDto> getConversation(String email, Long otherUserId) {
         User current = findUserByEmail(email);
         User other = userRepository.findById(otherUserId)
@@ -57,10 +58,24 @@ public class ChatService {
                     "You can only message users with whom you have a confirmed or completed appointment.");
         }
 
-        return chatMessageRepository.findConversation(current.getId(), other.getId()).stream()
+                chatMessageRepository.markConversationRead(current.getId(), other.getId(), Instant.now());
+
+                return chatMessageRepository.findConversation(current.getId(), other.getId()).stream()
                 .map(this::toMessageDto)
                 .toList();
     }
+
+        @Transactional(readOnly = true)
+        public Instant getLatestUnreadTimestamp(String email) {
+                User current = findUserByEmail(email);
+                return chatMessageRepository.findLatestUnread(current.getId());
+        }
+
+        @Transactional(readOnly = true)
+        public long getUnreadCount(String email) {
+                User current = findUserByEmail(email);
+                return chatMessageRepository.countUnread(current.getId());
+        }
 
     @Transactional
     public ChatMessageDto sendMessage(String email, ChatSendRequest request) {

@@ -7,19 +7,30 @@ import { authSession } from '../../auth/authSession';
 import SpecializationSelect from '../../../shared/ui/SpecializationSelect';
 import axios from 'axios';
 
-function validate(form) {
+import { useToast } from '../../../shared/ui/ToastProvider';
+
+function validate(form, addToast) {
   const e = {};
-  if (!form.specialization || form.specialization.length === 0) e.specialization = 'At least one specialization is required.';
-  if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
-  if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
+  if (!form.specialization || form.specialization.length === 0) {
+    e.specialization = 'At least one specialization is required.';
+    addToast(e.specialization, 'error');
+  }
+  if (!form.clinicName.trim()) {
+    e.clinicName = 'Clinic / hospital name is required.';
+    addToast(e.clinicName, 'error');
+  }
+  if (!form.clinicAddress.trim()) {
+    e.clinicAddress = 'Clinic address is required.';
+    addToast(e.clinicAddress, 'error');
+  }
   return e;
 }
 
 export default function DoctorRegistration() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
   const [fieldErrors, setFieldErrors] = useState({});
-  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -42,21 +53,22 @@ export default function DoctorRegistration() {
     const { name, value } = e.target;
     setForm(p => ({ ...p, [name]: value }));
     setFieldErrors(p => ({ ...p, [name]: undefined }));
-    setApiError('');
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const errors = validate(form);
+    const errors = validate(form, addToast);
     if (Object.keys(errors).length) { setFieldErrors(errors); return; }
-    setLoading(true); setApiError('');
+    setLoading(true);
     try {
       await doctorApi.upsertMyProfile({ specialization: form.specialization.join(', '), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
+      addToast('Practice profile saved successfully!', 'success');
       navigate('/doctor/profile', { replace: true });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data)
-        setApiError(err.response.data?.error?.message || err.response.data?.message || 'Submission failed.');
-      else setApiError('Unable to connect. Please try again.');
+      const msg = (axios.isAxiosError(err) && err.response?.data)
+        ? (err.response.data?.error?.message || err.response.data?.message || 'Submission failed.')
+        : 'Unable to connect. Please try again.';
+      addToast(msg, 'error');
     } finally { setLoading(false); }
   }
 
@@ -91,12 +103,6 @@ export default function DoctorRegistration() {
             <p style={{ fontSize: 14, color: '#6B7280' }}>Complete your professional profile to start accepting patient appointments.</p>
           </div>
 
-          {apiError && (
-            <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', fontSize: 13, color: '#D90429' }}>
-              <span>⚠</span><span>{apiError}</span>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>
@@ -104,7 +110,7 @@ export default function DoctorRegistration() {
               </label>
               <SpecializationSelect
                 value={form.specialization}
-                onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); setApiError(''); }}
+                onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); }}
                 error={!!fieldErrors.specialization}
                 placeholder="Select your specializations"
               />

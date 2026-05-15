@@ -4,6 +4,20 @@ import { Send, Search, MessageSquare } from 'lucide-react';
 import { chatApi, authApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 
+const APPT_CONFIRM_TAG = '[APPT_CONFIRMED]';
+
+function parseAppointmentConfirmation(content) {
+  if (!content || !content.startsWith(APPT_CONFIRM_TAG)) return null;
+  const data = {};
+  content.split('|').slice(1).forEach(part => {
+    const idx = part.indexOf('=');
+    if (idx > 0) {
+      data[part.slice(0, idx)] = part.slice(idx + 1);
+    }
+  });
+  return data;
+}
+
 function fmtTime(ts) {
   if (!ts) return '';
   return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -29,6 +43,7 @@ export default function ChatInterface() {
   const [sending, setSending] = useState(false);
   const endRef = useRef(null);
   const pollRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => { authApi.me().then(r => setMe(r.data?.data ?? r.data)).catch(() => {}); }, []);
 
@@ -85,6 +100,17 @@ export default function ChatInterface() {
     acc[day].push(msg);
     return acc;
   }, {});
+
+  const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+  const lastIncomingConfirmation = lastMsg && String(lastMsg.senderId) !== String(me?.id)
+    ? parseAppointmentConfirmation(lastMsg.content)
+    : null;
+  const showQuickReplies = me?.role === 'PATIENT' && Boolean(lastIncomingConfirmation);
+  const quickReplies = [
+    'Thank you, doctor. I confirm my attendance.',
+    'Thanks for confirming. Is there anything I should prepare?',
+    'I appreciate the confirmation. May I ask about pre-visit requirements?'
+  ];
 
   return (
     <AppShell user={me}>
@@ -170,14 +196,46 @@ export default function ChatInterface() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {msgs.map(msg => {
                         const isMe = String(msg.senderId) === String(me?.id);
+                        const apptData = parseAppointmentConfirmation(msg.content);
+                        const bubbleStyle = apptData
+                          ? { background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', borderRadius: 16, boxShadow: '0 2px 10px rgba(43,45,66,0.05)' }
+                          : (isMe
+                            ? { background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', borderBottomRightRadius: 4, boxShadow: '0 4px 16px rgba(239,35,60,0.2)' }
+                            : { background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', borderBottomLeftRadius: 4, boxShadow: '0 2px 8px rgba(43,45,66,0.02)' }
+                          );
                         return (
                           <motion.div key={msg.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
                             style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                            <div style={{ maxWidth: 320, padding: '10px 14px', borderRadius: 18, fontSize: 14, ...(isMe
-                              ? { background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', borderBottomRightRadius: 4, boxShadow: '0 4px 16px rgba(239,35,60,0.2)' }
-                              : { background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', borderBottomLeftRadius: 4, boxShadow: '0 2px 8px rgba(43,45,66,0.02)' }
-                            ) }}>
-                              <p style={{ lineHeight: 1.5 }}>{msg.content}</p>
+                            <div style={{ maxWidth: 340, padding: '10px 14px', borderRadius: 18, fontSize: 14, ...bubbleStyle }}>
+                              {apptData ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                  <div>
+                                    <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>Appointment Confirmed</p>
+                                    <p style={{ fontSize: 12, color: 'rgba(43,45,66,0.7)', margin: 0 }}>
+                                      Your booking has been approved and is now confirmed.
+                                    </p>
+                                  </div>
+                                  <div style={{ display: 'grid', gap: 6 }}>
+                                    {apptData.Doctor && (
+                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Doctor:</strong> {apptData.Doctor}</p>
+                                    )}
+                                    {apptData.Patient && (
+                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Patient:</strong> {apptData.Patient}</p>
+                                    )}
+                                    {apptData.When && (
+                                      <p style={{ fontSize: 12, margin: 0 }}><strong>When:</strong> {apptData.When}</p>
+                                    )}
+                                    {apptData.Type && (
+                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Type:</strong> {apptData.Type}</p>
+                                    )}
+                                    {apptData.Location && (
+                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Location:</strong> {apptData.Location}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <p style={{ lineHeight: 1.5 }}>{msg.content}</p>
+                              )}
                               <p style={{ fontSize: 11, marginTop: 4, color: isMe ? 'rgba(255,255,255,0.6)' : 'rgba(43,45,66,0.4)' }}>
                                 {fmtTime(msg.sentAt || msg.createdAt)}
                               </p>
@@ -192,14 +250,30 @@ export default function ChatInterface() {
               </div>
 
               {/* Input */}
-              <form onSubmit={handleSend} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: 'rgba(255,255,255,0.9)', borderTop: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
-                <input type="text" value={text} onChange={e => setText(e.target.value)}
-                  placeholder="Type a message…" className="mg-input" style={{ flex: 1, padding: '10px 16px', background: 'rgba(237,242,244,0.5)', border: '1px solid rgba(43,45,66,0.08)' }} />
-                <button type="submit" disabled={!text.trim() || sending}
-                  style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', border: 'none', cursor: 'pointer', opacity: (!text.trim() || sending) ? 0.4 : 1, transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(239,35,60,0.25)' }}>
-                  {sending ? <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Send size={15} color="#fff" />}
-                </button>
-              </form>
+              <div style={{ background: 'rgba(255,255,255,0.9)', borderTop: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
+                {showQuickReplies && (
+                  <div style={{ display: 'flex', gap: 8, padding: '10px 20px 0', flexWrap: 'wrap' }}>
+                    {quickReplies.map(reply => (
+                      <button
+                        key={reply}
+                        type="button"
+                        onClick={() => { setText(reply); inputRef.current?.focus(); }}
+                        style={{ fontSize: 11, fontWeight: 600, padding: '6px 10px', borderRadius: 999, border: '1px solid rgba(43,45,66,0.12)', background: '#FFFFFF', color: '#2B2D42' }}
+                      >
+                        {reply}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <form onSubmit={handleSend} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px' }}>
+                  <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
+                    placeholder="Type a message…" className="mg-input" style={{ flex: 1, padding: '10px 16px', background: 'rgba(237,242,244,0.5)', border: '1px solid rgba(43,45,66,0.08)' }} />
+                  <button type="submit" disabled={!text.trim() || sending}
+                    style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', border: 'none', cursor: 'pointer', opacity: (!text.trim() || sending) ? 0.4 : 1, transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(239,35,60,0.25)' }}>
+                    {sending ? <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Send size={15} color="#fff" />}
+                  </button>
+                </form>
+              </div>
             </>
           )}
         </div>

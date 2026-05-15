@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Stethoscope, Building2, MapPin, ArrowRight,
-  CheckCircle, AlertCircle, FileText, Upload, Camera, X
+  CheckCircle, AlertCircle, FileText, Upload, Camera, X, Clock
 } from 'lucide-react';
 import { authApi, doctorApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
@@ -12,6 +12,7 @@ import SpecializationSelect from '../../../shared/ui/SpecializationSelect';
 import axios from 'axios';
 import { useDoctorProfile } from '../context/DoctorProfileContext';
 import { authSession } from '../../auth/authSession';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 /* ── Validation ─────────────────────────────────────────────────────────── */
 function validate(form) {
@@ -37,7 +38,7 @@ export default function DoctorProfile() {
   const navigate = useNavigate();
   const avatarInputRef = useRef(null);
 
-  const { isProfileComplete, isVerified, isLoading, markProfileComplete, updateProfilePicture } = useDoctorProfile();
+  const { isProfileComplete, isVerified, markProfileComplete, updateProfilePicture } = useDoctorProfile();
   const [user, setUser] = useState(null);
 
   const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
@@ -57,6 +58,10 @@ export default function DoctorProfile() {
   // In-page document viewer modal
   const [docViewer, setDocViewer] = useState(null); // { label, blobUrl, isPdf }
   const [docViewerLoading, setDocViewerLoading] = useState(false);
+  const [changeRequestOpen, setChangeRequestOpen] = useState(false);
+  const [changeRequestSubmitting, setChangeRequestSubmitting] = useState(false);
+  const [changeRequests, setChangeRequests] = useState([]);
+  const [changeRequestForm, setChangeRequestForm] = useState({ specialization: [], reason: '' });
 
   const formFilled = form.specialization.length > 0 && form.clinicName.trim() && form.clinicAddress.trim();
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
@@ -64,6 +69,7 @@ export default function DoctorProfile() {
 
   const totalSteps = 1 + REQUIRED_DOCS.length;
   const doneSteps  = (formFilled ? 1 : 0) + REQUIRED_DOCS.filter(k => !!docs[k]).length;
+  const { addToast } = useToast();
 
   useEffect(() => {
     async function load() {
@@ -90,6 +96,12 @@ export default function DoctorProfile() {
               government_id:     p.governmentIdUrl     || null,
             });
           }
+        }
+
+        const reqRes = await doctorApi.listMySpecializationChangeRequests().catch(() => null);
+        if (reqRes) {
+          const list = reqRes.data?.data ?? reqRes.data;
+          setChangeRequests(Array.isArray(list) ? list : []);
         }
       } catch {
         navigate('/login', { replace: true });
@@ -119,6 +131,11 @@ export default function DoctorProfile() {
         clinicAddress:  form.clinicAddress.trim(),
       });
       setSaveSuccess(true);
+      if (!isProfileComplete || !isVerified) {
+        addToast('Profile submitted for review. We will notify you once verification is complete.', 'success');
+      } else {
+        addToast('Your profile changes were saved successfully.', 'success');
+      }
       markProfileComplete();
       if (!isProfileComplete) {
         setTimeout(() => navigate('/pending-approval', { replace: true }), 1200);
@@ -127,10 +144,40 @@ export default function DoctorProfile() {
       if (axios.isAxiosError(err) && err.response?.data) {
         const errData = err.response.data?.error;
         setApiError(errData?.message || err.response.data?.message || 'Failed to save profile.');
+        addToast(errData?.message || err.response.data?.message || 'Failed to save profile.', 'error');
       } else {
         setApiError('Unable to connect. Please try again.');
+        addToast('Unable to connect. Please try again.', 'error');
       }
     } finally { setSaving(false); }
+  }
+
+  async function submitChangeRequest(e) {
+    e.preventDefault();
+    const requestedSpecialization = changeRequestForm.specialization.join(', ').trim();
+    if (!requestedSpecialization) {
+      addToast('Please choose a requested specialization.', 'error');
+      return;
+    }
+    setChangeRequestSubmitting(true);
+    try {
+      const res = await doctorApi.requestSpecializationChange({
+        requestedSpecialization,
+        reason: changeRequestForm.reason.trim() || null,
+      });
+      const created = res.data?.data ?? res.data;
+      setChangeRequests(prev => [created, ...prev]);
+      setChangeRequestOpen(false);
+      setChangeRequestForm({ specialization: [], reason: '' });
+      addToast('Specialization change request submitted for admin review.', 'success');
+    } catch (err) {
+      const msg = axios.isAxiosError(err)
+        ? (err.response?.data?.error?.message || err.response?.data?.message || 'Request failed.')
+        : 'Request failed.';
+      addToast(msg, 'error');
+    } finally {
+      setChangeRequestSubmitting(false);
+    }
   }
 
   async function handleDocUpload(docType, file) {
@@ -173,56 +220,45 @@ export default function DoctorProfile() {
       const blobUrl = await fetchAuthBlob(url);
       setDocViewer({ label, blobUrl, isPdf: url.toLowerCase().endsWith('.pdf') });
     } catch {
-      setDocViewer(null);
-      alert('Could not load document. Please try again.');
+      addToast('Failed to load document.', 'error');
     } finally {
       setDocViewerLoading(false);
     }
   }
 
-  function closeDocViewer() {
-    if (docViewer?.blobUrl) URL.revokeObjectURL(docViewer.blobUrl);
-    setDocViewer(null);
-  }
-
-  if (isLoading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#EDF2F4' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
-    </div>
-  );
-
   const avatarUrl = docs.profile_picture;
-  const initials  = user?.fullName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR';
+  const initials = user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : '??';
+
+  const changeRequest = changeRequests[0];
+  const changeStatus = changeRequest?.status;
+
+  const statusStyles = {
+    PENDING:  { label: 'Pending Approval', color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', Icon: Clock },
+    APPROVED: { label: 'Request Approved', color: '#22C55E', bg: 'rgba(34,197,94,0.08)',  border: 'rgba(34,197,94,0.2)',  Icon: CheckCircle },
+    REJECTED: { label: 'Request Rejected', color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  Icon: X },
+  };
 
   return (
-    <AppShell user={user}>
-
-      {/* ── In-page document viewer modal ── */}
+    <AppShell>
       <AnimatePresence>
-        {(docViewer || docViewerLoading) && (
+        {docViewer && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={closeDocViewer}
-            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(43,45,66,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+            onClick={() => setDocViewer(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(43,45,66,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(43,45,66,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(43,45,66,0.07)', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <FileText size={16} style={{ color: '#8D99AE' }} />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>{docViewer?.label || 'Loading…'}</span>
-                </div>
-                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
-                  <X size={18} />
+              style={{ background: '#fff', borderRadius: 20, width: '100%', maxWidth: 900, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8F9FA' }}>
+                <p style={{ margin: 0, fontWeight: 700, color: '#2B2D42' }}>{docViewer.label}</p>
+                <button onClick={() => setDocViewer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
+                  <X size={20} />
                 </button>
               </div>
-              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#EDF2F4' }}>
-                {docViewerLoading || !docViewer?.blobUrl ? (
-                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
+              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#E5E7EB', padding: 20 }}>
+                {docViewerLoading ? (
+                  <span className="w-10 h-10 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.1)', borderTopColor: '#EF233C' }} />
                 ) : docViewer.isPdf ? (
-                  <object
-                    data={docViewer.blobUrl}
-                    type="application/pdf"
-                    style={{ width: '100%', height: '75vh', border: 'none' }}>
+                  <object data={docViewer.blobUrl} type="application/pdf" style={{ width: '100%', height: '75vh', borderRadius: 8 }}>
                     <p style={{ color: '#8D99AE', textAlign: 'center', padding: 24 }}>
                       PDF preview not supported in this browser.{' '}
                       <a href={docViewer.blobUrl} download style={{ color: '#8D99AE' }}>Download instead</a>
@@ -232,6 +268,58 @@ export default function DoctorProfile() {
                   <img src={docViewer.blobUrl} alt={docViewer.label} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: 8 }} />
                 )}
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Specialization change request modal */}
+      <AnimatePresence>
+        {changeRequestOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setChangeRequestOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(43,45,66,0.08)', width: '100%', maxWidth: 520, overflow: 'hidden', boxShadow: '0 24px 64px rgba(43,45,66,0.15)' }}>
+              <div style={{ padding: '18px 22px', borderBottom: '1px solid rgba(43,45,66,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#2B2D42' }}>Specialization Change Request</p>
+                  <p style={{ margin: 0, fontSize: 12, color: '#8D99AE' }}>Admin approval is required to update your medical field.</p>
+                </div>
+                <button onClick={() => setChangeRequestOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
+                  <X size={18} />
+                </button>
+              </div>
+              <form onSubmit={submitChangeRequest} style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
+                    REQUESTED SPECIALIZATION <span style={{ color: '#D90429' }}>*</span>
+                  </label>
+                  <SpecializationSelect
+                    value={changeRequestForm.specialization}
+                    onChange={(val) => setChangeRequestForm(p => ({ ...p, specialization: val }))}
+                    placeholder="Select requested specializations"
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>REASON (OPTIONAL)</label>
+                  <textarea
+                    value={changeRequestForm.reason}
+                    onChange={e => setChangeRequestForm(p => ({ ...p, reason: e.target.value }))}
+                    rows={3}
+                    className="mg-input"
+                    style={{ resize: 'none', lineHeight: 1.5 }}
+                    placeholder="Share why you need to update your specialization"
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <button type="button" onClick={() => setChangeRequestOpen(false)} className="mg-btn-ghost" style={{ padding: '10px 16px' }}>Cancel</button>
+                  <button type="submit" disabled={changeRequestSubmitting} className="mg-btn" style={{ padding: '10px 16px' }}>
+                    {changeRequestSubmitting ? 'Submitting…' : 'Submit Request'}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
@@ -371,15 +459,36 @@ export default function DoctorProfile() {
             <form id="profile-form" onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {/* Specialization dropdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
-                  SPECIALIZATION(S) <span style={{ color: '#D90429' }}>*</span>
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
+                    SPECIALIZATION(S) <span style={{ color: '#D90429' }}>*</span>
+                  </label>
+                  {isVerified && (
+                    <button type="button" onClick={() => setChangeRequestOpen(true)} className="mg-btn-ghost" style={{ padding: '6px 10px', fontSize: 11 }}>
+                      Request change
+                    </button>
+                  )}
+                </div>
                 <SpecializationSelect
                   value={form.specialization}
                   onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); setApiError(''); setSaveSuccess(false); }}
                   error={!!fieldErrors.specialization}
+                  disabled={isVerified}
                   placeholder="Select your specializations"
                 />
+                {isVerified && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                    <p style={{ fontSize: 11, color: 'rgba(141,153,174,0.8)', margin: 0 }}>
+                      Specialization is locked after verification. Use the request option for updates.
+                    </p>
+                    {changeStatus && statusStyles[changeStatus] && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: statusStyles[changeStatus].bg, border: `1px solid ${statusStyles[changeStatus].border}`, color: statusStyles[changeStatus].color }}>
+                        {(() => { const Icon = statusStyles[changeStatus].Icon; return <Icon size={11} />; })()}
+                        {statusStyles[changeStatus].label}
+                      </span>
+                    )}
+                  </div>
+                )}
                 {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{fieldErrors.specialization}</p>}
               </div>
 
@@ -408,6 +517,19 @@ export default function DoctorProfile() {
                 </div>
               ))}
             </form>
+
+            <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="submit"
+                form="profile-form"
+                disabled={!canSave}
+                className="mg-btn"
+                style={{ padding: '12px 18px', opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
+                {saving
+                  ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
+                  : <>Save Changes <ArrowRight size={15} /></>}
+              </button>
+            </div>
 
           </div>{/* end profile info card */}
           {/* ── Verification Documents card ── */}
@@ -441,7 +563,7 @@ export default function DoctorProfile() {
                       <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
                         {label.toUpperCase()}
                       </label>
-                      {!isVerified && <span style={{ fontSize: 10, color: '#D90429' }}>*</span>}
+                      {!isVerified && <span style={{ color: '#D90429' }}>*</span>}
                       {existing && <CheckCircle size={11} style={{ color: '#EF233C', marginLeft: 2 }} />}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

@@ -5,6 +5,7 @@ import { Clock, Save, CheckCircle, Plus, Trash2, Calendar } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import { authSession } from '../../auth/authSession';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -42,10 +43,10 @@ function formatTime(t) {
 
 export default function DoctorSchedule() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [user, setUser] = useState(null);
   const [schedule, setSchedule] = useState(loadSchedule);
   const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,7 +66,6 @@ export default function DoctorSchedule() {
     setSchedule(prev => prev.map((d, i) =>
       i === dayIdx ? { ...d, enabled: !d.enabled } : d
     ));
-    setSaveSuccess(false);
   }
 
   function updateSlot(dayIdx, slotIdx, field, value) {
@@ -75,21 +75,18 @@ export default function DoctorSchedule() {
         slots: d.slots.map((s, si) => si === slotIdx ? { ...s, [field]: value } : s),
       } : d
     ));
-    setSaveSuccess(false);
   }
 
   function addSlot(dayIdx) {
     setSchedule(prev => prev.map((d, i) =>
       i === dayIdx ? { ...d, slots: [...d.slots, { start: '09:00', end: '17:00' }] } : d
     ));
-    setSaveSuccess(false);
   }
 
   function removeSlot(dayIdx, slotIdx) {
     setSchedule(prev => prev.map((d, i) =>
       i === dayIdx ? { ...d, slots: d.slots.filter((_, si) => si !== slotIdx) } : d
     ));
-    setSaveSuccess(false);
   }
 
   function handleSave() {
@@ -98,8 +95,7 @@ export default function DoctorSchedule() {
     setTimeout(() => {
       saveScheduleToStorage(schedule);
       setSaving(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      addToast('Schedule saved successfully!', 'success');
     }, 400);
   }
 
@@ -128,7 +124,7 @@ export default function DoctorSchedule() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Manage your weekly availability</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
             <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Set your working hours so patients can book at the right time</p>
           </div>
           <button onClick={handleSave} disabled={saving}
@@ -141,19 +137,7 @@ export default function DoctorSchedule() {
           </button>
         </motion.div>
 
-        {/* Save success toast */}
-        <AnimatePresence>
-          {saveSuccess && (
-            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              style={{
-                marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, borderRadius: 12, padding: '12px 16px',
-                background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)', fontSize: 13, color: '#EF233C',
-              }}>
-              <CheckCircle size={15} />
-              <span>Schedule saved successfully!</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* Summary stats */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}

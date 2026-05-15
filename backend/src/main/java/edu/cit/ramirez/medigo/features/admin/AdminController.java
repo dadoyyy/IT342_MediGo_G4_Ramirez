@@ -1,6 +1,7 @@
 package edu.cit.ramirez.medigo.features.admin;
 
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,32 @@ public class AdminController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<List<DoctorProfileDto>> getPendingDoctors() {
         return ApiResponse.ok(adminService.getPendingDoctors());
+    }
+
+    /** List specialization change requests. Optional query param: status=PENDING|APPROVED|REJECTED */
+    @GetMapping("/specialization-change-requests")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<DoctorSpecializationChangeRequestDto>> specializationChangeRequests(
+            @RequestParam(value = "status", required = false) String status) {
+        return ApiResponse.ok(adminService.getSpecializationChangeRequests(status));
+    }
+
+    @PutMapping("/specialization-change-requests/{requestId}/approve")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> approveSpecializationChange(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String note = body != null ? body.get("note") : null;
+        return ApiResponse.ok(adminService.approveSpecializationChange(requestId, note));
+    }
+
+    @PutMapping("/specialization-change-requests/{requestId}/reject")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> rejectSpecializationChange(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String note = body != null ? body.get("note") : null;
+        return ApiResponse.ok(adminService.rejectSpecializationChange(requestId, note));
     }
 
     /** Approves a doctor — sets verified = true. */

@@ -260,7 +260,7 @@ export default function AdminVerification() {
 
         {/* Page Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Review pending doctor applications</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}</h1>
           <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>{pending.length} application{pending.length !== 1 ? 's' : ''} awaiting your review and approval</p>
         </motion.div>
 

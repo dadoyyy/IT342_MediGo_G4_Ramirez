@@ -34,6 +34,9 @@ public class ChatMessage {
     @Column(name = "sent_at", nullable = false, updatable = false)
     private Instant sentAt;
 
+    @Column(name = "read_at")
+    private Instant readAt;
+
     public ChatMessage() {
     }
 
@@ -54,4 +57,7 @@ public class ChatMessage {
 
     public Instant getSentAt() { return sentAt; }
     public void setSentAt(Instant sentAt) { this.sentAt = sentAt; }
+
+    public Instant getReadAt() { return readAt; }
+    public void setReadAt(Instant readAt) { this.readAt = readAt; }
 }
