@@ -35,15 +35,10 @@ export default function AdminPatients() {
     <AppShell user={user}>
       <div style={{ padding: '28px 28px 40px' }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,35,60,0.12)' }}>
-              <Users size={20} style={{ color: '#EF233C' }} />
-            </div>
-            <div>
-              <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Registered Patients</h1>
-              <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>View all patients registered on the platform</p>
-            </div>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Your patient community</h1>
+            <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>{patients.length} patient{patients.length !== 1 ? 's' : ''} registered on the platform</p>
           </div>
           <div style={{ position: 'relative', width: '100%', maxWidth: 300 }}>
             <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
