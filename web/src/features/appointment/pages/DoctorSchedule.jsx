@@ -1,53 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Save, CheckCircle, Plus, Trash2, Calendar } from 'lucide-react';
+import { Clock, Plus, Trash2, Calendar, Save, Trash, AlertCircle } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import { authSession } from '../../auth/authSession';
 import { useToast } from '../../../shared/ui/ToastProvider';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-const LS_KEY = 'medigo_doctor_schedule';
-
-function getDefaultSchedule() {
-  return DAYS.map((day) => ({
-    day,
-    enabled: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day),
-    slots: [{ start: '09:00', end: '12:00' }, { start: '13:00', end: '17:00' }],
-  }));
-}
-
-function loadSchedule() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return getDefaultSchedule();
-}
-
-function saveScheduleToStorage(schedule) {
-  localStorage.setItem(LS_KEY, JSON.stringify(schedule));
-}
-
-function formatTime(t) {
-  if (!t) return '';
-  const [h, m] = t.split(':');
-  const hr = parseInt(h, 10);
-  const ampm = hr >= 12 ? 'PM' : 'AM';
-  const hr12 = hr === 0 ? 12 : hr > 12 ? hr - 12 : hr;
-  return `${hr12}:${m} ${ampm}`;
-}
+const LS_KEY = 'medigo_doctor_slots';
 
 export default function DoctorSchedule() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
-  const [schedule, setSchedule] = useState(loadSchedule);
-  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Slots: { id, date, startTime, endTime, type, status }
+  const [slots, setSlots] = useState(() => {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+
+  const [form, setForm] = useState({ date: '', startTime: '', endTime: '', type: 'In-person' });
 
   useEffect(() => {
     async function load() {
@@ -62,234 +39,229 @@ export default function DoctorSchedule() {
     load();
   }, [navigate]);
 
-  function toggleDay(dayIdx) {
-    setSchedule(prev => prev.map((d, i) =>
-      i === dayIdx ? { ...d, enabled: !d.enabled } : d
-    ));
+  useEffect(() => {
+    localStorage.setItem(LS_KEY, JSON.stringify(slots));
+  }, [slots]);
+
+  function validate() {
+    const e = {};
+    if (!form.date) e.date = 'Select date.';
+    if (!form.startTime) e.startTime = 'Select start time.';
+    if (!form.endTime) e.endTime = 'Select end time.';
+    return e;
   }
 
-  function updateSlot(dayIdx, slotIdx, field, value) {
-    setSchedule(prev => prev.map((d, i) =>
-      i === dayIdx ? {
-        ...d,
-        slots: d.slots.map((s, si) => si === slotIdx ? { ...s, [field]: value } : s),
-      } : d
-    ));
+  function onChange(e) {
+    const { name, value } = e.target;
+    setForm(p => ({ ...p, [name]: value }));
   }
 
-  function addSlot(dayIdx) {
-    setSchedule(prev => prev.map((d, i) =>
-      i === dayIdx ? { ...d, slots: [...d.slots, { start: '09:00', end: '17:00' }] } : d
-    ));
+  function addSlot(e) {
+    e.preventDefault();
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      addToast('Please fill in all fields.', 'error');
+      return;
+    }
+
+    // Basic validation: end time > start time
+    if (form.endTime <= form.startTime) {
+      addToast('End time must be after start time.', 'error');
+      return;
+    }
+
+    const newSlot = {
+      id: Date.now(),
+      ...form,
+      status: 'Available'
+    };
+
+    setSlots(p => [...p, newSlot].sort((a, b) => {
+      const dtA = new Date(`${a.date}T${a.startTime}`);
+      const dtB = new Date(`${b.date}T${b.startTime}`);
+      return dtA - dtB;
+    }));
+
+    setIsModalOpen(false);
+    setForm({ date: '', startTime: '', endTime: '', type: 'In-person' });
+    addToast('Availability slot added.', 'success');
   }
 
-  function removeSlot(dayIdx, slotIdx) {
-    setSchedule(prev => prev.map((d, i) =>
-      i === dayIdx ? { ...d, slots: d.slots.filter((_, si) => si !== slotIdx) } : d
-    ));
+  function removeSlot(id) {
+    setSlots(p => p.filter(s => s.id !== id));
+    addToast('Slot removed.', 'info');
   }
 
-  function handleSave() {
-    setSaving(true);
-    // Simulate saving with a small delay (persists to localStorage)
-    setTimeout(() => {
-      saveScheduleToStorage(schedule);
-      setSaving(false);
-      addToast('Schedule saved successfully!', 'success');
-    }, 400);
+  function formatTime(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':');
+    const hr = parseInt(h, 10);
+    const ampm = hr >= 12 ? 'PM' : 'AM';
+    const hr12 = hr === 0 ? 12 : hr > 12 ? hr - 12 : hr;
+    return `${hr12}:${m} ${ampm}`;
   }
 
-  // Total active hours
-  const totalHours = schedule.reduce((sum, day) => {
-    if (!day.enabled) return sum;
-    return sum + day.slots.reduce((s, slot) => {
-      const [sh, sm] = (slot.start || '0:0').split(':').map(Number);
-      const [eh, em] = (slot.end || '0:0').split(':').map(Number);
-      return s + Math.max(0, (eh + em / 60) - (sh + sm / 60));
-    }, 0);
-  }, 0);
-
-  const activeDays = schedule.filter(d => d.enabled).length;
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <AppShell user={user}>
       <div style={{ padding: '28px 28px 40px' }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
             <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : (
           <>
             {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
-            <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Set your working hours so patients can book at the right time</p>
-          </div>
-          <button onClick={handleSave} disabled={saving}
-            className="mg-btn" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {saving ? (
-              <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
-            ) : (
-              <><Save size={14} /> Save Schedule</>
-            )}
-          </button>
-        </motion.div>
-
-
-
-        {/* Summary stats */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
-          <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#EF233C', margin: '0 0 2px' }}>{activeDays}</p>
-            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Active Days</p>
-          </div>
-          <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#8D99AE', margin: '0 0 2px' }}>{totalHours.toFixed(1)}</p>
-            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Total Hours / Week</p>
-          </div>
-          <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#D90429', margin: '0 0 2px' }}>
-              {schedule.reduce((s, d) => s + (d.enabled ? d.slots.length : 0), 0)}
-            </p>
-            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Time Slots</p>
-          </div>
-        </motion.div>
-
-        {/* Weekly calendar overview */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="card" style={{ padding: '20px 20px 16px', marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Calendar size={15} style={{ color: '#8D99AE' }} />
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', margin: 0 }}>Weekly Overview</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
-            {schedule.map((day, i) => (
-              <div key={day.day} style={{
-                padding: '12px 8px', borderRadius: 12, textAlign: 'center',
-                background: day.enabled ? 'rgba(239,35,60,0.04)' : 'rgba(43,45,66,0.02)',
-                border: day.enabled ? '1px solid rgba(239,35,60,0.12)' : '1px solid rgba(43,45,66,0.06)',
-                transition: 'all 0.2s', cursor: 'pointer',
-              }}
-                onClick={() => toggleDay(i)}
-              >
-                <p style={{
-                  fontSize: 11, fontWeight: 700, margin: '0 0 6px',
-                  color: day.enabled ? '#EF233C' : '#8D99AE',
-                }}>{DAY_SHORT[i]}</p>
-                <div style={{
-                  width: 8, height: 8, borderRadius: '50%', margin: '0 auto 6px',
-                  background: day.enabled ? '#EF233C' : 'rgba(141,153,174,0.15)',
-                  boxShadow: day.enabled ? '0 0 8px rgba(239,35,60,0.4)' : 'none',
-                  transition: 'all 0.2s',
-                }} />
-                <p style={{ fontSize: 10, color: day.enabled ? 'rgba(239,35,60,0.6)' : 'rgba(141,153,174,0.5)', margin: 0 }}>
-                  {day.enabled ? `${day.slots.length} slot${day.slots.length !== 1 ? 's' : ''}` : 'Off'}
-                </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+              <div>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Availability Calendar</h1>
+                <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Define specific slots for patient bookings</p>
               </div>
-            ))}
-          </div>
-        </motion.div>
+              <button onClick={() => setIsModalOpen(true)} className="mg-btn" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Plus size={16} /> Add New Slot
+              </button>
+            </div>
 
-        {/* Day-by-day schedule editor */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {schedule.map((day, dayIdx) => (
-            <motion.div key={day.day}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12 + dayIdx * 0.03 }}
-              className="card" style={{ padding: '18px 20px', opacity: day.enabled ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+            {/* Quick Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+              <div className="card" style={{ padding: '20px', textAlign: 'center' }}>
+                <p style={{ fontSize: 28, fontWeight: 800, color: '#EF233C', margin: '0 0 2px' }}>{slots.length}</p>
+                <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Total Slots</p>
+              </div>
+              <div className="card" style={{ padding: '20px', textAlign: 'center' }}>
+                <p style={{ fontSize: 28, fontWeight: 800, color: '#2B2D42', margin: '0 0 2px' }}>
+                  {slots.filter(s => s.status === 'Available').length}
+                </p>
+                <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Available</p>
+              </div>
+              <div className="card" style={{ padding: '20px', textAlign: 'center' }}>
+                <p style={{ fontSize: 28, fontWeight: 800, color: '#8D99AE', margin: '0 0 2px' }}>
+                  {slots.filter(s => s.status === 'Booked').length}
+                </p>
+                <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Booked</p>
+              </div>
+            </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: day.enabled ? 16 : 0 }}>
-                {/* Toggle */}
-                <button onClick={() => toggleDay(dayIdx)} style={{
-                  width: 42, height: 24, borderRadius: 99, position: 'relative', cursor: 'pointer',
-                  background: day.enabled ? 'rgba(239,35,60,0.2)' : 'rgba(141,153,174,0.15)',
-                  border: 'none', transition: 'all 0.2s', flexShrink: 0,
-                }}>
-                  <div style={{
-                    width: 18, height: 18, borderRadius: '50%', position: 'absolute', top: 3,
-                    left: day.enabled ? 21 : 3, transition: 'all 0.2s',
-                    background: day.enabled ? '#EF233C' : '#8D99AE',
-                    boxShadow: day.enabled ? '0 0 8px rgba(239,35,60,0.3)' : 'none',
-                  }} />
-                </button>
-
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: day.enabled ? '#2B2D42' : '#8D99AE', margin: 0 }}>
-                    {day.day}
-                  </p>
-                  {day.enabled && day.slots.length > 0 && (
-                    <p style={{ fontSize: 12, color: '#8D99AE', margin: '2px 0 0' }}>
-                      {day.slots.map(s => `${formatTime(s.start)} – ${formatTime(s.end)}`).join('  •  ')}
-                    </p>
-                  )}
+            {/* Slots List */}
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(43,45,66,0.06)', background: 'rgba(43,45,66,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Calendar size={16} style={{ color: '#EF233C' }} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42' }}>Upcoming Availability</span>
                 </div>
-
-                {day.enabled && (
-                  <button onClick={() => addSlot(dayIdx)} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
-                    borderRadius: 8, fontSize: 11, fontWeight: 600,
-                    background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.12)',
-                    color: '#EF233C', cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'inherit',
-                  }}>
-                    <Plus size={12} /> Add Slot
-                  </button>
-                )}
               </div>
 
-              {/* Time slots */}
-              {day.enabled && day.slots.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {day.slots.map((slot, slotIdx) => (
-                    <div key={slotIdx} style={{
-                      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-                      borderRadius: 10, background: 'rgba(43,45,66,0.02)',
-                      border: '1px solid rgba(43,45,66,0.06)',
-                    }}>
-                      <Clock size={14} style={{ color: 'rgba(239,35,60,0.4)', flexShrink: 0 }} />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
-                        <label style={{ fontSize: 11, color: '#8D99AE', fontWeight: 600 }}>FROM</label>
-                        <input type="time" value={slot.start}
-                          onChange={e => updateSlot(dayIdx, slotIdx, 'start', e.target.value)}
-                          className="mg-input"
-                          style={{ width: 130, padding: '8px 12px', fontSize: 13 }}
-                        />
-                        <label style={{ fontSize: 11, color: '#8D99AE', fontWeight: 600 }}>TO</label>
-                        <input type="time" value={slot.end}
-                          onChange={e => updateSlot(dayIdx, slotIdx, 'end', e.target.value)}
-                          className="mg-input"
-                          style={{ width: 130, padding: '8px 12px', fontSize: 13 }}
-                        />
-                      </div>
-                      {day.slots.length > 1 && (
-                        <button onClick={() => removeSlot(dayIdx, slotIdx)} style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          width: 32, height: 32, borderRadius: 8,
-                          background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)',
-                          color: '#D90429', cursor: 'pointer', transition: 'all 0.2s',
-                          flexShrink: 0,
-                        }}>
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {day.enabled && day.slots.length === 0 && (
-                <p style={{ fontSize: 12, color: '#8D99AE', textAlign: 'center', padding: '12px 0', margin: 0 }}>
-                  No time slots — click "Add Slot" to set your availability
-                </p>
-              )}
-            </motion.div>
-          ))}
-        </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', background: 'rgba(43,45,66,0.01)' }}>
+                      <th style={{ padding: '16px 24px', fontSize: 12, fontWeight: 600, color: '#8D99AE', textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '16px 24px', fontSize: 12, fontWeight: 600, color: '#8D99AE', textTransform: 'uppercase' }}>Time Slot</th>
+                      <th style={{ padding: '16px 24px', fontSize: 12, fontWeight: 600, color: '#8D99AE', textTransform: 'uppercase' }}>Type</th>
+                      <th style={{ padding: '16px 24px', fontSize: 12, fontWeight: 600, color: '#8D99AE', textTransform: 'uppercase' }}>Status</th>
+                      <th style={{ padding: '16px 24px', fontSize: 12, fontWeight: 600, color: '#8D99AE', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {slots.length > 0 ? slots.map(slot => (
+                      <tr key={slot.id} style={{ borderTop: '1px solid rgba(43,45,66,0.05)' }}>
+                        <td style={{ padding: '20px 24px', fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>
+                          {new Date(slot.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td style={{ padding: '20px 24px', fontSize: 14, color: '#2B2D42' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Clock size={14} color="#8D99AE" />
+                            {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
+                          </div>
+                        </td>
+                        <td style={{ padding: '20px 24px' }}>
+                          <span style={{ 
+                            fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 8,
+                            background: slot.type === 'Video' ? 'rgba(239,35,60,0.08)' : 'rgba(43,45,66,0.05)',
+                            color: slot.type === 'Video' ? '#EF233C' : '#2B2D42',
+                            border: '1px solid rgba(0,0,0,0.05)'
+                          }}>
+                            {slot.type}
+                          </span>
+                        </td>
+                        <td style={{ padding: '20px 24px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: slot.status === 'Available' ? '#34A853' : '#EF233C' }} />
+                            <span style={{ fontSize: 13, fontWeight: 600, color: slot.status === 'Available' ? '#34A853' : '#EF233C' }}>{slot.status}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '20px 24px', textAlign: 'right' }}>
+                          {slot.status === 'Available' && (
+                            <button onClick={() => removeSlot(slot.id)} style={{ background: 'none', border: 'none', color: '#D90429', cursor: 'pointer', padding: 8, borderRadius: 8, transition: 'all 0.2s' }} className="hover-bg">
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '80px 24px', textAlign: 'center' }}>
+                          <AlertCircle size={32} color="#8D99AE" style={{ margin: '0 auto 16px', opacity: 0.5 }} />
+                          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0 }}>No availability slots defined yet.</p>
+                          <p style={{ fontSize: 13, color: 'rgba(141,153,174,0.6)', marginTop: 4 }}>Add slots so patients can see when you are free.</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </>
         )}
       </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)}
+              style={{ position: 'absolute', inset: 0, background: 'rgba(43,45,66,0.4)', backdropFilter: 'blur(4px)' }} />
+            
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="card" style={{ position: 'relative', width: '100%', maxWidth: 440, padding: 32, borderRadius: 24, background: '#FFF', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' }}>
+              
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Add Availability</h2>
+              <p style={{ fontSize: 14, color: '#8D99AE', marginBottom: 28 }}>Define a specific date and time you are available for booking.</p>
+
+              <form onSubmit={addSlot} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Date</label>
+                  <input type="date" name="date" value={form.date} onChange={onChange} min={today} className="mg-input" required />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Start Time</label>
+                    <input type="time" name="startTime" value={form.startTime} onChange={onChange} className="mg-input" required />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>End Time</label>
+                    <input type="time" name="endTime" value={form.endTime} onChange={onChange} className="mg-input" required />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</label>
+                  <select name="type" value={form.type} onChange={onChange} className="mg-input">
+                    <option value="In-person">In-person Visit</option>
+                    <option value="Video">Video Consultation</option>
+                  </select>
+                </div>
+
+                <button type="submit" className="mg-btn w-full" style={{ padding: 16, marginTop: 8, fontSize: 15 }}>
+                  Add Availability Slot
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }

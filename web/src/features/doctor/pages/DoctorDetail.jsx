@@ -13,7 +13,7 @@ export default function DoctorDetail() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
-  const [booking, setBooking] = useState({ date: '', time: '', appointmentType: '', notes: '' });
+  const [booking, setBooking] = useState({ slotId: null, date: '', time: '', appointmentType: '', notes: '' });
   const [bookingErrors, setBookingErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -28,9 +28,7 @@ export default function DoctorDetail() {
 
   function validate() {
     const e = {};
-    if (!booking.date) e.date = 'Select a date.';
-    else if (booking.date < getTodayStr()) e.date = 'Date cannot be in the past.';
-    if (!booking.time) e.time = 'Select a time.';
+    if (!booking.slotId) e.slotId = 'Select an available slot.';
     if (!booking.appointmentType.trim()) e.appointmentType = 'Describe the reason for your visit.';
     return e;
   }
@@ -41,7 +39,18 @@ export default function DoctorDetail() {
     if (Object.keys(errors).length) { setBookingErrors(errors); return; }
     setSubmitting(true); setApiError('');
     try {
-      await appointmentApi.create({ doctorId: Number(doctorId), appointmentAt: `${booking.date}T${booking.time}:00`, appointmentType: booking.appointmentType.trim(), notes: booking.notes.trim() || undefined });
+      await appointmentApi.create({ 
+        doctorId: Number(doctorId), 
+        appointmentAt: `${booking.date}T${booking.time}:00`, 
+        appointmentType: booking.appointmentType.trim(), 
+        notes: booking.notes.trim() || undefined 
+      });
+      
+      // Update local storage to mark slot as booked
+      const allSlots = JSON.parse(localStorage.getItem('medigo_doctor_slots') || '[]');
+      const updatedSlots = allSlots.map(s => s.id === booking.slotId ? { ...s, status: 'Booked' } : s);
+      localStorage.setItem('medigo_doctor_slots', JSON.stringify(updatedSlots));
+      
       setSuccess(true);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data)
@@ -147,19 +156,62 @@ export default function DoctorDetail() {
               </AnimatePresence>
 
               <form onSubmit={handleBook} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  {[['date','DATE','date',getTodayStr()],['time','TIME','time',null]].map(([name,label,type,min]) => (
-                    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>{label}</label>
-                      <div style={{ position: 'relative' }}>
-                        {name === 'date' ? <Calendar size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} /> : <Clock size={14} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />}
-                        <input type={type} min={min || undefined} value={booking[name]}
-                          onChange={e => { setBooking(p => ({ ...p, [name]: e.target.value })); setBookingErrors(p => ({ ...p, [name]: undefined })); }}
-                          className={`mg-input ${bookingErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 40 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>AVAILABLE SLOTS</label>
+                  
+                  {(() => {
+                    const allSlots = JSON.parse(localStorage.getItem('medigo_doctor_slots') || '[]');
+                    const availableSlots = allSlots.filter(s => s.status === 'Available');
+                    
+                    if (availableSlots.length === 0) {
+                      return (
+                        <div style={{ padding: '16px', borderRadius: 12, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.06)', textAlign: 'center' }}>
+                          <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>No available slots for this doctor.</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+                        {availableSlots.map(slot => {
+                          const isSelected = booking.slotId === slot.id;
+                          return (
+                            <motion.div key={slot.id}
+                              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                setBooking(p => ({ 
+                                  ...p, 
+                                  slotId: slot.id,
+                                  date: slot.date,
+                                  time: slot.startTime,
+                                  type: slot.type
+                                }));
+                                setBookingErrors(p => ({ ...p, slotId: undefined }));
+                              }}
+                              style={{
+                                padding: '12px', borderRadius: 12, cursor: 'pointer',
+                                background: isSelected ? 'rgba(239,35,60,0.1)' : '#FFF',
+                                border: isSelected ? '2px solid #EF233C' : '1px solid rgba(43,45,66,0.08)',
+                                transition: 'all 0.2s'
+                              }}>
+                              <p style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>
+                                {new Date(slot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </p>
+                              <p style={{ fontSize: 11, color: '#8D99AE', margin: '0 0 6px' }}>
+                                {(() => {
+                                  const [h, m] = slot.startTime.split(':');
+                                  const hr = parseInt(h, 10);
+                                  return `${hr === 0 ? 12 : hr > 12 ? hr - 12 : hr}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+                                })()}
+                              </p>
+                              <span style={{ fontSize: 10, fontWeight: 700, color: '#EF233C', textTransform: 'uppercase' }}>{slot.type}</span>
+                            </motion.div>
+                          );
+                        })}
                       </div>
-                      {bookingErrors[name] && <p style={{ fontSize: 12, color: '#D90429' }}>{bookingErrors[name]}</p>}
-                    </div>
-                  ))}
+                    );
+                  })()}
+                  {bookingErrors.slotId && <p style={{ fontSize: 12, color: '#D90429' }}>Please select an available slot.</p>}
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
