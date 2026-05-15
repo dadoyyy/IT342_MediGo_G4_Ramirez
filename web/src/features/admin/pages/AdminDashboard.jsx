@@ -100,8 +100,8 @@ export default function AdminDashboard() {
       ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
       // Draw grid & Y axis
-      ctx.strokeStyle = 'rgba(136,146,164,0.1)';
-      ctx.fillStyle = 'rgba(136,146,164,0.6)';
+      ctx.strokeStyle = 'rgba(43,45,66,0.08)';
+      ctx.fillStyle = '#8D99AE';
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
@@ -135,14 +135,14 @@ export default function AdminDashboard() {
         ctx.fillText(label, x, logicalHeight - padding.bottom + 8);
       });
 
-      ctx.strokeStyle = '#2EC4B6';
+      ctx.strokeStyle = '#EF233C';
       ctx.lineWidth = 3;
       ctx.stroke();
 
       // Draw points and fill
       const grad = ctx.createLinearGradient(0, padding.top, 0, logicalHeight - padding.bottom);
-      grad.addColorStop(0, 'rgba(46,196,182,0.2)');
-      grad.addColorStop(1, 'rgba(46,196,182,0)');
+      grad.addColorStop(0, 'rgba(239,35,60,0.15)');
+      grad.addColorStop(1, 'rgba(239,35,60,0)');
       
       ctx.lineTo(logicalWidth - padding.right, logicalHeight - padding.bottom);
       ctx.lineTo(padding.left, logicalHeight - padding.bottom);
@@ -157,10 +157,10 @@ export default function AdminDashboard() {
 
         ctx.beginPath();
         ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#0B1020';
+        ctx.fillStyle = '#FFFFFF';
         ctx.fill();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = '#2EC4B6';
+        ctx.strokeStyle = '#EF233C';
         ctx.stroke();
       });
 
@@ -212,18 +212,18 @@ export default function AdminDashboard() {
       <div style={{ padding: '28px 28px 40px' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
-            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : (
           <>
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
               style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, rgba(46,196,182,0.1), rgba(155,140,255,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(46,196,182,0.2)' }}>
-                <TrendingUp size={20} style={{ color: '#2EC4B6' }} />
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(217,4,41,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,35,60,0.15)' }}>
+                <TrendingUp size={20} style={{ color: '#EF233C' }} />
               </div>
               <div>
-                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>System Overview</h1>
-                <p style={{ fontSize: 14, color: '#8892A4', margin: 0 }}>Analytics and platform performance metrics</p>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>System Overview</h1>
+                <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Analytics and platform performance metrics</p>
               </div>
             </motion.div>
 
@@ -232,39 +232,39 @@ export default function AdminDashboard() {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="card" style={{ padding: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(155,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Stethoscope size={20} style={{ color: '#9B8CFF' }} />
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(141,153,174,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Stethoscope size={20} style={{ color: '#8D99AE' }} />
                   </div>
                 </div>
-                <p style={{ fontSize: 32, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>{analytics.totalDoctors}</p>
-                <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Registered Doctors</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.totalDoctors}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Registered Doctors</p>
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="card" style={{ padding: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(46,196,182,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users size={20} style={{ color: '#2EC4B6' }} />
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Users size={20} style={{ color: '#EF233C' }} />
                   </div>
                 </div>
-                <p style={{ fontSize: 32, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>{analytics.totalPatients}</p>
-                <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Registered Patients</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.totalPatients}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Registered Patients</p>
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="card" style={{ padding: 24, border: analytics.pendingVerifications > 0 ? '1px solid rgba(252,211,77,0.3)' : undefined }}>
+                className="card" style={{ padding: 24, border: analytics.pendingVerifications > 0 ? '1px solid rgba(245,158,11,0.25)' : undefined }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(252,211,77,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Clock size={20} style={{ color: '#FCD34D' }} />
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(245,158,11,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock size={20} style={{ color: '#D97706' }} />
                   </div>
                   {analytics.pendingVerifications > 0 && (
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 8px', borderRadius: 99, background: 'rgba(252,211,77,0.1)', color: '#FCD34D' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 8px', borderRadius: 99, background: 'rgba(245,158,11,0.08)', color: '#D97706' }}>
                       Action Needed
                     </span>
                   )}
                 </div>
-                <p style={{ fontSize: 32, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>{analytics.pendingVerifications}</p>
-                <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Pending Verifications</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.pendingVerifications}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Pending Verifications</p>
               </motion.div>
             </div>
 
@@ -272,8 +272,8 @@ export default function AdminDashboard() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
               className="card" style={{ padding: 24 }}>
               <div style={{ marginBottom: 24 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#F7F8FA', margin: '0 0 4px' }}>User Registrations</h2>
-                <p style={{ fontSize: 13, color: '#8892A4', margin: 0 }}>Last 6 months activity</p>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2B2D42', margin: '0 0 4px' }}>User Registrations</h2>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Last 6 months activity</p>
               </div>
               <div className="chart-scrollbar" style={{ width: '100%', overflowX: 'auto' }}>
                 <div style={{ position: 'relative', minWidth: 1000, paddingRight: 32 }}>
@@ -290,20 +290,20 @@ export default function AdminDashboard() {
                         top: hoveredPoint.y - 45,
                         transform: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
                         marginLeft: hoveredPoint.x > (chartDataRef.current.width - 150) ? -12 : hoveredPoint.x < 150 ? 12 : 0,
-                        background: '#111827',
-                        border: '1px solid rgba(46,196,182,0.3)',
+                        background: '#FFFFFF',
+                        border: '1px solid rgba(239,35,60,0.2)',
                         padding: '8px 12px',
                         borderRadius: 8,
                         pointerEvents: 'none',
-                        color: '#F7F8FA',
+                        color: '#2B2D42',
                         fontSize: 13,
                         fontWeight: 600,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                        boxShadow: '0 4px 16px rgba(43,45,66,0.1)',
                         whiteSpace: 'nowrap',
                         zIndex: 10
                       }}
                     >
-                      <span style={{ color: '#8892A4', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
+                      <span style={{ color: '#8D99AE', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
                       {hoveredPoint.value} Registrations
                     </motion.div>
                   )}

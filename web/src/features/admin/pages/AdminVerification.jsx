@@ -134,7 +134,7 @@ export default function AdminVerification() {
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999, padding: '12px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, backdropFilter: 'blur(12px)', ...(toast.type === 'success' ? { background: 'rgba(46,196,182,0.12)', border: '1px solid rgba(46,196,182,0.25)', color: '#5EEAD4' } : { background: 'rgba(255,117,89,0.12)', border: '1px solid rgba(255,117,89,0.25)', color: '#FCA5A5' }) }}>
+            style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999, padding: '12px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, backdropFilter: 'blur(12px)', ...(toast.type === 'success' ? { background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: '#16A34A' } : { background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.2)', color: '#D90429' }) }}>
             {toast.msg}
           </motion.div>
         )}
@@ -145,33 +145,33 @@ export default function AdminVerification() {
         {docViewer && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={closeDocViewer}
-            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(11,16,32,0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(43,45,66,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: '#111827', borderRadius: 20, border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(43,45,66,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 64px rgba(43,45,66,0.15)' }}>
               {/* Modal header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <FileText size={16} style={{ color: '#9B8CFF' }} />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA' }}>{docViewer.label}</span>
+                  <FileText size={16} style={{ color: '#8D99AE' }} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>{docViewer.label}</span>
                 </div>
-                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(136,146,164,0.6)', padding: 4 }}>
+                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
                   <X size={18} />
                 </button>
               </div>
               {/* Modal content */}
-              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#0B1020' }}>
+              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#EDF2F4' }}>
                 {docViewerLoading ? (
-                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
                 ) : docViewerBlobUrl ? (
                   isPdf ? (
                     <object
                       data={docViewerBlobUrl}
                       type="application/pdf"
                       style={{ width: '100%', height: '75vh', border: 'none' }}>
-                      <p style={{ color: '#8892A4', textAlign: 'center', padding: 24 }}>
+                      <p style={{ color: '#6B7280', textAlign: 'center', padding: 24 }}>
                         PDF preview not supported in this browser.{' '}
-                        <a href={docViewerBlobUrl} download style={{ color: '#9B8CFF' }}>Download instead</a>
+                        <a href={docViewerBlobUrl} download style={{ color: '#EF233C' }}>Download instead</a>
                       </p>
                     </object>
                   ) : (
@@ -189,43 +189,43 @@ export default function AdminVerification() {
         {rejectModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setRejectModal(null)}
-            style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(11,16,32,0.88)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: '#111827', borderRadius: 20, border: '1px solid rgba(255,117,89,0.2)', width: '100%', maxWidth: 520, padding: 28 }}>
+              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(217,4,41,0.15)', width: '100%', maxWidth: 520, padding: 28, boxShadow: '0 24px 64px rgba(43,45,66,0.15)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,117,89,0.1)', border: '1px solid rgba(255,117,89,0.2)' }}>
-                  <AlertTriangle size={16} style={{ color: '#FCA5A5' }} />
+                <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)' }}>
+                  <AlertTriangle size={16} style={{ color: '#D90429' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#F7F8FA', margin: 0 }}>Reject Registration</p>
-                  <p style={{ fontSize: 12, color: '#8892A4', margin: 0 }}>Dr. {rejectModal.doctor.doctorName}</p>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: 0 }}>Reject Registration</p>
+                  <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>Dr. {rejectModal.doctor.doctorName}</p>
                 </div>
-                <button onClick={() => setRejectModal(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(136,146,164,0.5)', padding: 4 }}>
+                <button onClick={() => setRejectModal(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
                   <X size={16} />
                 </button>
               </div>
 
               {/* Document checklist */}
-              <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.6)', letterSpacing: '0.07em', marginBottom: 10 }}>DOCUMENT REVIEW</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.07em', marginBottom: 10 }}>DOCUMENT REVIEW</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                 {DOC_KEYS.map(({ key, label }) => {
                   const status = docChecks[key]; // null | true | false
                   return (
-                    <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${status === true ? 'rgba(46,196,182,0.25)' : status === false ? 'rgba(255,117,89,0.25)' : 'rgba(255,255,255,0.07)'}` }}>
-                      <FileText size={13} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />
-                      <span style={{ flex: 1, fontSize: 13, color: '#F7F8FA' }}>{label}</span>
+                    <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(43,45,66,0.02)', border: `1px solid ${status === true ? 'rgba(34,197,94,0.25)' : status === false ? 'rgba(217,4,41,0.25)' : 'rgba(43,45,66,0.08)'}` }}>
+                      <FileText size={13} style={{ color: '#8D99AE', flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 13, color: '#2B2D42' }}>{label}</span>
                       {/* Accept button */}
                       <button
                         onClick={() => setDocChecks(p => ({ ...p, [key]: true }))}
-                        style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', background: status === true ? 'rgba(46,196,182,0.2)' : 'rgba(255,255,255,0.05)', transition: 'all 0.15s' }}>
-                        <Check size={13} style={{ color: status === true ? '#5EEAD4' : 'rgba(136,146,164,0.4)' }} />
+                        style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', background: status === true ? 'rgba(34,197,94,0.12)' : 'rgba(43,45,66,0.04)', transition: 'all 0.15s' }}>
+                        <Check size={13} style={{ color: status === true ? '#16A34A' : '#8D99AE' }} />
                       </button>
                       {/* Reject button */}
                       <button
                         onClick={() => setDocChecks(p => ({ ...p, [key]: false }))}
-                        style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', background: status === false ? 'rgba(255,117,89,0.2)' : 'rgba(255,255,255,0.05)', transition: 'all 0.15s' }}>
-                        <X size={13} style={{ color: status === false ? '#FCA5A5' : 'rgba(136,146,164,0.4)' }} />
+                        style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', background: status === false ? 'rgba(217,4,41,0.1)' : 'rgba(43,45,66,0.04)', transition: 'all 0.15s' }}>
+                        <X size={13} style={{ color: status === false ? '#D90429' : '#8D99AE' }} />
                       </button>
                     </div>
                   );
@@ -233,22 +233,22 @@ export default function AdminVerification() {
               </div>
 
               {/* Rejection reason */}
-              <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.6)', letterSpacing: '0.07em', marginBottom: 8 }}>REJECTION REASON (optional)</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.07em', marginBottom: 8 }}>REJECTION REASON (optional)</p>
               <textarea
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
                 placeholder="Provide additional details about why this registration is being rejected…"
                 rows={3}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#F7F8FA', fontSize: 13, resize: 'none', lineHeight: 1.5, boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(43,45,66,0.1)', color: '#2B2D42', fontSize: 13, resize: 'none', lineHeight: 1.5, boxSizing: 'border-box', outline: 'none' }}
               />
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                 <button onClick={() => setRejectModal(null)}
-                  style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#8892A4', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(43,45,66,0.04)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button onClick={submitReject} disabled={processing === rejectModal.doctor.doctorId}
-                  style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(255,117,89,0.12)', border: '1px solid rgba(255,117,89,0.25)', color: '#FCA5A5', cursor: 'pointer', opacity: processing === rejectModal.doctor.doctorId ? 0.5 : 1 }}>
+                  style={{ flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.18)', color: '#D90429', cursor: 'pointer', opacity: processing === rejectModal.doctor.doctorId ? 0.5 : 1 }}>
                   {processing === rejectModal.doctor.doctorId ? 'Rejecting…' : 'Confirm Rejection'}
                 </button>
               </div>
@@ -258,26 +258,26 @@ export default function AdminVerification() {
       </AnimatePresence>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)' }}>
-              <ShieldCheck size={16} style={{ color: '#9B8CFF' }} />
+            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(141,153,174,0.08)', border: '1px solid rgba(141,153,174,0.15)' }}>
+              <ShieldCheck size={16} style={{ color: '#8D99AE' }} />
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA' }}>Doctor Verification</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42' }}>Doctor Verification</h1>
           </div>
-          <p style={{ fontSize: 14, color: '#8892A4' }}>Review and approve pending doctor registrations</p>
+          <p style={{ fontSize: 14, color: '#6B7280' }}>Review and approve pending doctor registrations</p>
         </motion.div>
 
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
-            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : pending.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="glass" style={{ borderRadius: 24, padding: 48, textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.15)' }}>
-              <CheckCircle size={26} style={{ color: 'rgba(46,196,182,0.6)' }} />
+            className="card" style={{ borderRadius: 24, padding: 48, textAlign: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
+              <CheckCircle size={26} style={{ color: '#16A34A' }} />
             </div>
-            <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 4 }}>All caught up!</p>
-            <p style={{ fontSize: 14, color: '#8892A4' }}>No pending verifications at this time.</p>
+            <p style={{ fontWeight: 600, color: '#2B2D42', marginBottom: 4 }}>All caught up!</p>
+            <p style={{ fontSize: 14, color: '#6B7280' }}>No pending verifications at this time.</p>
           </motion.div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -294,7 +294,7 @@ export default function AdminVerification() {
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: hasAnyDoc ? 20 : 0 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flex: 1, minWidth: 0 }}>
                       {/* Avatar */}
-                      <div style={{ width: 52, height: 52, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, rgba(46,196,182,0.12), rgba(155,140,255,0.12))', border: '1px solid rgba(46,196,182,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#2EC4B6' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,35,60,0.06), rgba(141,153,174,0.06))', border: '1px solid rgba(239,35,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#EF233C' }}>
                         <AuthImage
                           src={avatarAdminUrl}
                           alt="Doctor"
@@ -303,25 +303,25 @@ export default function AdminVerification() {
                         />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 2 }}>Dr. {doctor.doctorName}</p>
-                        <p style={{ fontSize: 13, color: '#8892A4', marginBottom: 8 }}>{doctor.email}</p>
+                        <p style={{ fontWeight: 600, color: '#2B2D42', marginBottom: 2 }}>Dr. {doctor.doctorName}</p>
+                        <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>{doctor.email}</p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                           {doctor.specialization && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                              <Stethoscope size={11} style={{ color: '#2EC4B6' }} />
-                              <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.specialization}</span>
+                              <Stethoscope size={11} style={{ color: '#EF233C' }} />
+                              <span style={{ fontSize: 12, color: '#6B7280' }}>{doctor.specialization}</span>
                             </div>
                           )}
                           {doctor.clinicName && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                              <Building2 size={11} style={{ color: '#9B8CFF' }} />
-                              <span style={{ fontSize: 12, color: '#8892A4' }}>{doctor.clinicName}</span>
+                              <Building2 size={11} style={{ color: '#8D99AE' }} />
+                              <span style={{ fontSize: 12, color: '#6B7280' }}>{doctor.clinicName}</span>
                             </div>
                           )}
                           {doctor.clinicAddress && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                              <MapPin size={11} style={{ color: 'rgba(136,146,164,0.4)' }} />
-                              <span style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)' }}>{doctor.clinicAddress}</span>
+                              <MapPin size={11} style={{ color: '#8D99AE' }} />
+                              <span style={{ fontSize: 12, color: '#8D99AE' }}>{doctor.clinicAddress}</span>
                             </div>
                           )}
                         </div>
@@ -329,13 +329,13 @@ export default function AdminVerification() {
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                       <button onClick={() => openRejectModal(doctor)} disabled={processing === doctor.doctorId}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', color: '#FCA5A5', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', color: '#D90429', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
                         <XCircle size={14} /> Reject
                       </button>
                       <button onClick={() => handleApprove(doctor.doctorId)} disabled={processing === doctor.doctorId}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)', color: '#5EEAD4', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', color: '#16A34A', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
                         {processing === doctor.doctorId
-                          ? <span className="w-3 h-3 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(46,196,182,0.3)', borderTopColor: '#2EC4B6' }} />
+                          ? <span className="w-3 h-3 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(34,197,94,0.3)', borderTopColor: '#16A34A' }} />
                           : <CheckCircle size={14} />}
                         Approve
                       </button>
@@ -344,8 +344,8 @@ export default function AdminVerification() {
 
                   {/* Documents */}
                   {hasAnyDoc && (
-                    <div style={{ paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.4)', letterSpacing: '0.07em', marginBottom: 10 }}>SUBMITTED DOCUMENTS — click to view</p>
+                    <div style={{ paddingTop: 16, borderTop: '1px solid rgba(43,45,66,0.06)' }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.07em', marginBottom: 10 }}>SUBMITTED DOCUMENTS — click to view</p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {DOC_KEYS.map(({ key, label }) => {
                           const url = doctor[key];
@@ -353,7 +353,7 @@ export default function AdminVerification() {
                           return (
                             <button key={key}
                               onClick={() => openDocViewer(url, label)}
-                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, background: 'rgba(155,140,255,0.08)', border: '1px solid rgba(155,140,255,0.18)', color: '#9B8CFF', cursor: 'pointer', transition: 'all 0.2s' }}>
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, background: 'rgba(141,153,174,0.06)', border: '1px solid rgba(141,153,174,0.15)', color: '#8D99AE', cursor: 'pointer', transition: 'all 0.2s' }}>
                               <FileText size={12} />
                               {label}
                             </button>
