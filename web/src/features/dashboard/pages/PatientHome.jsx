@@ -52,14 +52,9 @@ export default function PatientHome() {
       <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.07em', marginBottom: 4 }}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}
-          </p>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42' }}>
-            Hello{firstName ? `, ${firstName}` : ''}
-          </h1>
-          <p style={{ fontSize: 14, color: '#6B7280', marginTop: 4 }}>Find and book your next appointment</p>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Find your perfect doctor{firstName ? `, ${firstName}` : ''}</h1>
+          <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Browse verified specialists and book your appointment in seconds</p>
         </motion.div>
 
         {/* Search */}
