@@ -216,15 +216,9 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <>
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(217,4,41,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,35,60,0.15)' }}>
-                <TrendingUp size={20} style={{ color: '#EF233C' }} />
-              </div>
-              <div>
-                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>System Overview</h1>
-                <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Analytics and platform performance metrics</p>
-              </div>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}</h1>
+              <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Here's what's happening across the platform today</p>
             </motion.div>
 
             {/* Stat Cards */}
