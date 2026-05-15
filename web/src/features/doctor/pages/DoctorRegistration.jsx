@@ -61,47 +61,46 @@ export default function DoctorRegistration() {
   }
 
   if (checking) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#EDF2F4' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', padding: '48px 24px', background: '#0B1020', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', padding: '48px 24px', background: '#EDF2F4', position: 'relative' }}>
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <div className="blob-1 absolute rounded-full" style={{ width: 400, height: 400, top: -100, right: -100, background: 'radial-gradient(circle, rgba(155,140,255,0.1) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+        <div className="blob-1 absolute rounded-full" style={{ width: 400, height: 400, top: -100, right: -100, background: 'radial-gradient(circle, rgba(239,35,60,0.05) 0%, transparent 70%)', filter: 'blur(60px)' }} />
       </div>
 
       <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', boxShadow: '0 0 18px rgba(46,196,182,0.35)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 18px rgba(239,35,60,0.3)' }}>
             <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
           </div>
           <div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#F7F8FA', lineHeight: 1.2 }}>MediGo</p>
-            <p style={{ fontSize: 9, color: 'rgba(136,146,164,0.45)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#2B2D42', lineHeight: 1.2 }}>MediGo</p>
+            <p style={{ fontSize: 9, color: '#8D99AE', letterSpacing: '0.07em' }}>HEALTHCARE</p>
           </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-          className="glass" style={{ borderRadius: 24, padding: 32 }}>
+          style={{ borderRadius: 24, padding: 32, background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(16px)' }}>
           <div style={{ marginBottom: 32 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#F7F8FA', marginBottom: 8 }}>Doctor Profile</h1>
-            <p style={{ fontSize: 14, color: '#8892A4' }}>Complete your professional profile to start accepting appointments.</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', marginBottom: 8 }}>Doctor Profile</h1>
+            <p style={{ fontSize: 14, color: '#6B7280' }}>Complete your professional profile to start accepting appointments.</p>
           </div>
 
           {apiError && (
-            <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+            <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', fontSize: 13, color: '#D90429' }}>
               <span>⚠</span><span>{apiError}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Specialization dropdown */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>
-                SPECIALIZATION(S) <span style={{ color: '#FCA5A5' }}>*</span>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>
+                SPECIALIZATION(S) <span style={{ color: '#D90429' }}>*</span>
               </label>
               <SpecializationSelect
                 value={form.specialization}
@@ -109,20 +108,19 @@ export default function DoctorRegistration() {
                 error={!!fieldErrors.specialization}
                 placeholder="Select your specializations"
               />
-              {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{fieldErrors.specialization}</p>}
+              {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#D90429' }}>{fieldErrors.specialization}</p>}
             </div>
 
-            {/* Clinic fields */}
             {[
-              { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
-              { name: 'clinicAddress',  label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
+              { name: 'clinicName', label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
+              { name: 'clinicAddress', label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
             ].map(({ name, label, Icon, ph, textarea }) => (
               <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.04em' }}>
-                  {label} <span style={{ color: '#FCA5A5' }}>*</span>
+                <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>
+                  {label} <span style={{ color: '#D90429' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} />
+                  <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
                   {textarea ? (
                     <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
                       className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
@@ -131,7 +129,7 @@ export default function DoctorRegistration() {
                       className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
                   )}
                 </div>
-                {fieldErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5' }}>{fieldErrors[name]}</p>}
+                {fieldErrors[name] && <p style={{ fontSize: 12, color: '#D90429' }}>{fieldErrors[name]}</p>}
               </div>
             ))}
 
