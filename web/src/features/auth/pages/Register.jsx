@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Stethoscope, ShieldCheck, Zap, Heart, ChevronLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Stethoscope, ShieldCheck, Activity, Heart, ChevronLeft } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import { authSession } from '../authSession';
 import { authResponseAdapter } from '../authResponseAdapter';
@@ -25,33 +25,32 @@ function validate(f) {
 }
 
 const PERKS = [
-  { icon: ShieldCheck, text: 'Verified healthcare professionals', color: '#EF233C' },
-  { icon: Zap,         text: 'Instant appointment booking',       color: '#D90429' },
-  { icon: Heart,       text: 'Personalized health tracking',      color: '#8D99AE' },
+  { icon: ShieldCheck, text: 'Bank-grade security & verified professionals', color: '#EF233C' },
+  { icon: Activity,    text: 'Real-time appointment synchronization',        color: '#D90429' },
+  { icon: Heart,       text: 'AI-driven personalized health insights',       color: '#8D99AE' },
 ];
 
 const ROLES = [
   {
     id: 'PATIENT',
     icon: User,
-    title: 'Patient',
-    description: 'Book appointments and consult with verified doctors',
+    title: 'Patient Portal',
+    description: 'Book appointments, track history, and consult seamlessly',
     color: '#EF233C',
     rgb: '239,35,60',
   },
   {
     id: 'DOCTOR',
     icon: Stethoscope,
-    title: 'Doctor',
-    description: 'Manage your schedule and accept patient appointments',
-    color: '#8D99AE',
-    rgb: '141,153,174',
+    title: 'Provider Portal',
+    description: 'Manage schedules, analytics, and patient records securely',
+    color: '#2B2D42',
+    rgb: '43,45,66',
   },
 ];
 
 export default function Register() {
   const navigate = useNavigate();
-  // step: 'role' | 'form'
   const [step, setStep] = useState('role');
   const [role, setRole] = useState('');
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
@@ -86,13 +85,11 @@ export default function Register() {
         password: form.password,
         role,
       });
-      // Auto-login with the returned token
       const token = authResponseAdapter.extractToken(res);
       if (token) {
         authSession.setToken(token);
         authEvents.emit(authEvents.names.login, { source: 'register' });
       }
-      // Doctors go straight to profile setup; patients go to login
       if (role === 'DOCTOR') {
         navigate('/doctor/profile', { replace: true });
       } else {
@@ -107,7 +104,7 @@ export default function Register() {
           setApiErr(errData?.message || err.response.data?.message || 'Registration failed.');
         }
       } else {
-        setApiErr('Unable to connect. Please try again.');
+        setApiErr('Unable to connect. Please check your network.');
       }
     } finally { setLoading(false); }
   }
@@ -119,71 +116,71 @@ export default function Register() {
 
       {/* ── LEFT PANEL ── */}
       <div className="hidden lg:flex" style={{
-        width: '42%', flexShrink: 0, position: 'relative', overflow: 'hidden',
+        width: '45%', flexShrink: 0, position: 'relative', overflow: 'hidden',
         flexDirection: 'column', justifyContent: 'space-between',
-        padding: '48px', background: 'linear-gradient(145deg, #2B2D42 0%, #1E1F33 50%, #2B2D42 100%)',
+        padding: '56px', background: 'linear-gradient(135deg, #1A1B28 0%, #2B2D42 50%, #1A1B28 100%)',
       }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-          <div className="blob-1" style={{ position: 'absolute', width: 480, height: 480, top: -140, right: -140, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.1) 0%, transparent 70%)', filter: 'blur(55px)' }} />
-          <div className="blob-2" style={{ position: 'absolute', width: 380, height: 380, bottom: -80, left: -80, borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,4,41,0.08) 0%, transparent 70%)', filter: 'blur(50px)' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          <div className="blob-1" style={{ position: 'absolute', width: 600, height: 600, top: -150, right: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.12) 0%, transparent 60%)', filter: 'blur(60px)' }} />
+          <div className="blob-2" style={{ position: 'absolute', width: 500, height: 500, bottom: -100, left: -100, borderRadius: '50%', background: 'radial-gradient(circle, rgba(141,153,174,0.1) 0%, transparent 60%)', filter: 'blur(50px)' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         </div>
 
-        {/* Logo */}
-        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 24px rgba(239,35,60,0.4)' }}>
-            <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
+        {/* Branding Logo */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 32px rgba(239,35,60,0.3)' }}>
+            <Stethoscope size={24} color="#fff" strokeWidth={2.5} />
           </div>
           <div>
-            <p style={{ fontSize: 20, fontWeight: 700, color: '#EDF2F4', lineHeight: 1.2, margin: 0 }}>MediGo</p>
-            <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.55)', letterSpacing: '0.1em', margin: 0 }}>HEALTHCARE PLATFORM</p>
+            <p style={{ fontSize: 24, fontWeight: 800, color: '#EDF2F4', lineHeight: 1.1, margin: 0, letterSpacing: '-0.02em' }}>MediGo</p>
+            <p style={{ fontSize: 11, color: '#8D99AE', letterSpacing: '0.15em', margin: 0, fontWeight: 600, textTransform: 'uppercase' }}>Next-Gen Healthcare</p>
           </div>
         </motion.div>
 
         {/* Hero */}
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 28 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <h1 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0, color: '#EDF2F4' }}>
-              Join the future<br />
-              <span className="gradient-text">of healthcare.</span>
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
+          style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <h1 style={{ fontSize: 52, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.03em', margin: 0, color: '#EDF2F4' }}>
+              Experience the<br />
+              <span className="gradient-text">future of care.</span>
             </h1>
-            <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(141,153,174,0.7)', margin: 0 }}>
-              Create your account and experience a smarter way to manage your health.
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: '#8D99AE', margin: 0, maxWidth: 400, fontWeight: 400 }}>
+              Join thousands of professionals and patients on a secure, intelligent, and beautifully designed platform.
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {PERKS.map(({ icon: Icon, text, color }, i) => (
-              <motion.div key={text} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + i * 0.1 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: `rgba(${color === '#EF233C' ? '239,35,60' : color === '#D90429' ? '217,4,41' : '141,153,174'},0.1)`, border: `1px solid rgba(${color === '#EF233C' ? '239,35,60' : color === '#D90429' ? '217,4,41' : '141,153,174'},0.2)` }}>
-                  <Icon size={14} style={{ color }} />
+              <motion.div key={text} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + i * 0.15, duration: 0.5 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: `rgba(${color === '#EF233C' ? '239,35,60' : color === '#D90429' ? '217,4,41' : '141,153,174'}, 0.1)`, border: `1px solid rgba(${color === '#EF233C' ? '239,35,60' : color === '#D90429' ? '217,4,41' : '141,153,174'}, 0.2)` }}>
+                  <Icon size={20} style={{ color }} />
                 </div>
-                <span style={{ fontSize: 13, color: 'rgba(141,153,174,0.75)' }}>{text}</span>
+                <span style={{ fontSize: 15, color: '#EDF2F4', fontWeight: 500 }}>{text}</span>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <p style={{ position: 'relative', zIndex: 1, fontSize: 11, color: 'rgba(141,153,174,0.25)', margin: 0 }}>
-          © 2026 MediGo. All rights reserved.
+        <p style={{ position: 'relative', zIndex: 1, fontSize: 13, color: 'rgba(141,153,174,0.4)', margin: 0 }}>
+          © 2026 MediGo Inc. High-Performance Healthcare.
         </p>
       </div>
 
       {/* ── RIGHT PANEL ── */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative', background: '#EDF2F4' }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(239,35,60,0.03) 0%, transparent 70%)' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(239,35,60,0.03) 0%, transparent 70%)' }} />
 
-        <div style={{ width: '100%', maxWidth: 380, position: 'relative', zIndex: 1 }}>
+        <div style={{ width: '100%', maxWidth: 480, position: 'relative', zIndex: 1 }}>
 
           {/* Mobile logo */}
-          <div className="lg:hidden" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)' }}>
-              <Stethoscope size={16} color="#fff" strokeWidth={2.5} />
+          <div className="lg:hidden" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
+              <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42' }}>MediGo</span>
+            <span style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.02em' }}>MediGo</span>
           </div>
 
           <AnimatePresence mode="wait">
@@ -191,52 +188,55 @@ export default function Register() {
             {/* ── STEP 1: Role selection ── */}
             {step === 'role' && (
               <motion.div key="role"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25 }}>
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="glass" style={{ padding: '40px', borderRadius: 24 }}>
 
-                <div style={{ marginBottom: 28 }}>
-                  <h2 style={{ fontSize: 26, fontWeight: 700, color: '#2B2D42', margin: '0 0 6px' }}>Create account</h2>
-                  <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>First, tell us how you'll use MediGo</p>
+                <div style={{ marginBottom: 36 }}>
+                  <h2 style={{ fontSize: 30, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Initialize Account</h2>
+                  <p style={{ fontSize: 15, color: '#6B7280', margin: 0 }}>Select your operational environment</p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
                   {ROLES.map(r => (
                     <motion.button key={r.id}
                       onClick={() => handleRoleSelect(r.id)}
-                      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 20px', borderRadius: 16, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(43,45,66,0.08)', width: '100%', boxShadow: '0 1px 3px rgba(43,45,66,0.04)' }}>
-                      <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: `rgba(${r.rgb},0.08)`, border: `1px solid rgba(${r.rgb},0.15)` }}>
-                        <r.icon size={22} style={{ color: r.color }} />
+                      whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 24px', borderRadius: 16, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', width: '100%', boxShadow: '0 4px 12px rgba(43,45,66,0.03)' }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: `rgba(${r.rgb},0.08)`, border: `1px solid rgba(${r.rgb},0.15)` }}>
+                        <r.icon size={26} style={{ color: r.color }} />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: '0 0 3px' }}>{r.title}</p>
-                        <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>{r.description}</p>
+                        <p style={{ fontSize: 16, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{r.title}</p>
+                        <p style={{ fontSize: 13, color: '#8D99AE', margin: 0, lineHeight: 1.4 }}>{r.description}</p>
                       </div>
-                      <ArrowRight size={16} style={{ color: r.color, flexShrink: 0 }} />
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: `rgba(${r.rgb},0.05)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ArrowRight size={18} style={{ color: r.color }} />
+                      </div>
                     </motion.button>
                   ))}
                 </div>
 
                 {/* Google OAuth */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.1)' }} />
-                  <span style={{ fontSize: 12, color: '#8D99AE' }}>or</span>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.1)' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
+                  <span style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
                 </div>
                 <button type="button" onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
-                  className="mg-btn-ghost w-full">
-                  <svg width="16" height="16" viewBox="0 0 48 48">
+                  className="mg-btn-ghost w-full" style={{ padding: '14px' }}>
+                  <svg width="20" height="20" viewBox="0 0 48 48">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                   </svg>
-                  Continue with Google
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>Sign up with Google</span>
                 </button>
 
-                <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: '#8D99AE' }}>
-                  Already have an account?{' '}
-                  <Link to="/login" style={{ color: '#EF233C', fontWeight: 600 }}>Sign in</Link>
+                <p style={{ marginTop: 24, textAlign: 'center', fontSize: 15, color: '#6B7280' }}>
+                  Already registered?{' '}
+                  <Link to="/login" style={{ color: '#EF233C', fontWeight: 700, textDecoration: 'none' }}>Access Portal</Link>
                 </p>
               </motion.div>
             )}
@@ -244,98 +244,95 @@ export default function Register() {
             {/* ── STEP 2: Registration form ── */}
             {step === 'form' && (
               <motion.div key="form"
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25 }}>
+                initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="glass" style={{ padding: '40px', borderRadius: 24 }}>
 
-                {/* Back + header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
                   <button onClick={() => { setStep('role'); setApiErr(''); setErrs({}); }}
-                    style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(43,45,66,0.05)', border: '1px solid rgba(43,45,66,0.1)', color: '#8D99AE', cursor: 'pointer', flexShrink: 0 }}>
-                    <ChevronLeft size={16} />
+                    style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(43,45,66,0.05)', border: '1px solid rgba(43,45,66,0.1)', color: '#2B2D42', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}>
+                    <ChevronLeft size={20} />
                   </button>
                   <div>
-                    <h2 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: 0 }}>
-                      Register as {selectedRole?.title}
+                    <h2 style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>
+                      {selectedRole?.title} Setup
                     </h2>
-                    <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Fill in your details below</p>
+                    <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Provide your professional details</p>
                   </div>
-                  {/* Role badge */}
-                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 99, background: `rgba(${selectedRole?.rgb},0.08)`, border: `1px solid rgba(${selectedRole?.rgb},0.15)`, flexShrink: 0 }}>
-                    {selectedRole && <selectedRole.icon size={12} style={{ color: selectedRole.color }} />}
-                    <span style={{ fontSize: 11, fontWeight: 600, color: selectedRole?.color }}>{selectedRole?.title}</span>
+                  {/* Badge */}
+                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 99, background: `rgba(${selectedRole?.rgb},0.1)`, border: `1px solid rgba(${selectedRole?.rgb},0.2)`, flexShrink: 0 }}>
+                    {selectedRole && <selectedRole.icon size={14} style={{ color: selectedRole.color }} />}
+                    <span style={{ fontSize: 12, fontWeight: 700, color: selectedRole?.color }}>{selectedRole?.id}</span>
                   </div>
                 </div>
 
                 <AnimatePresence>
                   {apiErr && (
-                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                      style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', fontSize: 13, color: '#D90429' }}>
-                      <span>⚠</span><span>{apiErr}</span>
+                    <motion.div initial={{ opacity: 0, height: 0, marginBottom: 0 }} animate={{ opacity: 1, height: 'auto', marginBottom: 24 }} exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      style={{ overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, borderRadius: 12, padding: '14px 16px', background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.15)', color: '#D90429' }}>
+                        <span style={{ fontSize: 16, flexShrink: 0, marginTop: 2 }}>⚠</span>
+                        <span style={{ fontSize: 14, fontWeight: 500 }}>{apiErr}</span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {/* Name row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    {[['firstName','FIRST NAME','John','given-name'],['lastName','LAST NAME','Doe','family-name']].map(([name,label,ph,ac]) => (
-                      <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>{label}</label>
+                <form onSubmit={onSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    {[['firstName','First Name','John','given-name'],['lastName','Last Name','Doe','family-name']].map(([name,label,ph,ac]) => (
+                      <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>{label}</label>
                         <div style={{ position: 'relative' }}>
-                          <User size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                          <User size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                           <input name={name} type="text" value={form[name]} onChange={onChange}
                             autoComplete={ac} placeholder={ph}
-                            className={`mg-input ${errs[name] ? 'error' : ''}`} style={{ paddingLeft: 36 }} />
+                            className={`mg-input ${errs[name] ? 'error' : ''}`} style={{ paddingLeft: 44, fontSize: 15 }} />
                         </div>
-                        {errs[name] && <p style={{ fontSize: 11, color: '#D90429', margin: 0 }}>{errs[name]}</p>}
+                        {errs[name] && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs[name]}</p>}
                       </div>
                     ))}
                   </div>
 
-                  {/* Email */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>EMAIL ADDRESS</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>Email Address</label>
                     <div style={{ position: 'relative' }}>
-                      <Mail size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                      <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                       <input name="email" type="email" value={form.email} onChange={onChange}
-                        autoComplete="email" placeholder="you@example.com"
-                        className={`mg-input ${errs.email ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
+                        autoComplete="email" placeholder="john.doe@example.com"
+                        className={`mg-input ${errs.email ? 'error' : ''}`} style={{ paddingLeft: 48, fontSize: 15 }} />
                     </div>
-                    {errs.email && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{errs.email}</p>}
+                    {errs.email && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs.email}</p>}
                   </div>
 
-                  {/* Password fields */}
                   {[
-                    ['password','PASSWORD','Min. 8 chars, uppercase, number & symbol','new-password',showPw,setShowPw],
-                    ['confirmPassword','CONFIRM PASSWORD','Re-enter password','new-password',showCf,setShowCf],
+                    ['password','Password','Min 8 chars, 1 uppercase, 1 symbol','new-password',showPw,setShowPw],
+                    ['confirmPassword','Confirm Password','Match password exactly','new-password',showCf,setShowCf],
                   ].map(([name,label,ph,ac,show,setShow]) => (
-                    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>{label}</label>
+                    <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>{label}</label>
                       <div style={{ position: 'relative' }}>
-                        <Lock size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                        <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                         <input name={name} type={show ? 'text' : 'password'} value={form[name]} onChange={onChange}
                           autoComplete={ac} placeholder={ph}
-                          className={`mg-input ${errs[name] ? 'error' : ''}`} style={{ paddingLeft: 44, paddingRight: 48 }} />
+                          className={`mg-input ${errs[name] ? 'error' : ''}`} style={{ paddingLeft: 48, paddingRight: 52, fontSize: 15 }} />
                         <button type="button" onClick={() => setShow(v => !v)} tabIndex={-1}
-                          style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-                          {show ? <EyeOff size={15} /> : <Eye size={15} />}
+                          style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE', background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {show ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                      {errs[name] && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{errs[name]}</p>}
+                      {errs[name] && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs[name]}</p>}
                     </div>
                   ))}
 
-                  <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 4 }}>
+                  <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 8, padding: '16px', fontSize: 16 }}>
                     {loading
-                      ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Creating account…</>
-                      : <>Create Account <ArrowRight size={15} /></>}
+                      ? <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing…</>
+                      : <>Initialize Account <ArrowRight size={18} /></>}
                   </button>
                 </form>
 
-                <p style={{ marginTop: 20, textAlign: 'center', fontSize: 14, color: '#8D99AE' }}>
-                  Already have an account?{' '}
-                  <Link to="/login" style={{ color: '#EF233C', fontWeight: 600 }}>Sign in</Link>
-                </p>
               </motion.div>
             )}
 
