@@ -77,11 +77,11 @@ export default function NotificationDropdown({
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: open ? 'rgba(46,196,182,0.1)' : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${open ? 'rgba(46,196,182,0.2)' : 'rgba(255,255,255,0.08)'}`,
+          background: open ? 'rgba(239,35,60,0.1)' : 'rgba(43,45,66,0.04)',
+          border: `1px solid ${open ? 'rgba(239,35,60,0.2)' : 'rgba(43,45,66,0.08)'}`,
           cursor: 'pointer',
           transition: 'all 0.2s',
-          color: open ? '#2EC4B6' : 'rgba(136,146,164,0.6)',
+          color: open ? '#EF233C' : 'rgba(43,45,66,0.6)',
         }}
       >
         <Bell size={16} />
@@ -101,11 +101,11 @@ export default function NotificationDropdown({
               padding: '0 4px',
               fontSize: 9,
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #FF7A59, #FF5252)',
+              background: 'linear-gradient(135deg, #EF233C, #D90429)',
               color: '#fff',
-              border: '2px solid #0B1020',
+              border: '2px solid #EDF2F4',
               lineHeight: 1,
-              boxShadow: '0 2px 8px rgba(255,122,89,0.4)',
+              boxShadow: '0 2px 8px rgba(239,35,60,0.4)',
             }}
           >
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -128,11 +128,11 @@ export default function NotificationDropdown({
               width: 340,
               maxHeight: 440,
               zIndex: 200,
-              background: '#111827',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: '#FFFFFF',
+              border: '1px solid rgba(43,45,66,0.1)',
               borderRadius: 16,
               boxShadow:
-                '0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(46,196,182,0.06)',
+                '0 20px 60px rgba(0,0,0,0.1), 0 0 30px rgba(239,35,60,0.06)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -145,12 +145,12 @@ export default function NotificationDropdown({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px 16px 12px',
-                borderBottom: '1px solid rgba(255,255,255,0.07)',
+                borderBottom: '1px solid rgba(43,45,66,0.07)',
                 flexShrink: 0,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#F7F8FA' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42' }}>
                   Notifications
                 </span>
                 {unreadCount > 0 && (
@@ -160,8 +160,8 @@ export default function NotificationDropdown({
                       fontWeight: 700,
                       padding: '2px 7px',
                       borderRadius: 99,
-                      background: 'rgba(46,196,182,0.12)',
-                      color: '#2EC4B6',
+                      background: 'rgba(239,35,60,0.12)',
+                      color: '#EF233C',
                     }}
                   >
                     {unreadCount} new
@@ -177,7 +177,7 @@ export default function NotificationDropdown({
                     gap: 4,
                     fontSize: 11,
                     fontWeight: 600,
-                    color: 'rgba(46,196,182,0.7)',
+                    color: 'rgba(239,35,60,0.7)',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
@@ -196,7 +196,7 @@ export default function NotificationDropdown({
                 flex: 1,
                 overflowY: 'auto',
                 scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(136,146,164,0.15) transparent',
+                scrollbarColor: 'rgba(43,45,66,0.15) transparent',
               }}
             >
               {loading ? (
@@ -210,8 +210,8 @@ export default function NotificationDropdown({
                   <div
                     className="w-6 h-6 rounded-full border-2 animate-spin"
                     style={{
-                      borderColor: 'rgba(46,196,182,0.2)',
-                      borderTopColor: '#2EC4B6',
+                      borderColor: 'rgba(239,35,60,0.2)',
+                      borderTopColor: '#EF233C',
                     }}
                   />
                 </div>
@@ -231,20 +231,20 @@ export default function NotificationDropdown({
                       alignItems: 'center',
                       justifyContent: 'center',
                       margin: '0 auto 12px',
-                      background: 'rgba(136,146,164,0.06)',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(43,45,66,0.06)',
+                      border: '1px solid rgba(43,45,66,0.06)',
                     }}
                   >
                     <Bell
                       size={18}
-                      style={{ color: 'rgba(136,146,164,0.3)' }}
+                      style={{ color: 'rgba(43,45,66,0.3)' }}
                     />
                   </div>
                   <p
                     style={{
                       fontSize: 13,
                       fontWeight: 600,
-                      color: 'rgba(136,146,164,0.5)',
+                      color: 'rgba(43,45,66,0.5)',
                       margin: '0 0 4px',
                     }}
                   >
@@ -253,7 +253,7 @@ export default function NotificationDropdown({
                   <p
                     style={{
                       fontSize: 12,
-                      color: 'rgba(136,146,164,0.3)',
+                      color: 'rgba(43,45,66,0.4)',
                       margin: 0,
                     }}
                   >
@@ -277,11 +277,11 @@ export default function NotificationDropdown({
                         padding: '12px 16px',
                         background: n.read
                           ? 'transparent'
-                          : 'rgba(46,196,182,0.03)',
+                          : 'rgba(239,35,60,0.03)',
                         border: 'none',
                         borderBottom:
                           i < notifications.length - 1
-                            ? '1px solid rgba(255,255,255,0.04)'
+                            ? '1px solid rgba(43,45,66,0.04)'
                             : 'none',
                         cursor: n.read ? 'default' : 'pointer',
                         textAlign: 'left',
@@ -290,12 +290,12 @@ export default function NotificationDropdown({
                       onMouseEnter={e => {
                         if (!n.read)
                           e.currentTarget.style.background =
-                            'rgba(46,196,182,0.06)';
+                            'rgba(239,35,60,0.06)';
                       }}
                       onMouseLeave={e => {
                         e.currentTarget.style.background = n.read
                           ? 'transparent'
-                          : 'rgba(46,196,182,0.03)';
+                          : 'rgba(239,35,60,0.03)';
                       }}
                     >
                       {/* Icon */}
@@ -333,8 +333,8 @@ export default function NotificationDropdown({
                               fontSize: 12,
                               fontWeight: n.read ? 500 : 700,
                               color: n.read
-                                ? 'rgba(136,146,164,0.7)'
-                                : '#F7F8FA',
+                                ? 'rgba(43,45,66,0.7)'
+                                : '#2B2D42',
                               flex: 1,
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -349,9 +349,9 @@ export default function NotificationDropdown({
                                 width: 6,
                                 height: 6,
                                 borderRadius: '50%',
-                                background: '#2EC4B6',
+                                background: '#EF233C',
                                 flexShrink: 0,
-                                boxShadow: '0 0 6px rgba(46,196,182,0.5)',
+                                boxShadow: '0 0 6px rgba(239,35,60,0.5)',
                               }}
                             />
                           )}
@@ -359,7 +359,7 @@ export default function NotificationDropdown({
                         <p
                           style={{
                             fontSize: 12,
-                            color: 'rgba(136,146,164,0.5)',
+                            color: 'rgba(43,45,66,0.6)',
                             margin: '0 0 3px',
                             lineHeight: 1.4,
                             overflow: 'hidden',
@@ -372,7 +372,7 @@ export default function NotificationDropdown({
                         <span
                           style={{
                             fontSize: 10,
-                            color: 'rgba(136,146,164,0.35)',
+                            color: 'rgba(43,45,66,0.4)',
                           }}
                         >
                           {timeAgo(n.time)}

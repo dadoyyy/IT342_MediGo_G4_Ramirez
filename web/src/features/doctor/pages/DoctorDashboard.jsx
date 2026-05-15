@@ -132,12 +132,12 @@ export default function DoctorDashboard() {
   const recentPatients = Object.values(patientMap).sort((a, b) => (b.lastVisit ? new Date(b.lastVisit).getTime() : 0) - (a.lastVisit ? new Date(a.lastVisit).getTime() : 0)).slice(0, 8);
 
   const statCards = [
-    { label: 'Total Appointments', value: total, icon: CalendarCheck, color: '#EF233C', bg: 'rgba(239,35,60,0.06)', border: 'rgba(239,35,60,0.15)' },
-    { label: 'Completed', value: completed, icon: CheckCircle, color: '#16A34A', bg: 'rgba(34,197,94,0.06)', border: 'rgba(34,197,94,0.15)' },
-    { label: 'Pending', value: pending, icon: Clock, color: '#D97706', bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.15)' },
-    { label: 'Confirmed', value: confirmed, icon: TrendingUp, color: '#8D99AE', bg: 'rgba(141,153,174,0.06)', border: 'rgba(141,153,174,0.12)' },
+    { label: 'Total Appointments', value: total, icon: CalendarCheck, color: '#2B2D42', bg: 'rgba(43,45,66,0.06)', border: 'rgba(43,45,66,0.15)' },
+    { label: 'Completed', value: completed, icon: CheckCircle, color: '#EF233C', bg: 'rgba(239,35,60,0.06)', border: 'rgba(239,35,60,0.15)' },
+    { label: 'Pending', value: pending, icon: Clock, color: '#8D99AE', bg: 'rgba(141,153,174,0.06)', border: 'rgba(141,153,174,0.15)' },
+    { label: 'Confirmed', value: confirmed, icon: TrendingUp, color: '#D90429', bg: 'rgba(217,4,41,0.06)', border: 'rgba(217,4,41,0.12)' },
     { label: 'Cancelled', value: cancelled, icon: XCircle, color: '#6B7280', bg: 'rgba(107,114,128,0.06)', border: 'rgba(107,114,128,0.12)' },
-    { label: 'Attendance Rate', value: `${attendanceRate}%`, icon: Activity, color: '#D90429', bg: 'rgba(217,4,41,0.06)', border: 'rgba(217,4,41,0.15)' },
+    { label: 'Attendance Rate', value: `${attendanceRate}%`, icon: Activity, color: '#2B2D42', bg: 'rgba(43,45,66,0.06)', border: 'rgba(43,45,66,0.15)' },
   ];
 
   return (

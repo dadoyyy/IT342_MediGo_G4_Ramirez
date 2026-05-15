@@ -186,8 +186,8 @@ export default function DoctorProfile() {
   }
 
   if (isLoading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
-      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#EDF2F4' }}>
+      <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
     </div>
   );
 
@@ -202,30 +202,30 @@ export default function DoctorProfile() {
         {(docViewer || docViewerLoading) && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={closeDocViewer}
-            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(11,16,32,0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(43,45,66,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: '#111827', borderRadius: 20, border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(43,45,66,0.08)', width: '100%', maxWidth: 900, maxHeight: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(43,45,66,0.07)', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <FileText size={16} style={{ color: '#9B8CFF' }} />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA' }}>{docViewer?.label || 'Loading…'}</span>
+                  <FileText size={16} style={{ color: '#8D99AE' }} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>{docViewer?.label || 'Loading…'}</span>
                 </div>
-                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(136,146,164,0.6)', padding: 4 }}>
+                <button onClick={closeDocViewer} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4 }}>
                   <X size={18} />
                 </button>
               </div>
-              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#0B1020' }}>
+              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400, background: '#EDF2F4' }}>
                 {docViewerLoading || !docViewer?.blobUrl ? (
-                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                  <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
                 ) : docViewer.isPdf ? (
                   <object
                     data={docViewer.blobUrl}
                     type="application/pdf"
                     style={{ width: '100%', height: '75vh', border: 'none' }}>
-                    <p style={{ color: '#8892A4', textAlign: 'center', padding: 24 }}>
+                    <p style={{ color: '#8D99AE', textAlign: 'center', padding: 24 }}>
                       PDF preview not supported in this browser.{' '}
-                      <a href={docViewer.blobUrl} download style={{ color: '#9B8CFF' }}>Download instead</a>
+                      <a href={docViewer.blobUrl} download style={{ color: '#8D99AE' }}>Download instead</a>
                     </p>
                   </object>
                 ) : (
@@ -242,20 +242,20 @@ export default function DoctorProfile() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
           {!isProfileComplete && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, marginBottom: 20, background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.2)' }}>
-              <AlertCircle size={18} style={{ color: '#2EC4B6', flexShrink: 0, marginTop: 1 }} />
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, marginBottom: 20, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
+              <AlertCircle size={18} style={{ color: '#EF233C', flexShrink: 0, marginTop: 1 }} />
               <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#2EC4B6', margin: '0 0 2px' }}>Complete your profile to get started</p>
-                <p style={{ fontSize: 13, color: 'rgba(136,146,164,0.75)', margin: 0 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#EF233C', margin: '0 0 2px' }}>Complete your profile to get started</p>
+                <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>
                   Fill in all fields, upload your profile photo, and attach all required documents before submitting.
                 </p>
               </div>
             </div>
           )}
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA', margin: 0 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: 0 }}>
             {!isProfileComplete ? 'Set Up Your Profile' : 'My Profile'}
           </h1>
-          <p style={{ fontSize: 14, color: '#8892A4', marginTop: 4 }}>
+          <p style={{ fontSize: 14, color: '#8D99AE', marginTop: 4 }}>
             {!isProfileComplete
               ? 'Complete all steps below before submitting'
               : `Welcome back, Dr. ${user?.fullName?.split(' ')[0] || ''}`}
@@ -267,22 +267,22 @@ export default function DoctorProfile() {
 
           {/* Progress bar */}
           {!isProfileComplete && (
-            <div style={{ marginBottom: 20, padding: '16px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ marginBottom: 20, padding: '16px 20px', borderRadius: 14, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.07)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(136,146,164,0.7)' }}>PROFILE COMPLETION</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: doneSteps === totalSteps ? '#2EC4B6' : '#9B8CFF' }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE' }}>PROFILE COMPLETION</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: doneSteps === totalSteps ? '#EF233C' : '#8D99AE' }}>
                   {doneSteps} / {totalSteps} steps
                 </span>
               </div>
-              <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+              <div style={{ height: 6, borderRadius: 99, background: 'rgba(43,45,66,0.07)', overflow: 'hidden' }}>
                 <motion.div
                   animate={{ width: `${(doneSteps / totalSteps) * 100}%` }}
                   transition={{ duration: 0.4 }}
-                  style={{ height: '100%', borderRadius: 99, background: doneSteps === totalSteps ? 'linear-gradient(90deg, #2EC4B6, #86EFAC)' : 'linear-gradient(90deg, #9B8CFF, #2EC4B6)' }}
+                  style={{ height: '100%', borderRadius: 99, background: doneSteps === totalSteps ? 'linear-gradient(90deg, #EF233C, #D90429)' : 'linear-gradient(90deg, #EF233C, #8D99AE)' }}
                 />
               </div>
               {doneSteps === totalSteps && (
-                <p style={{ fontSize: 12, color: '#5EEAD4', marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <p style={{ fontSize: 12, color: '#16A34A', marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
                   <CheckCircle size={12} /> All steps complete — you can now submit your profile
                 </p>
               )}
@@ -293,7 +293,7 @@ export default function DoctorProfile() {
           <div className="card" style={{ padding: 28, marginBottom: 20 }}>
 
             {/* Avatar + identity */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 <div
                   onClick={() => avatarInputRef.current?.click()}
@@ -301,8 +301,8 @@ export default function DoctorProfile() {
                     width: 72, height: 72, borderRadius: 20, overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', position: 'relative',
-                    background: avatarUrl ? 'transparent' : 'linear-gradient(135deg, rgba(46,196,182,0.15), rgba(155,140,255,0.15))',
-                    border: avatarUrl ? '2px solid rgba(46,196,182,0.4)' : '2px dashed rgba(46,196,182,0.3)',
+                    background: avatarUrl ? 'transparent' : 'linear-gradient(135deg, rgba(239,35,60,0.12), rgba(155,140,255,0.15))',
+                    border: avatarUrl ? '2px solid rgba(239,35,60,0.3)' : '2px dashed rgba(239,35,60,0.2)',
                     transition: 'all 0.2s',
                   }}>
                   {avatarUrl
@@ -310,13 +310,13 @@ export default function DoctorProfile() {
                         src={avatarUrl}
                         alt="Profile"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        fallback={<span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>}
+                        fallback={<span style={{ fontSize: 22, fontWeight: 700, color: '#EF233C' }}>{initials}</span>}
                       />
-                    : <span style={{ fontSize: 22, fontWeight: 700, color: '#2EC4B6' }}>{initials}</span>}
+                    : <span style={{ fontSize: 22, fontWeight: 700, color: '#EF233C' }}>{initials}</span>}
                   <div style={{
                     position: 'absolute', inset: 0, borderRadius: 18,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-                    background: 'rgba(11,16,32,0.65)', opacity: 0, transition: 'opacity 0.2s',
+                    background: 'rgba(43,45,66,0.65)', opacity: 0, transition: 'opacity 0.2s',
                   }}
                     onMouseEnter={e => e.currentTarget.style.opacity = 1}
                     onMouseLeave={e => e.currentTarget.style.opacity = 0}>
@@ -325,12 +325,12 @@ export default function DoctorProfile() {
                   </div>
                 </div>
                 {docUploading.profile_picture && (
-                  <div style={{ position: 'absolute', inset: 0, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(11,16,32,0.7)' }}>
-                    <span className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                  <div style={{ position: 'absolute', inset: 0, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(43,45,66,0.7)' }}>
+                    <span className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
                   </div>
                 )}
                 {docs.profile_picture && !docUploading.profile_picture && (
-                  <div style={{ position: 'absolute', bottom: -4, right: -4, width: 20, height: 20, borderRadius: '50%', background: '#2EC4B6', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1020' }}>
+                  <div style={{ position: 'absolute', bottom: -4, right: -4, width: 20, height: 20, borderRadius: '50%', background: '#EF233C', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1020' }}>
                     <CheckCircle size={11} style={{ color: '#fff' }} />
                   </div>
                 )}
@@ -339,13 +339,13 @@ export default function DoctorProfile() {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#F7F8FA', margin: '0 0 2px' }}>Dr. {user?.fullName}</p>
-                <p style={{ fontSize: 13, color: '#8892A4', margin: '0 0 6px' }}>{user?.email}</p>
-                <p style={{ fontSize: 11, color: docs.profile_picture ? '#5EEAD4' : 'rgba(136,146,164,0.5)', margin: 0 }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#2B2D42', margin: '0 0 2px' }}>Dr. {user?.fullName}</p>
+                <p style={{ fontSize: 13, color: '#8D99AE', margin: '0 0 6px' }}>{user?.email}</p>
+                <p style={{ fontSize: 11, color: docs.profile_picture ? '#EF233C' : 'rgba(141,153,174,0.7)', margin: 0 }}>
                   {docs.profile_picture ? '✓ Profile photo uploaded' : 'Click the avatar to upload your profile photo *'}
                 </p>
                 {docErrors.profile_picture && (
-                  <p style={{ fontSize: 11, color: '#FCA5A5', margin: '4px 0 0' }}>⚠ {docErrors.profile_picture}</p>
+                  <p style={{ fontSize: 11, color: '#D90429', margin: '4px 0 0' }}>⚠ {docErrors.profile_picture}</p>
                 )}
               </div>
             </div>
@@ -354,13 +354,13 @@ export default function DoctorProfile() {
             <AnimatePresence>
               {apiError && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(255,117,89,0.08)', border: '1px solid rgba(255,117,89,0.2)', fontSize: 13, color: '#FCA5A5' }}>
+                  style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', fontSize: 13, color: '#D90429' }}>
                   <span>⚠</span><span>{apiError}</span>
                 </motion.div>
               )}
               {saveSuccess && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.2)', fontSize: 13, color: '#5EEAD4' }}>
+                  style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, borderRadius: 12, padding: '12px 16px', background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)', fontSize: 13, color: '#EF233C' }}>
                   <CheckCircle size={15} />
                   <span>Profile saved! Redirecting to pending approval…</span>
                 </motion.div>
@@ -371,8 +371,8 @@ export default function DoctorProfile() {
             <form id="profile-form" onSubmit={handleSave} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {/* Specialization dropdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.05em' }}>
-                  SPECIALIZATION(S) <span style={{ color: '#FCA5A5' }}>*</span>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
+                  SPECIALIZATION(S) <span style={{ color: '#D90429' }}>*</span>
                 </label>
                 <SpecializationSelect
                   value={form.specialization}
@@ -380,7 +380,7 @@ export default function DoctorProfile() {
                   error={!!fieldErrors.specialization}
                   placeholder="Select your specializations"
                 />
-                {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{fieldErrors.specialization}</p>}
+                {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{fieldErrors.specialization}</p>}
               </div>
 
               {/* Clinic fields */}
@@ -389,11 +389,11 @@ export default function DoctorProfile() {
                 { name: 'clinicAddress',  label: 'CLINIC ADDRESS',         Icon: MapPin,      ph: 'Full address of your clinic or hospital',        textarea: true  },
               ].map(({ name, label, Icon, ph, textarea }) => (
                 <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.05em' }}>
-                    {label} <span style={{ color: '#FCA5A5' }}>*</span>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
+                    {label} <span style={{ color: '#D90429' }}>*</span>
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: 'rgba(136,146,164,0.35)' }} />
+                    <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
                     {textarea ? (
                       <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
                         className={`mg-input ${fieldErrors[name] ? 'error' : ''}`}
@@ -404,7 +404,7 @@ export default function DoctorProfile() {
                         style={{ paddingLeft: 44 }} />
                     )}
                   </div>
-                  {fieldErrors[name] && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>{fieldErrors[name]}</p>}
+                  {fieldErrors[name] && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{fieldErrors[name]}</p>}
                 </div>
               ))}
             </form>
@@ -412,16 +412,16 @@ export default function DoctorProfile() {
           </div>{/* end profile info card */}
           {/* ── Verification Documents card ── */}
           <div className="card" style={{ padding: 28 }}>
-            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#F7F8FA', margin: 0, flex: 1 }}>Verification Documents</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: 0, flex: 1 }}>Verification Documents</p>
                 {isVerified && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 99, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.25)', color: '#5EEAD4' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 99, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)', color: '#EF233C' }}>
                     <CheckCircle size={11} /> Verified & Locked
                   </span>
                 )}
               </div>
-              <p style={{ fontSize: 13, color: '#8892A4', margin: '6px 0 0' }}>
+              <p style={{ fontSize: 13, color: '#8D99AE', margin: '6px 0 0' }}>
                 {isVerified
                   ? 'Your documents have been verified and approved. They cannot be replaced.'
                   : 'All 4 documents are required before you can submit. Accepted format: PDF only.'}
@@ -438,11 +438,11 @@ export default function DoctorProfile() {
                 return (
                   <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <label style={{ fontSize: 11, fontWeight: 600, color: 'rgba(136,146,164,0.75)', letterSpacing: '0.05em' }}>
+                      <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
                         {label.toUpperCase()}
                       </label>
-                      {!isVerified && <span style={{ fontSize: 10, color: '#FCA5A5' }}>*</span>}
-                      {existing && <CheckCircle size={11} style={{ color: '#2EC4B6', marginLeft: 2 }} />}
+                      {!isVerified && <span style={{ fontSize: 10, color: '#D90429' }}>*</span>}
+                      {existing && <CheckCircle size={11} style={{ color: '#EF233C', marginLeft: 2 }} />}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       {isVerified ? (
@@ -450,15 +450,15 @@ export default function DoctorProfile() {
                         <div style={{
                           flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                           padding: '10px 14px', borderRadius: 10,
-                          background: 'rgba(46,196,182,0.04)',
-                          border: '1px solid rgba(46,196,182,0.15)',
+                          background: 'rgba(239,35,60,0.02)',
+                          border: '1px solid rgba(239,35,60,0.12)',
                           opacity: 0.8,
                         }}>
-                          <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
-                          <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: '#5EEAD4', flex: 1 }}>
+                          <CheckCircle size={15} style={{ color: '#EF233C', flexShrink: 0 }} />
+                          <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: '#EF233C', flex: 1 }}>
                             Submitted &amp; verified
                           </p>
-                          <FileText size={13} style={{ color: 'rgba(46,196,182,0.4)', flexShrink: 0 }} />
+                          <FileText size={13} style={{ color: 'rgba(239,35,60,0.3)', flexShrink: 0 }} />
                         </div>
                       ) : (
                         /* Editable upload row */
@@ -466,36 +466,36 @@ export default function DoctorProfile() {
                           flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                           padding: '10px 14px', borderRadius: 10,
                           cursor: uploading ? 'not-allowed' : 'pointer',
-                          background: existing ? 'rgba(46,196,182,0.06)' : 'rgba(255,255,255,0.03)',
-                          border: existing ? '1px solid rgba(46,196,182,0.25)' : '1px dashed rgba(255,255,255,0.12)',
+                          background: existing ? 'rgba(239,35,60,0.04)' : 'rgba(43,45,66,0.02)',
+                          border: existing ? '1px solid rgba(239,35,60,0.2)' : '1px dashed rgba(43,45,66,0.1)',
                           transition: 'all 0.2s',
                         }}>
                           <input type="file" accept={accept} style={{ display: 'none' }}
                             disabled={uploading}
                             onChange={e => { const f = e.target.files?.[0]; if (f) handleDocUpload(key, f); e.target.value = ''; }} />
                           {uploading
-                            ? <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+                            ? <span className="w-4 h-4 rounded-full border-2 animate-spin flex-shrink-0" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
                             : existing
-                            ? <CheckCircle size={15} style={{ color: '#2EC4B6', flexShrink: 0 }} />
-                            : <Upload size={15} style={{ color: 'rgba(136,146,164,0.4)', flexShrink: 0 }} />}
+                            ? <CheckCircle size={15} style={{ color: '#EF233C', flexShrink: 0 }} />
+                            : <Upload size={15} style={{ color: '#8D99AE', flexShrink: 0 }} />}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: existing ? '#5EEAD4' : 'rgba(136,146,164,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: existing ? '#EF233C' : '#8D99AE', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {uploading ? 'Uploading…' : existing ? 'Uploaded — click to replace' : hint}
                             </p>
                           </div>
-                          {!uploading && <FileText size={13} style={{ color: 'rgba(136,146,164,0.3)', flexShrink: 0 }} />}
+                          {!uploading && <FileText size={13} style={{ color: 'rgba(141,153,174,0.5)', flexShrink: 0 }} />}
                         </label>
                       )}
                       {existing && !uploading && (
                         <button type="button" onClick={() => openDocModal(existing, label)}
-                          style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(155,140,255,0.1)', border: '1px solid rgba(155,140,255,0.2)', color: '#9B8CFF', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                          style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(141,153,174,0.08)', border: '1px solid rgba(141,153,174,0.15)', color: '#8D99AE', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
                           View
                         </button>
                       )}
                     </div>
-                    {err && <p style={{ fontSize: 12, color: '#FCA5A5', margin: 0 }}>⚠ {err}</p>}
+                    {err && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>⚠ {err}</p>}
                     {success && (
-                      <p style={{ fontSize: 12, color: '#5EEAD4', margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <p style={{ fontSize: 12, color: '#16A34A', margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
                         <CheckCircle size={11} /> Uploaded successfully
                       </p>
                     )}
@@ -506,9 +506,9 @@ export default function DoctorProfile() {
 
             {/* Submit button — only shown when not yet verified */}
             {!isVerified && (
-              <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(43,45,66,0.07)' }}>
                 {!canSave && !saving && (
-                  <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.5)', marginBottom: 10, textAlign: 'center' }}>
+                  <p style={{ fontSize: 12, color: 'rgba(141,153,174,0.7)', marginBottom: 10, textAlign: 'center' }}>
                     {!formFilled && !allDocsUploaded
                       ? 'Fill in all profile fields and upload all required documents to continue'
                       : !formFilled

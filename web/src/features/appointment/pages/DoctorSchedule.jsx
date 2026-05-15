@@ -120,7 +120,7 @@ export default function DoctorSchedule() {
       <div style={{ padding: '28px 28px 40px' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
-            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : (
           <>
@@ -128,8 +128,8 @@ export default function DoctorSchedule() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA', margin: '0 0 4px' }}>My Schedule</h1>
-            <p style={{ fontSize: 14, color: '#8892A4', margin: 0 }}>Set your availability for patient appointments</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>My Schedule</h1>
+            <p style={{ fontSize: 14, color: '#8D99AE', margin: 0 }}>Set your availability for patient appointments</p>
           </div>
           <button onClick={handleSave} disabled={saving}
             className="mg-btn" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -147,7 +147,7 @@ export default function DoctorSchedule() {
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               style={{
                 marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, borderRadius: 12, padding: '12px 16px',
-                background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.2)', fontSize: 13, color: '#5EEAD4',
+                background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)', fontSize: 13, color: '#EF233C',
               }}>
               <CheckCircle size={15} />
               <span>Schedule saved successfully!</span>
@@ -159,18 +159,18 @@ export default function DoctorSchedule() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
           <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#2EC4B6', margin: '0 0 2px' }}>{activeDays}</p>
-            <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.6)', margin: 0 }}>Active Days</p>
+            <p style={{ fontSize: 28, fontWeight: 700, color: '#EF233C', margin: '0 0 2px' }}>{activeDays}</p>
+            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Active Days</p>
           </div>
           <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#9B8CFF', margin: '0 0 2px' }}>{totalHours.toFixed(1)}</p>
-            <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.6)', margin: 0 }}>Total Hours / Week</p>
+            <p style={{ fontSize: 28, fontWeight: 700, color: '#8D99AE', margin: '0 0 2px' }}>{totalHours.toFixed(1)}</p>
+            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Total Hours / Week</p>
           </div>
           <div className="card" style={{ padding: '18px 16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: '#FCD34D', margin: '0 0 2px' }}>
+            <p style={{ fontSize: 28, fontWeight: 700, color: '#D90429', margin: '0 0 2px' }}>
               {schedule.reduce((s, d) => s + (d.enabled ? d.slots.length : 0), 0)}
             </p>
-            <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.6)', margin: 0 }}>Time Slots</p>
+            <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>Time Slots</p>
           </div>
         </motion.div>
 
@@ -178,30 +178,30 @@ export default function DoctorSchedule() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="card" style={{ padding: '20px 20px 16px', marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Calendar size={15} style={{ color: '#9B8CFF' }} />
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA', margin: 0 }}>Weekly Overview</p>
+            <Calendar size={15} style={{ color: '#8D99AE' }} />
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', margin: 0 }}>Weekly Overview</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
             {schedule.map((day, i) => (
               <div key={day.day} style={{
                 padding: '12px 8px', borderRadius: 12, textAlign: 'center',
-                background: day.enabled ? 'rgba(46,196,182,0.06)' : 'rgba(255,255,255,0.02)',
-                border: day.enabled ? '1px solid rgba(46,196,182,0.15)' : '1px solid rgba(255,255,255,0.05)',
+                background: day.enabled ? 'rgba(239,35,60,0.04)' : 'rgba(43,45,66,0.02)',
+                border: day.enabled ? '1px solid rgba(239,35,60,0.12)' : '1px solid rgba(43,45,66,0.06)',
                 transition: 'all 0.2s', cursor: 'pointer',
               }}
                 onClick={() => toggleDay(i)}
               >
                 <p style={{
                   fontSize: 11, fontWeight: 700, margin: '0 0 6px',
-                  color: day.enabled ? '#5EEAD4' : 'rgba(136,146,164,0.4)',
+                  color: day.enabled ? '#EF233C' : '#8D99AE',
                 }}>{DAY_SHORT[i]}</p>
                 <div style={{
                   width: 8, height: 8, borderRadius: '50%', margin: '0 auto 6px',
-                  background: day.enabled ? '#2EC4B6' : 'rgba(136,146,164,0.15)',
-                  boxShadow: day.enabled ? '0 0 8px rgba(46,196,182,0.5)' : 'none',
+                  background: day.enabled ? '#EF233C' : 'rgba(141,153,174,0.15)',
+                  boxShadow: day.enabled ? '0 0 8px rgba(239,35,60,0.4)' : 'none',
                   transition: 'all 0.2s',
                 }} />
-                <p style={{ fontSize: 10, color: day.enabled ? 'rgba(94,234,212,0.6)' : 'rgba(136,146,164,0.3)', margin: 0 }}>
+                <p style={{ fontSize: 10, color: day.enabled ? 'rgba(239,35,60,0.6)' : 'rgba(141,153,174,0.5)', margin: 0 }}>
                   {day.enabled ? `${day.slots.length} slot${day.slots.length !== 1 ? 's' : ''}` : 'Off'}
                 </p>
               </div>
@@ -221,23 +221,23 @@ export default function DoctorSchedule() {
                 {/* Toggle */}
                 <button onClick={() => toggleDay(dayIdx)} style={{
                   width: 42, height: 24, borderRadius: 99, position: 'relative', cursor: 'pointer',
-                  background: day.enabled ? 'rgba(46,196,182,0.3)' : 'rgba(136,146,164,0.15)',
+                  background: day.enabled ? 'rgba(239,35,60,0.2)' : 'rgba(141,153,174,0.15)',
                   border: 'none', transition: 'all 0.2s', flexShrink: 0,
                 }}>
                   <div style={{
                     width: 18, height: 18, borderRadius: '50%', position: 'absolute', top: 3,
                     left: day.enabled ? 21 : 3, transition: 'all 0.2s',
-                    background: day.enabled ? '#2EC4B6' : 'rgba(136,146,164,0.4)',
-                    boxShadow: day.enabled ? '0 0 8px rgba(46,196,182,0.4)' : 'none',
+                    background: day.enabled ? '#EF233C' : '#8D99AE',
+                    boxShadow: day.enabled ? '0 0 8px rgba(239,35,60,0.3)' : 'none',
                   }} />
                 </button>
 
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: day.enabled ? '#F7F8FA' : 'rgba(136,146,164,0.5)', margin: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: day.enabled ? '#2B2D42' : '#8D99AE', margin: 0 }}>
                     {day.day}
                   </p>
                   {day.enabled && day.slots.length > 0 && (
-                    <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.45)', margin: '2px 0 0' }}>
+                    <p style={{ fontSize: 12, color: '#8D99AE', margin: '2px 0 0' }}>
                       {day.slots.map(s => `${formatTime(s.start)} – ${formatTime(s.end)}`).join('  •  ')}
                     </p>
                   )}
@@ -247,8 +247,8 @@ export default function DoctorSchedule() {
                   <button onClick={() => addSlot(dayIdx)} style={{
                     display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px',
                     borderRadius: 8, fontSize: 11, fontWeight: 600,
-                    background: 'rgba(46,196,182,0.08)', border: '1px solid rgba(46,196,182,0.15)',
-                    color: '#5EEAD4', cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'inherit',
+                    background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.12)',
+                    color: '#EF233C', cursor: 'pointer', transition: 'all 0.2s', fontFamily: 'inherit',
                   }}>
                     <Plus size={12} /> Add Slot
                   </button>
@@ -261,18 +261,18 @@ export default function DoctorSchedule() {
                   {day.slots.map((slot, slotIdx) => (
                     <div key={slotIdx} style={{
                       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-                      borderRadius: 10, background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.05)',
+                      borderRadius: 10, background: 'rgba(43,45,66,0.02)',
+                      border: '1px solid rgba(43,45,66,0.06)',
                     }}>
-                      <Clock size={14} style={{ color: 'rgba(46,196,182,0.5)', flexShrink: 0 }} />
+                      <Clock size={14} style={{ color: 'rgba(239,35,60,0.4)', flexShrink: 0 }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
-                        <label style={{ fontSize: 11, color: 'rgba(136,146,164,0.5)', fontWeight: 600 }}>FROM</label>
+                        <label style={{ fontSize: 11, color: '#8D99AE', fontWeight: 600 }}>FROM</label>
                         <input type="time" value={slot.start}
                           onChange={e => updateSlot(dayIdx, slotIdx, 'start', e.target.value)}
                           className="mg-input"
                           style={{ width: 130, padding: '8px 12px', fontSize: 13 }}
                         />
-                        <label style={{ fontSize: 11, color: 'rgba(136,146,164,0.5)', fontWeight: 600 }}>TO</label>
+                        <label style={{ fontSize: 11, color: '#8D99AE', fontWeight: 600 }}>TO</label>
                         <input type="time" value={slot.end}
                           onChange={e => updateSlot(dayIdx, slotIdx, 'end', e.target.value)}
                           className="mg-input"
@@ -283,8 +283,8 @@ export default function DoctorSchedule() {
                         <button onClick={() => removeSlot(dayIdx, slotIdx)} style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           width: 32, height: 32, borderRadius: 8,
-                          background: 'rgba(255,117,89,0.06)', border: '1px solid rgba(255,117,89,0.15)',
-                          color: 'rgba(252,165,165,0.6)', cursor: 'pointer', transition: 'all 0.2s',
+                          background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)',
+                          color: '#D90429', cursor: 'pointer', transition: 'all 0.2s',
                           flexShrink: 0,
                         }}>
                           <Trash2 size={13} />
@@ -296,7 +296,7 @@ export default function DoctorSchedule() {
               )}
 
               {day.enabled && day.slots.length === 0 && (
-                <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.4)', textAlign: 'center', padding: '12px 0', margin: 0 }}>
+                <p style={{ fontSize: 12, color: '#8D99AE', textAlign: 'center', padding: '12px 0', margin: 0 }}>
                   No time slots — click "Add Slot" to set your availability
                 </p>
               )}

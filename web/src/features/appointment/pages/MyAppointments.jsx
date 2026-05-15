@@ -57,8 +57,8 @@ export default function MyAppointments() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#F7F8FA' }}>My Appointments</h1>
-            <p style={{ fontSize: 14, color: '#8892A4', marginTop: 4 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42' }}>My Appointments</h1>
+            <p style={{ fontSize: 14, color: '#8D99AE', marginTop: 4 }}>
               {appointments.length} total appointment{appointments.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -73,8 +73,8 @@ export default function MyAppointments() {
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
               style={filter === f
-                ? { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #2EC4B6, #9B8CFF)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(46,196,182,0.25)', transition: 'all 0.2s' }
-                : { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(136,146,164,0.75)', cursor: 'pointer', transition: 'all 0.2s' }
+                ? { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(239,35,60,0.25)', transition: 'all 0.2s' }
+                : { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer', transition: 'all 0.2s' }
               }>
               {f === 'ALL' ? `All (${appointments.length})` : STATUS_META[f]?.label}
             </button>
@@ -84,15 +84,15 @@ export default function MyAppointments() {
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
             <div className="w-8 h-8 rounded-full border-2 animate-spin"
-              style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }} />
+              style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : displayed.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '80px 0' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(155,140,255,0.08)', border: '1px solid rgba(155,140,255,0.15)' }}>
-              <Calendar size={22} style={{ color: 'rgba(155,140,255,0.5)' }} />
+            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.12)' }}>
+              <Calendar size={22} style={{ color: 'rgba(239,35,60,0.4)' }} />
             </div>
-            <p style={{ fontWeight: 600, color: '#F7F8FA', marginBottom: 4 }}>No appointments</p>
-            <p style={{ fontSize: 14, color: '#8892A4', marginBottom: 16 }}>Book your first appointment today</p>
+            <p style={{ fontWeight: 600, color: '#2B2D42', marginBottom: 4 }}>No appointments</p>
+            <p style={{ fontSize: 14, color: '#8D99AE', marginBottom: 16 }}>Book your first appointment today</p>
             <button onClick={() => navigate('/home')} className="mg-btn" style={{ padding: '10px 20px', fontSize: 13 }}>
               Find a Doctor
             </button>
@@ -109,29 +109,29 @@ export default function MyAppointments() {
                   className="card" style={{ padding: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flex: 1, minWidth: 0 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(46,196,182,0.1)', border: '1px solid rgba(46,196,182,0.2)' }}>
-                        <Stethoscope size={16} style={{ color: '#2EC4B6' }} />
+                      <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
+                        <Stethoscope size={16} style={{ color: '#EF233C' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ marginBottom: 6 }}>
                           <span className={`badge ${meta.cls}`}>{meta.label}</span>
                         </div>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#F7F8FA' }}>Dr. {appt.doctorName}</p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>Dr. {appt.doctorName}</p>
                         {appt.appointmentType && (
-                          <p style={{ fontSize: 12, fontWeight: 500, color: '#2EC4B6', marginTop: 2 }}>{appt.appointmentType}</p>
+                          <p style={{ fontSize: 12, fontWeight: 500, color: '#EF233C', marginTop: 2 }}>{appt.appointmentType}</p>
                         )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                          <Clock size={11} style={{ color: 'rgba(136,146,164,0.4)' }} />
-                          <span style={{ fontSize: 12, color: '#8892A4' }}>{fmtDt(appt.appointmentAt)}</span>
+                          <Clock size={11} style={{ color: '#8D99AE' }} />
+                          <span style={{ fontSize: 12, color: '#8D99AE' }}>{fmtDt(appt.appointmentAt)}</span>
                         </div>
                         {appt.notes && (
-                          <p style={{ fontSize: 12, color: 'rgba(136,146,164,0.45)', marginTop: 8, fontStyle: 'italic' }}>"{appt.notes}"</p>
+                          <p style={{ fontSize: 12, color: '#8D99AE', marginTop: 8, fontStyle: 'italic' }}>"{appt.notes}"</p>
                         )}
                       </div>
                     </div>
                     {canCancel && (
                       <button onClick={() => handleCancel(appt.id)} disabled={cancelling === appt.id}
-                        style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,117,89,0.75)', background: 'none', border: 'none', padding: 0, flexShrink: 0, cursor: 'pointer' }}>
+                        style={{ fontSize: 12, fontWeight: 600, color: '#D90429', background: 'none', border: 'none', padding: 0, flexShrink: 0, cursor: 'pointer' }}>
                         {cancelling === appt.id ? 'Cancelling…' : 'Cancel'}
                       </button>
                     )}
