@@ -10,7 +10,7 @@ import axios from 'axios';
 import { useToast } from '../../../shared/ui/ToastProvider';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PW_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+const PW_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
 function validate(f, addToast) {
   const e = {};
@@ -20,7 +20,7 @@ function validate(f, addToast) {
   else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email.';
   if (!f.password) e.password = 'Password is required.';
   else if (f.password.length < 8) e.password = 'Min. 8 characters.';
-  else if (!PW_RE.test(f.password)) e.password = 'Must include uppercase, lowercase, number & special character.';
+  else if (!PW_RE.test(f.password)) e.password = 'Requires uppercase, lowercase & special character.';
   if (f.password !== f.confirmPassword) e.confirmPassword = 'Passwords do not match.';
 
   if (Object.keys(e).length > 0) {
@@ -32,7 +32,7 @@ function validate(f, addToast) {
 const PERKS = [
   { icon: ShieldCheck, text: 'Bank-grade security & verified professionals', color: '#EF233C' },
   { icon: Activity,    text: 'Real-time appointment synchronization',        color: '#D90429' },
-  { icon: Heart,       text: 'AI-driven personalized health insights',       color: '#8D99AE' },
+  { icon: Heart,       text: 'Comprehensive personalized health insights',       color: '#8D99AE' },
 ];
 
 const ROLES = [
@@ -47,7 +47,7 @@ const ROLES = [
   {
     id: 'DOCTOR',
     icon: Stethoscope,
-    title: 'Provider Portal',
+    title: 'Doctor Portal',
     description: 'Manage schedules, analytics, and patient records securely',
     color: '#2B2D42',
     rgb: '43,45,66',
@@ -123,13 +123,29 @@ export default function Register() {
 
       {/* ── LEFT PANEL ── */}
       <div className="hidden lg:flex" style={{
-        width: '45%', flexShrink: 0, position: 'relative', overflow: 'hidden',
+        width: '55%', flexShrink: 0, position: 'relative', overflow: 'hidden',
         flexDirection: 'column', justifyContent: 'space-between',
         padding: '56px', background: 'linear-gradient(135deg, #1A1B28 0%, #2B2D42 50%, #1A1B28 100%)',
       }}>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-          <div className="blob-1" style={{ position: 'absolute', width: 600, height: 600, top: -150, right: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.12) 0%, transparent 60%)', filter: 'blur(60px)' }} />
-          <div className="blob-2" style={{ position: 'absolute', width: 500, height: 500, bottom: -100, left: -100, borderRadius: '50%', background: 'radial-gradient(circle, rgba(141,153,174,0.1) 0%, transparent 60%)', filter: 'blur(50px)' }} />
+          <div className="blob-1" style={{ position: 'absolute', width: 600, height: 600, top: -200, left: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.15) 0%, transparent 60%)', filter: 'blur(60px)' }} />
+          <div className="blob-2" style={{ position: 'absolute', width: 500, height: 500, bottom: -150, right: -150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(141,153,174,0.12) 0%, transparent 60%)', filter: 'blur(50px)' }} />
+          <div className="blob-3" style={{ position: 'absolute', width: 400, height: 400, top: '35%', left: '40%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,4,41,0.1) 0%, transparent 60%)', filter: 'blur(70px)' }} />
+          
+          {/* Animated Heartbeat Line */}
+          <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, opacity: 0.12, mixBlendMode: 'screen' }}>
+            <motion.path
+              d="M 0 200 L 200 200 L 220 180 L 240 220 L 260 100 L 280 300 L 300 200 L 500 200 L 520 180 L 540 220 L 560 100 L 580 300 L 600 200 L 800 200 L 820 180 L 840 220 L 860 100 L 880 300 L 900 200 L 1000 200"
+              fill="transparent"
+              stroke="#EF233C"
+              strokeWidth="1.5"
+              strokeDasharray="1000"
+              initial={{ strokeDashoffset: 1000 }}
+              animate={{ strokeDashoffset: [1000, -1000] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            />
+          </svg>
+
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         </div>
 
@@ -149,9 +165,8 @@ export default function Register() {
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
           style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 40 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h1 style={{ fontSize: 52, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.03em', margin: 0, color: '#EDF2F4' }}>
-              Experience the<br />
-              <span className="gradient-text">future of care.</span>
+            <h1 style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0, color: '#EDF2F4', maxWidth: 800 }}>
+              Experience the <span className="gradient-text">future of care.</span>
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.6, color: '#8D99AE', margin: 0, maxWidth: 400, fontWeight: 400 }}>
               Join thousands of professionals and patients on a secure, intelligent, and beautifully designed platform.
@@ -182,13 +197,7 @@ export default function Register() {
 
         <div style={{ width: '100%', maxWidth: 480, position: 'relative', zIndex: 1 }}>
 
-          {/* Mobile logo */}
-          <div className="lg:hidden" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
-              <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
-            </div>
-            <span style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.02em' }}>MediGo</span>
-          </div>
+          {/* Mobile logo (hidden on desktop if branding is above) */}
 
           <AnimatePresence mode="wait">
 
@@ -196,12 +205,14 @@ export default function Register() {
             {step === 'role' && (
               <motion.div key="role"
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="glass" style={{ padding: '40px', borderRadius: 24 }}>
+                transition={{ duration: 0.4, ease: "easeInOut" }}>
 
-                <div style={{ marginBottom: 36 }}>
-                  <h2 style={{ fontSize: 30, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Initialize Account</h2>
-                  <p style={{ fontSize: 15, color: '#6B7280', margin: 0 }}>Select your operational environment</p>
+                {/* Consistent Branding Placement */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
+                    <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
+                  </div>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.02em' }}>MediGo</span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
@@ -253,7 +264,15 @@ export default function Register() {
               <motion.div key="form"
                 initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="glass" style={{ padding: '40px', borderRadius: 24 }}>
+                className="glass" style={{ padding: '48px 40px', borderRadius: 24 }}>
+
+                {/* Consistent Branding Placement */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
+                    <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
+                  </div>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.02em' }}>MediGo</span>
+                </div>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>

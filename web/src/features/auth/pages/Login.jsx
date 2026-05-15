@@ -79,6 +79,21 @@ export default function Login() {
           <div className="blob-1" style={{ position: 'absolute', width: 600, height: 600, top: -200, left: -200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,35,60,0.15) 0%, transparent 60%)', filter: 'blur(60px)' }} />
           <div className="blob-2" style={{ position: 'absolute', width: 500, height: 500, bottom: -150, right: -150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(141,153,174,0.12) 0%, transparent 60%)', filter: 'blur(50px)' }} />
           <div className="blob-3" style={{ position: 'absolute', width: 400, height: 400, top: '35%', left: '40%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(217,4,41,0.1) 0%, transparent 60%)', filter: 'blur(70px)' }} />
+          
+          {/* Animated Heartbeat Line */}
+          <svg width="100%" height="100%" viewBox="0 0 1000 400" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, opacity: 0.12, mixBlendMode: 'screen' }}>
+            <motion.path
+              d="M 0 200 L 200 200 L 220 180 L 240 220 L 260 100 L 280 300 L 300 200 L 500 200 L 520 180 L 540 220 L 560 100 L 580 300 L 600 200 L 800 200 L 820 180 L 840 220 L 860 100 L 880 300 L 900 200 L 1000 200"
+              fill="transparent"
+              stroke="#EF233C"
+              strokeWidth="1.5"
+              strokeDasharray="1000"
+              initial={{ strokeDashoffset: 1000 }}
+              animate={{ strokeDashoffset: [1000, -1000] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            />
+          </svg>
+
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         </div>
 
@@ -103,17 +118,16 @@ export default function Login() {
               <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF233C', display: 'inline-block', boxShadow: '0 0 10px rgba(239,35,60,0.5)' }} />
               <span style={{ fontSize: 12, color: '#EDF2F4', fontWeight: 600, letterSpacing: '0.02em' }}>Platform 2026 Edition</span>
             </div>
-            <h1 style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.03em', margin: 0, color: '#EDF2F4' }}>
-              Healthcare,<br />
-              <span className="gradient-text">evolved.</span>
+            <h1 style={{ fontSize: 60, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0, color: '#EDF2F4', maxWidth: 800 }}>
+              Healthcare, <span className="gradient-text">evolved.</span>
             </h1>
-            <p style={{ fontSize: 16, lineHeight: 1.6, color: '#8D99AE', margin: 0, maxWidth: 420, fontWeight: 400 }}>
-              Seamlessly connect with top-tier specialists and manage your medical history through an elegant, AI-driven interface.
+            <p style={{ fontSize: 16, lineHeight: 1.6, color: '#8D99AE', margin: 0, maxWidth: 480, fontWeight: 400 }}>
+              Seamlessly connect with top-tier specialists and manage your medical history through an elegant, high-performance interface.
             </p>
           </div>
 
           {/* Floating Glass Cards Showcase */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 380, marginTop: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 420, marginTop: 10 }}>
             {PREVIEW_CARDS.map((c, i) => (
               <motion.div key={c.label}
                 initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
@@ -151,10 +165,10 @@ export default function Login() {
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(239,35,60,0.03) 0%, transparent 70%)' }} />
 
         <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.1, duration: 0.5, ease: "easeOut" }}
-          className="glass" style={{ width: '100%', maxWidth: 440, padding: '40px', borderRadius: 24, zIndex: 1 }}>
+          className="glass" style={{ width: '100%', maxWidth: 480, padding: '48px 40px', borderRadius: 24, zIndex: 1 }}>
 
-          {/* Mobile logo */}
-          <div className="lg:hidden" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+          {/* Consistent Branding Placement */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
               <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
             </div>
