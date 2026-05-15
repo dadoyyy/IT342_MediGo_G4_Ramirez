@@ -126,10 +126,10 @@ export default function DoctorSchedule() {
           <>
             {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>My Schedule</h1>
-            <p style={{ fontSize: 14, color: '#8D99AE', margin: 0 }}>Set your availability for patient appointments</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Manage your weekly availability</h1>
+            <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Set your working hours so patients can book at the right time</p>
           </div>
           <button onClick={handleSave} disabled={saving}
             className="mg-btn" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
