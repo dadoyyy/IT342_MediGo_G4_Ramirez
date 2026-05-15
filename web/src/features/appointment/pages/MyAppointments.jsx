@@ -55,12 +55,10 @@ export default function MyAppointments() {
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42' }}>My Appointments</h1>
-            <p style={{ fontSize: 14, color: '#8D99AE', marginTop: 4 }}>
-              {appointments.length} total appointment{appointments.length !== 1 ? 's' : ''}
-            </p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Your upcoming visits</h1>
+            <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Track, manage, and stay on top of all your medical appointments</p>
           </div>
           <button onClick={() => navigate('/home')} className="mg-btn" style={{ padding: '10px 16px', fontSize: 13 }}>
             <Plus size={14} /> Book New
