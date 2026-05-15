@@ -241,25 +241,25 @@ export default function DoctorProfile() {
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>
+            {isProfileComplete ? 'Your professional profile' : 'Complete your professional profile'}
+          </h1>
+          <p style={{ fontSize: 13, color: '#8D99AE', margin: '0 0 16px' }}>
+            {isProfileComplete
+              ? 'Keep your credentials and practice details up to date'
+              : 'Fill in your details and upload documents to get verified and start accepting patients'}
+          </p>
           {!isProfileComplete && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, marginBottom: 20, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
               <AlertCircle size={18} style={{ color: '#EF233C', flexShrink: 0, marginTop: 1 }} />
               <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#EF233C', margin: '0 0 2px' }}>Complete your profile to get started</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#EF233C', margin: '0 0 2px' }}>Action required</p>
                 <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>
                   Fill in all fields, upload your profile photo, and attach all required documents before submitting.
                 </p>
               </div>
             </div>
           )}
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: 0 }}>
-            {!isProfileComplete ? 'Set Up Your Profile' : 'My Profile'}
-          </h1>
-          <p style={{ fontSize: 14, color: '#8D99AE', marginTop: 4 }}>
-            {!isProfileComplete
-              ? 'Complete all steps below before submitting'
-              : `Welcome back, Dr. ${user?.fullName?.split(' ')[0] || ''}`}
-          </p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}
