@@ -85,15 +85,9 @@ export default function AppShell({ children, user }) {
 
   /* ── Top Navbar JSX (profile + notifications + logout) ── */
   const topNavbar = (
-    <header className="top-navbar" style={{
-      background: 'rgba(255, 255, 255, 0.75)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
-      borderBottom: '1px solid rgba(43,45,66,0.08)',
-      padding: '12px 32px'
-    }}>
+    <header className="top-navbar">
       <div style={{ flex: 1 }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {/* Notifications */}
         <NotificationDropdown
           notifications={notifications}
@@ -103,37 +97,30 @@ export default function AppShell({ children, user }) {
           loading={notifLoading}
         />
 
-        <div style={{ width: 1, height: 24, background: 'rgba(43,45,66,0.1)' }} />
-
         {/* Profile dropdown */}
         <div ref={profileDropdownRef} style={{ position: 'relative' }}>
           <button
             onClick={() => setProfileDropdownOpen(o => !o)}
             className="top-navbar-profile-btn"
-            style={{ padding: '6px 16px 6px 6px', borderRadius: 99, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(43,45,66,0.08)', boxShadow: '0 2px 8px rgba(43,45,66,0.03)' }}
           >
             <div style={{
-              width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+              width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
               background: 'linear-gradient(135deg, #EF233C, #D90429)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, color: '#fff',
-              boxShadow: '0 2px 8px rgba(239,35,60,0.3)'
+              fontSize: 11, fontWeight: 700, color: '#fff',
             }}>
               <AuthImage
                 key={profileVersion}
                 src={profilePictureUrl}
                 alt="avatar"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                fallback={<span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{initials}</span>}
+                fallback={<span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</span>}
               />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '0 8px' }}>
-              <span className="top-navbar-profile-name" style={{ fontSize: 13, fontWeight: 600, color: '#2B2D42', lineHeight: 1.2 }}>{displayName}</span>
-              <span style={{ fontSize: 10, color: '#8D99AE', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{role}</span>
-            </div>
+            <span className="top-navbar-profile-name">{displayName}</span>
             <ChevronDown size={14} style={{
               color: '#8D99AE',
-              transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />
           </button>
@@ -142,35 +129,33 @@ export default function AppShell({ children, user }) {
           <AnimatePresence>
             {profileDropdownOpen && (
               <motion.div
-                initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                initial={{ opacity: 0, y: -8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+                exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                transition={{ duration: 0.15 }}
                 className="top-navbar-dropdown"
-                style={{ borderRadius: 16, border: '1px solid rgba(43,45,66,0.08)', boxShadow: '0 12px 40px rgba(43,45,66,0.12)' }}
               >
                 {/* User info header */}
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(43,45,66,0.06)', background: 'rgba(255,255,255,0.5)' }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: '0 0 2px' }}>{displayName}</p>
-                  <p style={{ fontSize: 11, color: '#8D99AE', margin: 0, fontWeight: 500 }}>{resolvedUser?.email}</p>
+                <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#2B2D42', margin: '0 0 2px' }}>{displayName}</p>
+                  <p style={{ fontSize: 11, color: '#8D99AE', margin: 0 }}>{role === 'DOCTOR' ? 'Doctor' : role === 'ADMIN' ? 'Admin' : 'Patient'}</p>
                 </div>
-                <div style={{ padding: '8px' }}>
+                <div style={{ padding: '6px 8px' }}>
                   {role === 'DOCTOR' && (
                     <button
                       onClick={() => { navigate('/doctor/profile'); setProfileDropdownOpen(false); }}
                       className="top-navbar-dropdown-item"
-                      style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500 }}
                     >
-                      <UserCircle size={16} style={{ color: '#8D99AE' }} />
+                      <UserCircle size={14} />
                       <span>My Profile</span>
                     </button>
                   )}
                   <button
                     onClick={confirmLogout}
                     className="top-navbar-dropdown-item"
-                    style={{ color: '#D90429', padding: '10px 12px', fontSize: 13, fontWeight: 600, marginTop: 4, background: 'rgba(217,4,41,0.05)' }}
+                    style={{ color: '#D90429' }}
                   >
-                    <LogOut size={16} />
+                    <LogOut size={14} />
                     <span>Sign Out</span>
                   </button>
                 </div>
@@ -184,25 +169,25 @@ export default function AppShell({ children, user }) {
 
   /* Sidebar JSX — rendered as plain JSX, NOT as a nested component */
   const sidebarJSX = (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', zIndex: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '32px 24px 24px' }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 24px rgba(239,35,60,0.4)' }}>
-          <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '24px 20px 16px', marginBottom: 8 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 18px rgba(239,35,60,0.35)' }}>
+          <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 18, fontWeight: 800, color: '#EDF2F4', lineHeight: 1.1, letterSpacing: '-0.02em', margin: 0 }}>MediGo</p>
-          <p style={{ fontSize: 10, color: '#8D99AE', letterSpacing: '0.15em', fontWeight: 600, margin: '2px 0 0' }}>PORTAL</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#EDF2F4', lineHeight: 1.2 }}>MediGo</p>
+          <p style={{ fontSize: 9, color: 'rgba(141,153,174,0.5)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
         </div>
       </div>
 
       {/* Nav label */}
-      <div style={{ padding: '0 24px 12px' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: '#8D99AE', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Navigation</span>
+      <div style={{ padding: '0 20px 8px' }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(141,153,174,0.4)', letterSpacing: '0.08em' }}>GENERAL</span>
       </div>
 
       {/* Nav items */}
-      <nav style={{ flex: 1, padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {navItems.map(({ icon: Icon, label, path, gated }) => {
           const locked = role === 'DOCTOR' && gated && !isProfileComplete;
           const active = !locked && location.pathname === path;
@@ -211,38 +196,36 @@ export default function AppShell({ children, user }) {
               onClick={locked ? undefined : () => { navigate(path); setMobileOpen(false); }}
               className={`nav-item ${active ? 'active' : ''}`}
               style={locked ? { opacity: 0.35, cursor: 'not-allowed', pointerEvents: 'none' } : undefined}>
-              <Icon size={18} style={{ color: active ? '#EDF2F4' : '#8D99AE' }} />
-              <span style={{ fontSize: 14, fontWeight: active ? 600 : 500 }}>{label}</span>
-              {active && <ChevronRight size={14} style={{ marginLeft: 'auto', color: '#EF233C' }} />}
+              <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#EF233C' : 'rgba(141,153,174,0.25)', boxShadow: active ? '0 0 8px rgba(239,35,60,0.5)' : 'none', transition: 'all 0.2s' }} />
+              <Icon size={15} />
+              <span>{label}</span>
+              {active && <ChevronRight size={11} style={{ marginLeft: 'auto', color: '#EF233C' }} />}
             </button>
           );
         })}
       </nav>
 
       {/* Bottom — just a subtle branding line */}
-      <div style={{ padding: '0 24px 32px' }}>
-        <div style={{ height: 1, margin: '0 0 16px', background: 'rgba(141,153,174,0.1)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', boxShadow: '0 0 8px rgba(34,197,94,0.5)' }} />
-          <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 500, margin: 0 }}>Systems Online</p>
-        </div>
+      <div style={{ padding: '0 12px 24px' }}>
+        <div style={{ height: 1, margin: '0 8px 8px', background: 'rgba(255,255,255,0.06)' }} />
+        <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.25)', textAlign: 'center', margin: 0 }}>MediGo v1.0</p>
       </div>
     </div>
   );
 
   const sidebarStyle = {
-    background: '#2B2D42',
-    borderRight: '1px solid rgba(43,45,66,0.1)',
+    background: 'linear-gradient(180deg, #2B2D42 0%, #1E1F33 100%)',
+    borderRight: '1px solid rgba(255,255,255,0.05)',
   };
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#EDF2F4' }}>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 relative" style={sidebarStyle}>
+      <aside className="hidden lg:flex flex-col w-56 flex-shrink-0 relative" style={sidebarStyle}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute"
-            style={{ width: 200, height: 200, top: -50, left: -50, background: 'radial-gradient(circle, rgba(239,35,60,0.1) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+          <div className="absolute rounded-full"
+            style={{ width: 160, height: 160, top: 50, left: -30, background: 'radial-gradient(circle, rgba(239,35,60,0.07) 0%, transparent 70%)', filter: 'blur(30px)' }} />
         </div>
         {sidebarJSX}
       </aside>

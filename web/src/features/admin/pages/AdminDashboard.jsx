@@ -1,11 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Stethoscope, Clock, TrendingUp, Activity, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Users, Stethoscope, Clock, TrendingUp } from 'lucide-react';
 import { adminApi, authApi } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
 import AppShell from '../../../shared/ui/AppShell';
-
-const cardItem = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } };
 
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -54,11 +52,13 @@ export default function AdminDashboard() {
     const wrapper = canvas.parentElement;
 
     const draw = () => {
+      // Setup high-DPI canvas
       const rect = wrapper.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       
+      // Minimum width to ensure it always scrolls nicely
       const logicalWidth = Math.max(rect.width, 1000);
-      const logicalHeight = 340;
+      const logicalHeight = 300;
 
       canvas.width = logicalWidth * dpr;
       canvas.height = logicalHeight * dpr;
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
       const ctx = canvas.getContext('2d');
       ctx.scale(dpr, dpr);
 
-      const padding = { top: 30, right: 30, bottom: 40, left: 50 };
+      const padding = { top: 20, right: 20, bottom: 30, left: 40 };
 
       // Group by month
       const monthlyCounts = {};
@@ -76,16 +76,17 @@ export default function AdminDashboard() {
       // Initialize last 6 months
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const label = d.toLocaleString('default', { month: 'short' }) + " '" + d.getFullYear().toString().slice(2);
+        const label = d.toLocaleString('default', { month: 'short' });
         monthlyCounts[label] = 0;
       }
 
       allUsers.forEach(u => {
         if (!u.createdAt) return;
         const d = new Date(u.createdAt);
+        // Only count if within last 6 months
         const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth();
         if (diffMonths >= 0 && diffMonths <= 5) {
-          const label = d.toLocaleString('default', { month: 'short' }) + " '" + d.getFullYear().toString().slice(2);
+          const label = d.toLocaleString('default', { month: 'short' });
           if (monthlyCounts[label] !== undefined) {
             monthlyCounts[label]++;
           }
@@ -94,14 +95,14 @@ export default function AdminDashboard() {
 
       const labels = Object.keys(monthlyCounts);
       const data = Object.values(monthlyCounts);
-      const maxVal = Math.max(...data, 10); 
+      const maxVal = Math.max(...data, 10); // at least 10 for Y axis scale
 
       ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
       // Draw grid & Y axis
-      ctx.strokeStyle = 'rgba(43,45,66,0.06)';
+      ctx.strokeStyle = 'rgba(43,45,66,0.08)';
       ctx.fillStyle = '#8D99AE';
-      ctx.font = '600 12px Inter, sans-serif';
+      ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
 
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
         ctx.lineTo(logicalWidth - padding.right, y);
         ctx.stroke();
 
-        ctx.fillText(val.toString(), padding.left - 12, y);
+        ctx.fillText(val.toString(), padding.left - 8, y);
       }
 
       // Draw X axis & Line
@@ -131,18 +132,17 @@ export default function AdminDashboard() {
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
 
-        ctx.fillText(label, x, logicalHeight - padding.bottom + 12);
+        ctx.fillText(label, x, logicalHeight - padding.bottom + 8);
       });
 
       ctx.strokeStyle = '#EF233C';
-      ctx.lineWidth = 4;
-      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
       ctx.stroke();
 
       // Draw points and fill
       const grad = ctx.createLinearGradient(0, padding.top, 0, logicalHeight - padding.bottom);
-      grad.addColorStop(0, 'rgba(239,35,60,0.2)');
-      grad.addColorStop(1, 'rgba(239,35,60,0.01)');
+      grad.addColorStop(0, 'rgba(239,35,60,0.15)');
+      grad.addColorStop(1, 'rgba(239,35,60,0)');
       
       ctx.lineTo(logicalWidth - padding.right, logicalHeight - padding.bottom);
       ctx.lineTo(padding.left, logicalHeight - padding.bottom);
@@ -156,11 +156,11 @@ export default function AdminDashboard() {
         points.push({ x, y, label, value: data[i] });
 
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
         ctx.fillStyle = '#FFFFFF';
         ctx.fill();
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#D90429';
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#EF233C';
         ctx.stroke();
       });
 
@@ -169,9 +169,12 @@ export default function AdminDashboard() {
 
     draw();
 
-    const resizeObserver = new ResizeObserver(() => requestAnimationFrame(draw));
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(draw);
+    });
     resizeObserver.observe(wrapper);
 
+    // Mouse events for tooltip
     function handleMouseMove(e) {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -182,7 +185,7 @@ export default function AdminDashboard() {
       for (const p of points) {
         const dx = mouseX - p.x;
         const dy = mouseY - p.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 20) {
+        if (Math.sqrt(dx * dx + dy * dy) < 15) {
           hovered = p;
           break;
         }
@@ -190,7 +193,9 @@ export default function AdminDashboard() {
       setHoveredPoint(hovered);
     }
     
-    function handleMouseLeave() { setHoveredPoint(null); }
+    function handleMouseLeave() {
+      setHoveredPoint(null);
+    }
 
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', handleMouseLeave);
@@ -204,119 +209,104 @@ export default function AdminDashboard() {
 
   return (
     <AppShell user={user}>
-      <div style={{ padding: '32px 40px 60px', maxWidth: 1400, margin: '0 auto' }}>
+      <div style={{ padding: '28px 28px 40px' }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
-             <div className="w-10 h-10 rounded-full border-4 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.15)', borderTopColor: '#EF233C' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
         ) : (
           <>
-            {/* ── Dashboard Header ── */}
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: 'easeOut' }}
-              style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 20 }}>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(217,4,41,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239,35,60,0.15)' }}>
+                <TrendingUp size={20} style={{ color: '#EF233C' }} />
+              </div>
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 99, background: 'rgba(239,35,60,0.08)', border: '1px solid rgba(239,35,60,0.15)', marginBottom: 12 }}>
-                  <TrendingUp size={14} style={{ color: '#EF233C' }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#D90429', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Enterprise Analytics</span>
-                </div>
-                <h1 style={{ fontSize: 36, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-                  Platform Overview
-                </h1>
-                <p style={{ fontSize: 15, color: '#6B7280', margin: 0, fontWeight: 500 }}>Monitor system health, user acquisition, and pending actions.</p>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>System Overview</h1>
+                <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Analytics and platform performance metrics</p>
               </div>
             </motion.div>
 
-            {/* ── Stat Cards ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 40 }}>
-              <motion.div variants={cardItem} initial="initial" animate="animate" transition={{ delay: 0.1 }}
-                className="card" style={{ padding: '32px', borderRadius: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, rgba(141,153,174,0.1), rgba(141,153,174,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Stethoscope size={24} style={{ color: '#2B2D42' }} />
+            {/* Stat Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 32 }}>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="card" style={{ padding: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(141,153,174,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Stethoscope size={20} style={{ color: '#8D99AE' }} />
                   </div>
-                  <div style={{ padding: '6px 12px', borderRadius: 99, background: 'rgba(141,153,174,0.1)', fontSize: 12, fontWeight: 600, color: '#2B2D42' }}>Total</div>
                 </div>
-                <p style={{ fontSize: 40, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', lineHeight: 1 }}>{analytics.totalDoctors}</p>
-                <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 500 }}>Registered Providers</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.totalDoctors}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Registered Doctors</p>
               </motion.div>
 
-              <motion.div variants={cardItem} initial="initial" animate="animate" transition={{ delay: 0.2 }}
-                className="card" style={{ padding: '32px', borderRadius: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(217,4,41,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users size={24} style={{ color: '#EF233C' }} />
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="card" style={{ padding: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Users size={20} style={{ color: '#EF233C' }} />
                   </div>
-                  <div style={{ padding: '6px 12px', borderRadius: 99, background: 'rgba(239,35,60,0.08)', fontSize: 12, fontWeight: 600, color: '#EF233C' }}>Total</div>
                 </div>
-                <p style={{ fontSize: 40, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', lineHeight: 1 }}>{analytics.totalPatients}</p>
-                <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 500 }}>Registered Patients</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.totalPatients}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Registered Patients</p>
               </motion.div>
 
-              <motion.div variants={cardItem} initial="initial" animate="animate" transition={{ delay: 0.3 }}
-                className="card" style={{ padding: '32px', borderRadius: 24, border: analytics.pendingVerifications > 0 ? '1px solid rgba(245,158,11,0.4)' : undefined, boxShadow: analytics.pendingVerifications > 0 ? '0 8px 32px rgba(245,158,11,0.1)' : undefined }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(217,119,6,0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Clock size={24} style={{ color: '#D97706' }} />
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                className="card" style={{ padding: 24, border: analytics.pendingVerifications > 0 ? '1px solid rgba(245,158,11,0.25)' : undefined }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(245,158,11,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock size={20} style={{ color: '#D97706' }} />
                   </div>
                   {analytics.pendingVerifications > 0 && (
-                    <span style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 99, background: 'rgba(245,158,11,0.1)', color: '#D97706' }}>
-                      Action Required
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: '4px 8px', borderRadius: 99, background: 'rgba(245,158,11,0.08)', color: '#D97706' }}>
+                      Action Needed
                     </span>
                   )}
                 </div>
-                <p style={{ fontSize: 40, fontWeight: 800, color: '#2B2D42', margin: '0 0 8px', lineHeight: 1 }}>{analytics.pendingVerifications}</p>
-                <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 500 }}>Pending Verifications</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>{analytics.pendingVerifications}</p>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Pending Verifications</p>
               </motion.div>
             </div>
 
-            {/* ── Chart ── */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="card" style={{ padding: '32px', borderRadius: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-                <div>
-                  <h2 style={{ fontSize: 20, fontWeight: 800, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.01em' }}>User Growth</h2>
-                  <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 500 }}>Monthly registrations across all roles</p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: 'rgba(237,242,244,0.6)', borderRadius: 12, fontSize: 13, fontWeight: 600, color: '#2B2D42' }}>
-                  Last 6 Months <ChevronRight size={14} style={{ color: '#8D99AE' }} />
-                </div>
+            {/* Chart */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+              className="card" style={{ padding: 24 }}>
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: '#2B2D42', margin: '0 0 4px' }}>User Registrations</h2>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>Last 6 months activity</p>
               </div>
-              <div className="chart-scrollbar" style={{ width: '100%', overflowX: 'auto', paddingBottom: 16 }}>
-                <div style={{ position: 'relative', minWidth: 1000, paddingRight: 40 }}>
-                  <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default', width: '100%' }} />
+              <div className="chart-scrollbar" style={{ width: '100%', overflowX: 'auto' }}>
+                <div style={{ position: 'relative', minWidth: 1000, paddingRight: 32 }}>
+                  <canvas ref={canvasRef} style={{ display: 'block', cursor: hoveredPoint ? 'pointer' : 'default' }} />
                   
-                  <AnimatePresence>
-                    {hoveredPoint && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        style={{
-                          position: 'absolute',
-                          left: hoveredPoint.x,
-                          top: hoveredPoint.y - 56,
-                          transform: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
-                          marginLeft: hoveredPoint.x > (chartDataRef.current.width - 150) ? -16 : hoveredPoint.x < 150 ? 16 : 0,
-                          background: '#2B2D42',
-                          padding: '10px 16px',
-                          borderRadius: 12,
-                          pointerEvents: 'none',
-                          color: '#EDF2F4',
-                          fontSize: 14,
-                          fontWeight: 600,
-                          boxShadow: '0 12px 32px rgba(43,45,66,0.3)',
-                          whiteSpace: 'nowrap',
-                          zIndex: 20
-                        }}
-                      >
-                        <span style={{ color: '#8D99AE', fontWeight: 500, marginRight: 8 }}>{hoveredPoint.label}</span>
-                        {hoveredPoint.value} Users
-                        {/* Little triangle pointer */}
-                        <div style={{ position: 'absolute', bottom: -6, left: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'calc(100% - 24px)' : hoveredPoint.x < 150 ? '24px' : '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid #2B2D42' }} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {hoveredPoint && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      style={{
+                        position: 'absolute',
+                        left: hoveredPoint.x,
+                        top: hoveredPoint.y - 45,
+                        transform: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
+                        marginLeft: hoveredPoint.x > (chartDataRef.current.width - 150) ? -12 : hoveredPoint.x < 150 ? 12 : 0,
+                        background: '#FFFFFF',
+                        border: '1px solid rgba(239,35,60,0.2)',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        pointerEvents: 'none',
+                        color: '#2B2D42',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 16px rgba(43,45,66,0.1)',
+                        whiteSpace: 'nowrap',
+                        zIndex: 10
+                      }}
+                    >
+                      <span style={{ color: '#8D99AE', fontWeight: 500, marginRight: 6 }}>{hoveredPoint.label}</span>
+                      {hoveredPoint.value} Registrations
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </motion.div>
