@@ -256,14 +256,12 @@ export default function AdminVerification() {
           </motion.div>
         )}
       </AnimatePresence>
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(141,153,174,0.08)', border: '1px solid rgba(141,153,174,0.15)' }}>
-              <ShieldCheck size={16} style={{ color: '#8D99AE' }} />
-            </div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42' }}>Doctor Verification</h1>
-          </div>
-          <p style={{ fontSize: 14, color: '#6B7280' }}>Review and approve pending doctor registrations</p>
+
+
+        {/* Page Header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Review pending doctor applications</h1>
+          <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>{pending.length} application{pending.length !== 1 ? 's' : ''} awaiting your review and approval</p>
         </motion.div>
 
         {loading ? (
