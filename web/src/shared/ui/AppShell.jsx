@@ -252,7 +252,7 @@ export default function AppShell({ children, user }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 13, color: '#8D99AE', fontWeight: 500 }}>Pages</span>
         <span style={{ fontSize: 13, color: 'rgba(43,45,66,0.2)', fontWeight: 500 }}>/</span>
-        <span style={{ fontSize: 13, color: '#2B2D42', fontWeight: 600 }}>
+        <span style={{ fontSize: 13, color: '#2B2D42', fontWeight: 800, letterSpacing: '-0.02em' }}>
           {(() => {
             const path = location.pathname;
             if (path === '/home') return 'Home';
@@ -261,13 +261,13 @@ export default function AppShell({ children, user }) {
             if (path.startsWith('/doctor/dashboard')) return 'Dashboard';
             if (path.startsWith('/doctor/appointments')) return 'Appointments';
             if (path.startsWith('/doctor/schedule')) return 'My Schedule';
-            if (path.startsWith('/doctor/profile')) return 'Professional Profile';
+            if (path.startsWith('/doctor/profile')) return 'Profile';
             if (path.startsWith('/doctor/register')) return 'Account Setup';
             if (path.startsWith('/admin/dashboard')) return 'Dashboard';
             if (path.startsWith('/admin/verification')) return 'Doctor Verification';
-            if (path.startsWith('/admin/specialization-requests')) return 'Spec. Requests';
-            if (path.startsWith('/admin/doctors')) return 'Doctors List';
-            if (path.startsWith('/admin/patients')) return 'Patients List';
+            if (path.startsWith('/admin/specialization-requests')) return 'Specialization Requests';
+            if (path.startsWith('/admin/doctors')) return 'Doctors';
+            if (path.startsWith('/admin/patients')) return 'Patients';
             return 'Profile';
           })()}
         </span>
@@ -286,34 +286,39 @@ export default function AppShell({ children, user }) {
         {/* Profile dropdown */}
         <div ref={profileDropdownRef} style={{ position: 'relative' }}>
           <motion.button
-            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,1)' }}
+            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,1)', boxShadow: '0 8px 24px rgba(43,45,66,0.06)' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setProfileDropdownOpen(o => !o)}
             style={{ 
-              display: 'flex', alignItems: 'center', gap: 10, padding: '6px 12px 6px 6px',
-              borderRadius: 20, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(43,45,66,0.08)', cursor: 'pointer', transition: 'all 0.2s',
-              boxShadow: '0 4px 12px rgba(43,45,66,0.03)'
+              display: 'flex', alignItems: 'center', gap: 10, padding: '6px 14px 6px 6px',
+              borderRadius: 24, background: '#FFFFFF',
+              border: '1px solid rgba(43,45,66,0.06)', cursor: 'pointer', transition: 'all 0.2s',
+              boxShadow: '0 4px 12px rgba(43,45,66,0.02)'
             }}
           >
             <div style={{
-              width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+              width: 38, height: 38, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
               background: 'linear-gradient(135deg, #EF233C, #D90429)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 800, color: '#fff',
-              border: '2px solid #fff', boxShadow: '0 0 10px rgba(239,35,60,0.2)'
+              padding: 2, border: '2px solid rgba(239,35,60,0.1)'
             }}>
-              <AuthImage
-                key={profileVersion}
-                src={profilePictureUrl}
-                alt="avatar"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                fallback={<span style={{ fontSize: 12, fontWeight: 800, color: '#fff' }}>{initials}</span>}
-              />
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#fff' }}>
+                <AuthImage
+                  key={profileVersion}
+                  src={profilePictureUrl}
+                  alt="avatar"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  fallback={<span style={{ fontSize: 13, fontWeight: 900, color: '#EF233C' }}>{initials}</span>}
+                />
+              </div>
             </div>
-            <span style={{ fontSize: 13, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.01em' }}>{displayName}</span>
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ fontSize: 13, fontWeight: 900, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{displayName}</p>
+              <p style={{ fontSize: 10, fontWeight: 700, color: '#8D99AE', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{role}</p>
+            </div>
             <ChevronDown size={14} style={{
               color: '#8D99AE',
+              marginLeft: 4,
               transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />
@@ -364,49 +369,64 @@ export default function AppShell({ children, user }) {
   /* Sidebar JSX — rendered as plain JSX, NOT as a nested component */
   const sidebarJSX = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '24px 20px 16px', marginBottom: 8 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 0 18px rgba(239,35,60,0.35)' }}>
-          <Stethoscope size={17} color="#fff" strokeWidth={2.5} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#EDF2F4', lineHeight: 1.2 }}>MediGo</p>
-          <p style={{ fontSize: 9, color: 'rgba(141,153,174,0.5)', letterSpacing: '0.07em' }}>HEALTHCARE</p>
+      {/* Logo Area */}
+      <div style={{ padding: '32px 24px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ 
+            width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            background: 'linear-gradient(135deg, #EF233C, #D90429)', 
+            boxShadow: '0 8px 24px rgba(239,35,60,0.4)',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}>
+            <Stethoscope size={20} color="#fff" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p style={{ fontSize: 18, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.03em', margin: 0, lineHeight: 1 }}>MediGo</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34A853', boxShadow: '0 0 6px rgba(52,168,83,0.5)' }} />
+              <p style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase' }}>System Live</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Nav label */}
-      <div style={{ padding: '0 20px 8px' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(141,153,174,0.4)', letterSpacing: '0.08em' }}>GENERAL</span>
+      <div style={{ padding: '0 24px 12px' }}>
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
       </div>
 
       {/* Nav items */}
-      <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav style={{ flex: 1, padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {navItems.map(({ icon: Icon, label, path, gated }) => {
           const locked = role === 'DOCTOR' && gated && !isProfileComplete;
           const active = !locked && location.pathname === path;
           const showPulse = !locked && Boolean(navPulseMap[path]);
           return (
-            <button key={path}
+            <motion.button key={path}
               onClick={locked ? undefined : () => { navigate(path); setMobileOpen(false); }}
-              className={`nav-item ${active ? 'active' : ''}`}
-              style={locked ? { opacity: 0.35, cursor: 'not-allowed', pointerEvents: 'none' } : undefined}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block', background: active ? '#EF233C' : 'rgba(141,153,174,0.25)', boxShadow: active ? '0 0 8px rgba(239,35,60,0.5)' : 'none', transition: 'all 0.2s' }} />
-              <Icon size={15} />
-              <span>{label}</span>
-              <span className="nav-item-right">
-                {showPulse && <span className="nav-pulse pulse-dot" aria-hidden="true" />}
-                {active && <ChevronRight size={11} style={{ color: '#EF233C' }} />}
+              whileHover={locked ? {} : { x: 4, background: active ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)' }}
+              style={{ 
+                width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', 
+                borderRadius: 16, background: active ? 'rgba(255,255,255,0.1)' : 'transparent', 
+                border: 'none', textAlign: 'left', cursor: locked ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                opacity: locked ? 0.35 : 1, position: 'relative', overflow: 'hidden'
+              }}>
+              {active && (
+                <motion.div layoutId="activeIndicator" style={{ position: 'absolute', left: 0, top: '25%', bottom: '25%', width: 4, background: '#EF233C', borderRadius: '0 4px 4px 0', boxShadow: '0 0 12px rgba(239,35,60,0.6)' }} />
+              )}
+              <Icon size={18} style={{ color: active ? '#EF233C' : 'rgba(255,255,255,0.5)', transition: 'all 0.2s' }} />
+              <span style={{ fontSize: 14, fontWeight: active ? 800 : 600, color: active ? '#FFFFFF' : 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}>{label}</span>
+              <span style={{ marginLeft: 'auto', position: 'relative' }}>
+                {showPulse && <span className="nav-pulse pulse-dot" style={{ position: 'static', display: 'block', width: 8, height: 8 }} />}
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </nav>
 
-      {/* Bottom — just a subtle branding line */}
+      {/* Bottom Branding */}
       <div style={{ padding: '0 12px 24px' }}>
-        <div style={{ height: 1, margin: '0 8px 8px', background: 'rgba(255,255,255,0.06)' }} />
-        <p style={{ fontSize: 10, color: 'rgba(141,153,174,0.25)', textAlign: 'center', margin: 0 }}>MediGo v1.0</p>
+        <div style={{ height: 1, margin: '0 8px 12px', background: 'rgba(255,255,255,0.06)' }} />
+        <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: 0, fontWeight: 700, letterSpacing: '0.05em' }}>MediGo v1.0 • SYSTEM LIVE</p>
       </div>
     </div>
   );

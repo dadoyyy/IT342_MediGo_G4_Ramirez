@@ -224,10 +224,12 @@ export default function DoctorSchedule() {
           <>
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
-              <div>
-                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Availability Calendar</h1>
-                <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Define specific slots for patient bookings</p>
-              </div>
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+                  Weekly Availability
+                </h1>
+                <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Configure your consultation hours and manage weekly slots</p>
+              </motion.div>
               <div style={{ display: 'flex', gap: 12 }}>
                 <button onClick={bulkGenerate} className="mg-btn-ghost" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Calendar size={16} /> Bulk Generate Week

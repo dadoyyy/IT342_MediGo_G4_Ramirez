@@ -109,12 +109,12 @@ export default function DoctorDashboard() {
     if (lineChartRef.current) {
       const last7 = getLast7Days();
       const lineData = last7.map(day => ({ label: day.toLocaleDateString('en-US', { weekday: 'short' }), value: appointments.filter(a => { const dt = a.appointmentAt || a.createdAt; return dt && isSameDay(new Date(dt), day); }).length }));
-      drawLineChart(lineChartRef.current, lineData, '#EF233C');
+      drawLineChart(lineChartRef.current, lineData, 'Patients', '#EF233C');
     }
     if (barChartRef.current) {
       const last6 = getLast6Months();
       const barData = last6.map(month => ({ label: month.toLocaleDateString('en-US', { month: 'short' }), value: appointments.filter(a => { const dt = a.appointmentAt || a.createdAt; return dt && isSameMonth(new Date(dt), month); }).length }));
-      drawBarChart(barChartRef.current, barData, '#8D99AE');
+      drawBarChart(barChartRef.current, barData, '#4CC9F0');
     }
   }, [appointments]);
 

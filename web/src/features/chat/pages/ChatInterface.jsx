@@ -124,30 +124,32 @@ export default function ChatInterface() {
 
   return (
     <AppShell user={me}>
-      <div style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '28px 28px 40px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+            Communications
+          </h1>
+          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Coordinate with your patients and manage clinical discussions</p>
+        </motion.div>
+
         <div style={{ 
           display: 'flex', flex: 1, height: '100%', minHeight: 0, overflow: 'hidden', 
-          background: '#FFFFFF', borderRadius: 24, 
+          background: '#FFFFFF', borderRadius: 32, 
           border: '1px solid rgba(43,45,66,0.06)',
-          boxShadow: '0 8px 32px rgba(43,45,66,0.03)'
+          boxShadow: '0 20px 50px rgba(43,45,66,0.05)'
         }}>
 
         {/* Contacts sidebar */}
-        <aside style={{ width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRight: '1px solid rgba(43,45,66,0.06)', zIndex: 10 }}>
-          <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(43,45,66,0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>Messages</h2>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <MessageSquare size={16} style={{ color: '#EF233C' }} />
-              </div>
-            </div>
-            
+        <aside style={{ width: 360, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRight: '1px solid rgba(43,45,66,0.06)', zIndex: 10 }}>
+          <div style={{ padding: '32px 24px', borderBottom: '1px solid rgba(43,45,66,0.04)' }}>
             <div style={{ position: 'relative' }}>
-              <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+              <Search size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
               <input type="text" value={contactQuery} onChange={e => setContactQuery(e.target.value)}
-                placeholder="Search conversations..." 
+                placeholder="Search patients..." 
                 className="mg-input" 
-                style={{ paddingLeft: 42, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.05)', fontSize: 13, height: 44, borderRadius: 12 }} />
+                style={{ paddingLeft: 46, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.05)', fontSize: 14, height: 48, borderRadius: 16 }} />
             </div>
           </div>
 
@@ -165,36 +167,51 @@ export default function ChatInterface() {
                 <p style={{ fontSize: 12, color: '#8D99AE', lineHeight: 1.6 }}>Message doctors once you have an appointment confirmed.</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {contacts.map(c => {
                   const isSelected = selected?.userId === c.userId;
                   return (
                     <motion.button 
                       key={c.userId} 
                       onClick={() => setSelected(c)}
-                      whileHover={{ scale: 1.01 }}
+                      whileHover={{ scale: 1.01, background: isSelected ? 'rgba(239,35,60,0.06)' : 'rgba(43,45,66,0.02)' }}
                       whileTap={{ scale: 0.99 }}
                       style={{ 
-                        width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 12px', 
-                        borderRadius: 14, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', 
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '16px 14px', 
+                        borderRadius: 20, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', 
                         background: isSelected ? 'rgba(239,35,60,0.04)' : 'transparent', 
                         border: isSelected ? '1px solid rgba(239,35,60,0.1)' : '1px solid transparent',
-                        boxShadow: isSelected ? '0 4px 12px rgba(239,35,60,0.04)' : 'none'
+                        boxShadow: isSelected ? '0 10px 20px rgba(239,35,60,0.04)' : 'none'
                       }}>
                       <div style={{ position: 'relative', flexShrink: 0 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(43,45,66,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <AuthImage src={c.profilePictureUrl} alt={c.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            fallback={<span style={{ fontSize: 15, fontWeight: 700, color: '#EF233C' }}>{(c.firstName?.[0] || '?').toUpperCase()}</span>} />
+                        <div style={{ 
+                          width: 52, height: 52, borderRadius: 18, overflow: 'hidden', 
+                          background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(43,45,66,0.05))', 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: isSelected ? '2px solid #EF233C' : '2px solid transparent',
+                          padding: 2
+                        }}>
+                          <div style={{ width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden', background: '#fff' }}>
+                            <AuthImage src={c.profilePictureUrl} alt={c.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              fallback={<span style={{ fontSize: 16, fontWeight: 900, color: '#EF233C' }}>{(c.firstName?.[0] || '?').toUpperCase()}</span>} />
+                          </div>
                         </div>
-                        <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: '#22C55E', border: '2px solid #fff' }} />
+                        {c.online && (
+                          <div style={{ position: 'absolute', bottom: 1, right: 1, width: 14, height: 14, borderRadius: '50%', background: '#22C55E', border: '3px solid #fff', boxShadow: '0 2px 4px rgba(34,197,94,0.3)' }} />
+                        )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
-                          <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <p style={{ fontSize: 15, fontWeight: 800, color: '#2B2D42', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0, letterSpacing: '-0.01em' }}>
                             {c.role === 'DOCTOR' ? `Dr. ${c.firstName} ${c.lastName}` : `${c.firstName} ${c.lastName}`}
                           </p>
+                          {c.unread > 0 && (
+                            <span style={{ fontSize: 10, fontWeight: 900, background: '#EF233C', color: '#fff', padding: '2px 7px', borderRadius: 6 }}>{c.unread}</span>
+                          )}
                         </div>
-                        <p style={{ fontSize: 12, color: '#8D99AE', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>{c.role || 'User'}</p>
+                        <p style={{ fontSize: 12, color: isSelected ? '#EF233C' : '#8D99AE', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                          {c.lastMsg || c.role || 'Patient'}
+                        </p>
                       </div>
                     </motion.button>
                   );
@@ -220,29 +237,31 @@ export default function ChatInterface() {
             <>
               {/* Chat header */}
               <div style={{ 
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px', 
                 background: '#FFFFFF', borderBottom: '1px solid rgba(43,45,66,0.06)', flexShrink: 0,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+                boxShadow: '0 4px 30px rgba(0,0,0,0.03)', zIndex: 5
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(43,45,66,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <AuthImage src={selected.profilePictureUrl} alt={selected.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      fallback={<span style={{ fontSize: 16, fontWeight: 700, color: '#EF233C' }}>{(selected.firstName?.[0] || '?').toUpperCase()}</span>} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(43,45,66,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 2, border: '2px solid rgba(239,35,60,0.1)' }}>
+                    <div style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+                      <AuthImage src={selected.profilePictureUrl} alt={selected.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        fallback={<span style={{ fontSize: 16, fontWeight: 900, color: '#EF233C' }}>{(selected.firstName?.[0] || '?').toUpperCase()}</span>} />
+                    </div>
                   </div>
                   <div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: 0 }}>
+                    <h3 style={{ fontSize: 17, fontWeight: 900, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>
                       {selected.role === 'DOCTOR' ? `Dr. ${selected.firstName} ${selected.lastName}` : `${selected.firstName} ${selected.lastName}`}
                     </h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#22C55E' }}>Online</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px rgba(34,197,94,0.5)' }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Now</span>
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Phone size={16} /></button>
-                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Video size={16} /></button>
-                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><MoreVertical size={16} /></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                   <motion.button whileHover={{ y: -2 }} style={{ width: 42, height: 42, borderRadius: 14, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Phone size={18} /></motion.button>
+                   <motion.button whileHover={{ y: -2 }} style={{ width: 42, height: 42, borderRadius: 14, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Video size={18} /></motion.button>
+                   <motion.button whileHover={{ y: -2 }} style={{ width: 42, height: 42, borderRadius: 14, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><MoreVertical size={18} /></motion.button>
                 </div>
               </div>
 
