@@ -50,13 +50,11 @@ export default function DoctorSchedule() {
     load();
   }, [navigate]);
 
-  useEffect(() => {
+  function handleSave() {
     localStorage.setItem(LS_KEY, JSON.stringify(slots));
-  }, [slots]);
-
-  useEffect(() => {
     localStorage.setItem(RULES_KEY, JSON.stringify(dayRules));
-  }, [dayRules]);
+    addToast('Schedule synchronized and saved successfully.', 'success');
+  }
 
   function validate() {
     const e = {};
@@ -103,6 +101,7 @@ export default function DoctorSchedule() {
 
     const newSlot = {
       id: Date.now(),
+      doctorId: user?.id,
       ...form,
       status: 'Available'
     };
@@ -130,7 +129,7 @@ export default function DoctorSchedule() {
       return;
     }
 
-    setSlots(p => p.map(s => s.id === form.id ? { ...s, ...form } : s).sort((a, b) => {
+    setSlots(p => p.map(s => s.id === form.id ? { ...s, ...form, doctorId: user?.id } : s).sort((a, b) => {
       const dtA = new Date(`${a.date}T${a.startTime}`);
       const dtB = new Date(`${b.date}T${b.startTime}`);
       return dtA - dtB;
@@ -169,6 +168,7 @@ export default function DoctorSchedule() {
         if (!exists) {
           newSlots.push({
             id: Date.now() + i * 100 + idx,
+            doctorId: user?.id,
             date: dateStr,
             startTime,
             endTime,
@@ -234,8 +234,11 @@ export default function DoctorSchedule() {
                 <button onClick={bulkGenerate} className="mg-btn-ghost" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Calendar size={16} /> Bulk Generate Week
                 </button>
-                <button onClick={() => { setForm({ date: '', startTime: '', endTime: '', type: 'In-person' }); setIsModalOpen(true); }} className="mg-btn" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button onClick={() => { setForm({ date: '', startTime: '', endTime: '', type: 'In-person' }); setIsModalOpen(true); }} className="mg-btn-ghost" style={{ padding: '10px 20px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Plus size={16} /> Add New Slot
+                </button>
+                <button onClick={handleSave} className="mg-btn" style={{ padding: '10px 24px', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #EF233C, #D90429)', boxShadow: '0 8px 20px rgba(239,35,60,0.2)' }}>
+                  <Save size={16} /> Save Schedule
                 </button>
               </div>
             </div>
@@ -276,11 +279,11 @@ export default function DoctorSchedule() {
                 {DAYS.map((day, i) => {
                   const rule = dayRules[i];
                   const getRuleColor = () => {
-                    if (rule === 'Video') return '#EF233C';
+                    if (rule === 'Online') return '#EF233C';
                     if (rule === 'In-person') return '#4CC9F0'; // Professional Cyan
                     return '#8D99AE'; // Day-off
                   };
-                  const RuleIcon = rule === 'Video' ? Video : rule === 'In-person' ? User : Coffee;
+                  const RuleIcon = rule === 'Online' ? Video : rule === 'In-person' ? User : Coffee;
 
                   return (
                     <motion.div 
@@ -303,14 +306,14 @@ export default function DoctorSchedule() {
                           style={{ 
                             width: '100%', fontSize: 13, fontWeight: 800, padding: '10px 14px', borderRadius: 12, 
                             border: 'none', 
-                            background: rule === 'Video' ? 'rgba(239,35,60,0.15)' : rule === 'In-person' ? 'rgba(76,201,240,0.15)' : 'rgba(141,153,174,0.15)',
+                            background: rule === 'Online' ? 'rgba(239,35,60,0.15)' : rule === 'In-person' ? 'rgba(76,201,240,0.15)' : 'rgba(141,153,174,0.15)',
                             color: getRuleColor(),
                             outline: 'none', cursor: 'pointer', appearance: 'none',
                             textAlign: 'center', transition: 'all 0.3s'
                           }}
                         >
-                          <option value="In-person">Clinic</option>
-                          <option value="Video">Video</option>
+                          <option value="In-person">In-person</option>
+                          <option value="Online">Online</option>
                           <option value="Day-off">Day-off</option>
                         </select>
                       </div>
@@ -417,9 +420,9 @@ export default function DoctorSchedule() {
                   return (
                     <div key={`col-${i}`} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       {daySlots.length > 0 ? daySlots.map(slot => {
-                        const isVideo = slot.type === 'Video';
-                        const themeColor = isVideo ? '#EF233C' : '#4CC9F0';
-                        const bgColor = isVideo ? 'rgba(239,35,60,0.05)' : 'rgba(76,201,240,0.05)';
+                        const isOnline = slot.type === 'Online';
+                        const themeColor = isOnline ? '#EF233C' : '#4CC9F0';
+                        const bgColor = isOnline ? 'rgba(239,35,60,0.05)' : 'rgba(76,201,240,0.05)';
                         
                         return (
                           <motion.div 
@@ -428,7 +431,7 @@ export default function DoctorSchedule() {
                               scale: 1.04, 
                               backgroundColor: bgColor,
                               borderColor: themeColor,
-                              boxShadow: `0 10px 20px ${isVideo ? 'rgba(239,35,60,0.1)' : 'rgba(76,201,240,0.1)'}`
+                              boxShadow: `0 10px 20px ${isOnline ? 'rgba(239,35,60,0.1)' : 'rgba(76,201,240,0.1)'}`
                             }}
                             onClick={() => openEditModal(slot)}
                             style={{ 
@@ -441,7 +444,7 @@ export default function DoctorSchedule() {
                               {formatTime(slot.startTime).toLowerCase()}
                             </p>
                             <span style={{ fontSize: 9, color: '#8D99AE', fontWeight: 800, textTransform: 'uppercase', marginTop: 4, display: 'block', letterSpacing: '0.05em' }}>
-                              {isVideo ? 'Video' : 'Clinic'}
+                              {isOnline ? 'Online' : 'In-person'}
                             </span>
                             
                             {/* Trash Icon - Subtle presence */}
@@ -534,8 +537,8 @@ export default function DoctorSchedule() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</label>
                   <select name="type" value={form.type} onChange={onChange} className="mg-input">
-                    <option value="In-person">In-person Visit</option>
-                    <option value="Video">Video Consultation</option>
+                    <option value="In-person">In-person</option>
+                    <option value="Online">Online</option>
                   </select>
                 </div>
 

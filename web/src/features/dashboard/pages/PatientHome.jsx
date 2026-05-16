@@ -85,63 +85,78 @@ export default function PatientHome() {
       <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Find your perfect doctor{firstName ? `, ${firstName}` : ''}</h1>
-          <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Browse verified specialists and book your appointment in seconds</p>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+            {firstName ? `Welcome back, ${firstName}` : 'Find Your Specialist'}
+          </h1>
+          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Access world-class medical professionals in just a few clicks</p>
         </motion.div>
 
-        {/* Search & Advanced Filters Container */}
-        <div style={{ marginBottom: 32 }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-            style={{ position: 'relative', marginBottom: 16 }}>
-            <Search size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
-            <input type="text" value={query} onChange={e => setQuery(e.target.value)}
-              placeholder="Search by name or clinic/hospital name…"
-              className="mg-input" style={{ paddingLeft: 44 }} />
-          </motion.div>
+        {/* Search & Advanced Filters Console */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+          style={{ marginBottom: 32, background: '#FFFFFF', padding: '24px', borderRadius: 24, border: '1px solid rgba(43,45,66,0.06)', boxShadow: '0 8px 32px rgba(43,45,66,0.02)' }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={18} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+              <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+                placeholder="Search by name, clinic, or hospital..."
+                className="mg-input" style={{ paddingLeft: 48, borderRadius: 16, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.04)' }} />
+            </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
             {/* Consultation Type Toggle */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#8D99AE', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Consultation:</span>
-              <div style={{ display: 'flex', background: 'rgba(43,45,66,0.04)', padding: 4, borderRadius: 10 }}>
-                {['All', 'Online', 'In-Person'].map(type => (
-                  <button key={type} 
-                    onClick={() => setFilters(p => ({ ...p, consultationType: type }))}
-                    style={{
-                      padding: '6px 12px', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                      background: filters.consultationType === type ? '#fff' : 'transparent',
-                      color: filters.consultationType === type ? '#EF233C' : '#8D99AE',
-                      boxShadow: filters.consultationType === type ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                      transition: 'all 0.2s'
-                    }}>
-                    {type}
-                  </button>
-                ))}
-              </div>
+            <div style={{ display: 'flex', background: 'rgba(43,45,66,0.04)', padding: 4, borderRadius: 12 }}>
+              {['All', 'Online', 'In-person'].map(type => (
+                <button key={type} 
+                  onClick={() => setFilters(p => ({ ...p, consultationType: type }))}
+                  style={{
+                    padding: '8px 16px', border: 'none', borderRadius: 10, fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                    background: filters.consultationType === type ? '#fff' : 'transparent',
+                    color: filters.consultationType === type ? '#EF233C' : '#8D99AE',
+                    boxShadow: filters.consultationType === type ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    transition: 'all 0.2s',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em'
+                  }}>
+                  {type === 'All' ? 'All' : type}
+                </button>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Specialty pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}
+          className="specialty-scroll"
           style={{ 
             display: 'flex', 
-            gap: 8, 
+            gap: 10, 
             flexWrap: 'nowrap', 
-            marginBottom: 24, 
+            marginBottom: 32, 
             overflowX: 'auto', 
-            paddingBottom: 12, 
+            paddingBottom: 16, 
             WebkitOverflowScrolling: 'touch',
-            msOverflowStyle: 'auto',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#EF233C transparent'
           }}>
+          <style>{`
+            .specialty-scroll::-webkit-scrollbar {
+              height: 4px;
+            }
+            .specialty-scroll::-webkit-scrollbar-track {
+              background: rgba(43,45,66,0.03);
+              border-radius: 10px;
+            }
+            .specialty-scroll::-webkit-scrollbar-thumb {
+              background: rgba(43,45,66,0.1);
+              border-radius: 10px;
+            }
+            .specialty-scroll::-webkit-scrollbar-thumb:hover {
+              background: rgba(239,35,60,0.3);
+            }
+          `}</style>
           {SPECIALTIES.map(s => (
             <button key={s} onClick={() => setActiveSpecialty(s)}
               style={activeSpecialty === s
-                ? { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(239,35,60,0.25)', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
-                : { padding: '6px 16px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
+                ? { padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 800, background: '#2B2D42', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(43,45,66,0.15)', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
+                : { padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 700, background: '#fff', border: '1px solid rgba(43,45,66,0.06)', color: '#8D99AE', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
               }>
               {s}
             </button>
@@ -173,12 +188,12 @@ export default function PatientHome() {
                   onClick={() => setSelectedDoctor(doctor)}
                   className="card"
                   style={{ 
-                    padding: 24, 
+                    padding: 32, 
                     textAlign: 'left', 
                     cursor: 'pointer', 
                     background: '#FFFFFF', 
                     border: '1px solid rgba(43,45,66,0.06)', 
-                    borderRadius: 20, 
+                    borderRadius: 32, 
                     position: 'relative', 
                     overflow: 'hidden', 
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -186,16 +201,16 @@ export default function PatientHome() {
                     flexDirection: 'column',
                     height: '100%'
                   }}
-                  whileHover={{ y: -6, boxShadow: `0 20px 40px rgba(43,45,66,0.08), 0 0 0 1px ${accent}30` }}>
+                  whileHover={{ y: -8, boxShadow: `0 32px 64px rgba(43,45,66,0.08)` }}>
                   
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, background: `rgba(${rgb},0.06)`, border: `1px solid rgba(${rgb},0.12)`, color: accent }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <div style={{ width: 56, height: 56, borderRadius: 18, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, background: `rgba(${rgb},0.08)`, border: `2px solid rgba(${rgb},0.1)`, color: accent }}>
                       <AuthImage src={doctor.profilePictureUrl} alt={doctor.doctorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         fallback={<>{doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}</>} />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.1)' }}>
                       <BadgeCheck size={12} style={{ color: '#16A34A' }} />
-                      <span style={{ fontSize: 10, fontWeight: 700, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Verified</span>
+                      <span style={{ fontSize: 10, fontWeight: 900, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Verified</span>
                     </div>
                   </div>
 
@@ -232,8 +247,8 @@ export default function PatientHome() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: accent, marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(43,45,66,0.04)' }}>
-                    View Profile <ChevronRight size={14} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, color: accent, marginTop: 'auto', paddingTop: 16, borderTop: '1px solid rgba(43,45,66,0.04)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    View Profile <ArrowRight size={14} />
                   </div>
                 </motion.div>
               );
