@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageSquare } from 'lucide-react';
+import { Send, Search, MessageSquare, Phone, Video, MoreVertical, CheckCheck, Clock } from 'lucide-react';
 import { chatApi, authApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import AuthImage from '../../../shared/ui/AuthImage';
 
 const APPT_CONFIRM_TAG = '[APPT_CONFIRMED]';
 
@@ -64,7 +65,6 @@ export default function ChatInterface() {
 
   const loadMessages = useCallback(async (userId) => {
     if (!userId) return;
-    setLoadingMsgs(true);
     try {
       const res = await chatApi.conversation(userId);
       const list = res.data?.data ?? res.data;
@@ -75,23 +75,33 @@ export default function ChatInterface() {
 
   useEffect(() => {
     if (!selected) return;
+    setLoadingMsgs(true);
     loadMessages(selected.userId);
-    pollRef.current = setInterval(() => loadMessages(selected.userId), 5000);
+    pollRef.current = setInterval(() => loadMessages(selected.userId), 4000);
     return () => clearInterval(pollRef.current);
   }, [selected, loadMessages]);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => { 
+    if (messages.length > 0) {
+      endRef.current?.scrollIntoView({ behavior: 'smooth' }); 
+    }
+  }, [messages]);
 
   async function handleSend(e) {
-    e.preventDefault();
-    if (!text.trim() || !selected) return;
+    if (e) e.preventDefault();
+    if (!text.trim() || !selected || sending) return;
+    
+    const content = text.trim();
+    setText('');
     setSending(true);
-    const content = text.trim(); setText('');
     try {
       await chatApi.sendMessage({ receiverId: selected.userId, content });
       await loadMessages(selected.userId);
-    } catch { setText(content); }
-    finally { setSending(false); }
+    } catch { 
+      setText(content); 
+    } finally { 
+      setSending(false); 
+    }
   }
 
   const grouped = messages.reduce((acc, msg) => {
@@ -108,174 +118,275 @@ export default function ChatInterface() {
   const showQuickReplies = me?.role === 'PATIENT' && Boolean(lastIncomingConfirmation);
   const quickReplies = [
     'Thank you, doctor. I confirm my attendance.',
-    'Thanks for confirming. Is there anything I should prepare?',
-    'I appreciate the confirmation. May I ask about pre-visit requirements?'
+    'Is there anything I should prepare for my visit?',
+    'I appreciate the confirmation. See you there!'
   ];
 
   return (
     <AppShell user={me}>
-      <div style={{ display: 'flex', flex: 1, height: '100%', minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          display: 'flex', flex: 1, height: '100%', minHeight: 0, overflow: 'hidden', 
+          background: '#FFFFFF', borderRadius: 24, 
+          border: '1px solid rgba(43,45,66,0.06)',
+          boxShadow: '0 8px 32px rgba(43,45,66,0.03)'
+        }}>
 
         {/* Contacts sidebar */}
-        <aside style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRight: '1px solid rgba(43,45,66,0.08)' }}>
-          <div style={{ padding: 16, borderBottom: '1px solid rgba(43,45,66,0.08)' }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', marginBottom: 4 }}>Your conversations</p>
-            <p style={{ fontSize: 11, color: '#8D99AE', marginBottom: 12 }}>Chat with your healthcare contacts</p>
+        <aside style={{ width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRight: '1px solid rgba(43,45,66,0.06)', zIndex: 10 }}>
+          <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(43,45,66,0.04)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>Messages</h2>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <MessageSquare size={16} style={{ color: '#EF233C' }} />
+              </div>
+            </div>
+            
             <div style={{ position: 'relative' }}>
-              <Search size={13} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(43,45,66,0.4)' }} />
+              <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
               <input type="text" value={contactQuery} onChange={e => setContactQuery(e.target.value)}
-                placeholder="Search…" className="mg-input" style={{ paddingLeft: 32, padding: '8px 12px 8px 32px', fontSize: 13, background: 'rgba(237,242,244,0.5)', border: '1px solid rgba(43,45,66,0.08)' }} />
+                placeholder="Search conversations..." 
+                className="mg-input" 
+                style={{ paddingLeft: 42, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.05)', fontSize: 13, height: 44, borderRadius: 12 }} />
             </div>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px' }}>
             {loadingContacts ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-                <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.1)', borderTopColor: '#EF233C' }} />
               </div>
             ) : contacts.length === 0 ? (
-              <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(43,45,66,0.5)', marginBottom: 6 }}>No contacts yet</p>
-                <p style={{ fontSize: 11, color: 'rgba(43,45,66,0.4)', lineHeight: 1.5 }}>
-                  You can message doctors once you have a confirmed or completed appointment with them.
-                </p>
+              <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(141,153,174,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                   <MessageSquare size={20} style={{ color: '#8D99AE' }} />
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', marginBottom: 8 }}>No active chats</p>
+                <p style={{ fontSize: 12, color: '#8D99AE', lineHeight: 1.6 }}>Message doctors once you have an appointment confirmed.</p>
               </div>
-            ) : contacts.map(c => (
-              <button key={c.userId} onClick={() => setSelected(c)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', textAlign: 'left', cursor: 'pointer', transition: 'all 0.15s', background: selected?.userId === c.userId ? 'rgba(239,35,60,0.04)' : 'transparent', borderRight: `2px solid ${selected?.userId === c.userId ? '#EF233C' : 'transparent'}`, border: 'none' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(217,4,41,0.15))', color: '#EF233C' }}>
-                  {(c.firstName?.[0] || '?').toUpperCase()}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#2B2D42', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.firstName} {c.lastName}</p>
-                  {c.role && <p style={{ fontSize: 10, color: 'rgba(43,45,66,0.5)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.role}</p>}
-                </div>
-              </button>
-            ))}
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {contacts.map(c => {
+                  const isSelected = selected?.userId === c.userId;
+                  return (
+                    <motion.button 
+                      key={c.userId} 
+                      onClick={() => setSelected(c)}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      style={{ 
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 12px', 
+                        borderRadius: 14, textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', 
+                        background: isSelected ? 'rgba(239,35,60,0.04)' : 'transparent', 
+                        border: isSelected ? '1px solid rgba(239,35,60,0.1)' : '1px solid transparent',
+                        boxShadow: isSelected ? '0 4px 12px rgba(239,35,60,0.04)' : 'none'
+                      }}>
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 16, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(43,45,66,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <AuthImage src={c.profilePictureUrl} alt={c.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            fallback={<span style={{ fontSize: 15, fontWeight: 700, color: '#EF233C' }}>{(c.firstName?.[0] || '?').toUpperCase()}</span>} />
+                        </div>
+                        <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: '#22C55E', border: '2px solid #fff' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 2 }}>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
+                            {c.role === 'DOCTOR' ? `Dr. ${c.firstName} ${c.lastName}` : `${c.firstName} ${c.lastName}`}
+                          </p>
+                        </div>
+                        <p style={{ fontSize: 12, color: '#8D99AE', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>{c.role || 'User'}</p>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </aside>
 
         {/* Chat area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#EDF2F4' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#F0F2F5' }}>
           {!selected ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', background: 'rgba(43,45,66,0.04)', border: '1px solid rgba(43,45,66,0.08)' }}>
-                  <MessageSquare size={22} style={{ color: 'rgba(43,45,66,0.3)' }} />
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF' }}>
+              <div style={{ textAlign: 'center', maxWidth: 300 }}>
+                <div style={{ width: 80, height: 80, borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', background: 'rgba(239,35,60,0.03)', border: '1px solid rgba(239,35,60,0.06)' }}>
+                  <MessageSquare size={32} style={{ color: 'rgba(239,35,60,0.2)' }} />
                 </div>
-                <p style={{ fontSize: 14, fontWeight: 500, color: '#8D99AE' }}>Select a contact to start chatting</p>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', marginBottom: 8 }}>Select a conversation</h3>
+                <p style={{ fontSize: 14, color: '#8D99AE', lineHeight: 1.6 }}>Choose a contact from the sidebar to view your messages and start chatting.</p>
               </div>
             </div>
           ) : (
             <>
               {/* Chat header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(217,4,41,0.15))', color: '#EF233C' }}>
-                  {(selected.firstName?.[0] || '?').toUpperCase()}
+              <div style={{ 
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', 
+                background: '#FFFFFF', borderBottom: '1px solid rgba(43,45,66,0.06)', flexShrink: 0,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(239,35,60,0.1), rgba(43,45,66,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AuthImage src={selected.profilePictureUrl} alt={selected.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      fallback={<span style={{ fontSize: 16, fontWeight: 700, color: '#EF233C' }}>{(selected.firstName?.[0] || '?').toUpperCase()}</span>} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: 0 }}>
+                      {selected.role === 'DOCTOR' ? `Dr. ${selected.firstName} ${selected.lastName}` : `${selected.firstName} ${selected.lastName}`}
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#22C55E' }}>Online</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>{selected.firstName} {selected.lastName}</p>
-                  {selected.role && <p style={{ fontSize: 10, color: 'rgba(43,45,66,0.5)' }}>{selected.role}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Phone size={16} /></button>
+                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><Video size={16} /></button>
+                   <button style={{ width: 38, height: 38, borderRadius: 12, border: '1px solid rgba(43,45,66,0.06)', background: '#F8F9FA', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2B2D42' }}><MoreVertical size={16} /></button>
                 </div>
               </div>
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 24, scrollbarWidth: 'none' }}>
                 {loadingMsgs ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-                    <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                    <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.1)', borderTopColor: '#EF233C' }} />
                   </div>
                 ) : messages.length === 0 ? (
-                  <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(43,45,66,0.5)', padding: '32px 0' }}>No messages yet. Say hello!</p>
+                  <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                     <p style={{ fontSize: 14, fontWeight: 500, color: '#8D99AE' }}>No messages yet. Say hello! 👋</p>
+                  </div>
                 ) : Object.entries(grouped).map(([day, msgs]) => (
-                  <div key={day}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' }}>
-                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.06)' }} />
-                      <span style={{ fontSize: 11, color: 'rgba(43,45,66,0.5)', padding: '3px 10px', borderRadius: 99, background: 'rgba(43,45,66,0.04)', border: '1px solid rgba(43,45,66,0.06)' }}>{day}</span>
-                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.06)' }} />
+                  <div key={day} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.05)' }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#8D99AE', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{day}</span>
+                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.05)' }} />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {msgs.map(msg => {
-                        const isMe = String(msg.senderId) === String(me?.id);
-                        const apptData = parseAppointmentConfirmation(msg.content);
-                        const bubbleStyle = apptData
-                          ? { background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', borderRadius: 16, boxShadow: '0 2px 10px rgba(43,45,66,0.05)' }
-                          : (isMe
-                            ? { background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', borderBottomRightRadius: 4, boxShadow: '0 4px 16px rgba(239,35,60,0.2)' }
-                            : { background: '#FFFFFF', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', borderBottomLeftRadius: 4, boxShadow: '0 2px 8px rgba(43,45,66,0.02)' }
-                          );
-                        return (
-                          <motion.div key={msg.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-                            style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                            <div style={{ maxWidth: 340, padding: '10px 14px', borderRadius: 18, fontSize: 14, ...bubbleStyle }}>
-                              {apptData ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                  <div>
-                                    <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>Appointment Confirmed</p>
-                                    <p style={{ fontSize: 12, color: 'rgba(43,45,66,0.7)', margin: 0 }}>
-                                      Your booking has been approved and is now confirmed.
-                                    </p>
+                    
+                    {msgs.map((msg, i) => {
+                      const isMe = String(msg.senderId) === String(me?.id);
+                      const apptData = parseAppointmentConfirmation(msg.content);
+                      
+                      return (
+                        <motion.div 
+                          key={msg.id} 
+                          initial={{ opacity: 0, x: isMe ? 10 : -10 }} 
+                          animate={{ opacity: 1, x: 0 }}
+                          style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            alignItems: isMe ? 'flex-end' : 'flex-start' 
+                          }}>
+                          
+                          <div style={{ 
+                            maxWidth: '75%', 
+                            padding: apptData ? '20px' : '12px 18px', 
+                            borderRadius: 20, 
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                            position: 'relative',
+                            background: apptData ? '#FFFFFF' : (isMe ? 'linear-gradient(135deg, #EF233C, #D90429)' : '#FFFFFF'),
+                            color: apptData ? '#2B2D42' : (isMe ? '#FFFFFF' : '#2B2D42'),
+                            boxShadow: isMe ? '0 6px 16px rgba(239,35,60,0.12)' : '0 4px 12px rgba(43,45,66,0.04)',
+                            border: apptData ? '1px solid rgba(43,45,66,0.08)' : (isMe ? 'none' : '1px solid rgba(43,45,66,0.05)')
+                          }}>
+                            {apptData ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid rgba(43,45,66,0.06)' }}>
+                                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(34,197,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <CheckCheck size={16} style={{ color: '#16A34A' }} />
                                   </div>
-                                  <div style={{ display: 'grid', gap: 6 }}>
-                                    {apptData.Doctor && (
-                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Doctor:</strong> {apptData.Doctor}</p>
-                                    )}
-                                    {apptData.Patient && (
-                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Patient:</strong> {apptData.Patient}</p>
-                                    )}
-                                    {apptData.When && (
-                                      <p style={{ fontSize: 12, margin: 0 }}><strong>When:</strong> {apptData.When}</p>
-                                    )}
-                                    {apptData.Type && (
-                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Type:</strong> {apptData.Type}</p>
-                                    )}
-                                    {apptData.Location && (
-                                      <p style={{ fontSize: 12, margin: 0 }}><strong>Location:</strong> {apptData.Location}</p>
-                                    )}
-                                  </div>
+                                  <p style={{ fontSize: 14, fontWeight: 800, margin: 0, color: '#2B2D42' }}>Appointment Confirmed</p>
                                 </div>
-                              ) : (
-                                <p style={{ lineHeight: 1.5 }}>{msg.content}</p>
-                              )}
-                              <p style={{ fontSize: 11, marginTop: 4, color: isMe ? 'rgba(255,255,255,0.6)' : 'rgba(43,45,66,0.4)' }}>
-                                {fmtTime(msg.sentAt || msg.createdAt)}
-                              </p>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                  {Object.entries(apptData).map(([key, val]) => (
+                                    <div key={key}>
+                                      <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>{key}</p>
+                                      <p style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', margin: 0 }}>{val}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <p style={{ margin: 0 }}>{msg.content}</p>
+                            )}
+                          </div>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6, opacity: 0.6 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: '#8D99AE' }}>{fmtTime(msg.sentAt || msg.createdAt)}</span>
+                            {isMe && <CheckCheck size={12} style={{ color: '#EF233C' }} />}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 ))}
                 <div ref={endRef} />
               </div>
 
-              {/* Input */}
-              <div style={{ background: 'rgba(255,255,255,0.9)', borderTop: '1px solid rgba(43,45,66,0.08)', backdropFilter: 'blur(12px)', flexShrink: 0 }}>
+              {/* Input Area */}
+              <div style={{ 
+                background: '#FFFFFF', padding: '20px 24px', 
+                borderTop: '1px solid rgba(43,45,66,0.06)', flexShrink: 0 
+              }}>
                 {showQuickReplies && (
-                  <div style={{ display: 'flex', gap: 8, padding: '10px 20px 0', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
                     {quickReplies.map(reply => (
-                      <button
+                      <motion.button
                         key={reply}
                         type="button"
-                        onClick={() => { setText(reply); inputRef.current?.focus(); }}
-                        style={{ fontSize: 11, fontWeight: 600, padding: '6px 10px', borderRadius: 999, border: '1px solid rgba(43,45,66,0.12)', background: '#FFFFFF', color: '#2B2D42' }}
+                        whileHover={{ y: -2, background: 'rgba(239,35,60,0.04)' }}
+                        onClick={() => setText(reply)}
+                        style={{ 
+                          fontSize: 11, fontWeight: 700, padding: '8px 16px', 
+                          borderRadius: 99, border: '1px solid rgba(239,35,60,0.15)', 
+                          background: '#FFFFFF', color: '#EF233C', cursor: 'pointer',
+                          whiteSpace: 'nowrap'
+                        }}
                       >
                         {reply}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 )}
-                <form onSubmit={handleSend} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px' }}>
-                  <input ref={inputRef} type="text" value={text} onChange={e => setText(e.target.value)}
-                    placeholder="Type a message…" className="mg-input" style={{ flex: 1, padding: '10px 16px', background: 'rgba(237,242,244,0.5)', border: '1px solid rgba(43,45,66,0.08)' }} />
-                  <button type="submit" disabled={!text.trim() || sending}
-                    style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', border: 'none', cursor: 'pointer', opacity: (!text.trim() || sending) ? 0.4 : 1, transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(239,35,60,0.25)' }}>
-                    {sending ? <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Send size={15} color="#fff" />}
-                  </button>
+                
+                <form onSubmit={handleSend} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <input 
+                      ref={inputRef} 
+                      type="text" 
+                      value={text} 
+                      onChange={e => setText(e.target.value)}
+                      placeholder="Type your message here..." 
+                      className="mg-input" 
+                      style={{ 
+                        padding: '14px 20px', background: '#F8F9FA', 
+                        border: '1px solid rgba(43,45,66,0.05)', borderRadius: 16,
+                        fontSize: 14, transition: 'all 0.2s'
+                      }} 
+                    />
+                  </div>
+                  <motion.button 
+                    type="submit" 
+                    disabled={!text.trim() || sending}
+                    whileHover={(!text.trim() || sending) ? {} : { scale: 1.05 }}
+                    whileTap={(!text.trim() || sending) ? {} : { scale: 0.95 }}
+                    style={{ 
+                      width: 48, height: 48, borderRadius: 16, 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      flexShrink: 0, background: 'linear-gradient(135deg, #EF233C, #D90429)', 
+                      border: 'none', cursor: 'pointer',
+                      boxShadow: '0 6px 16px rgba(239,35,60,0.25)',
+                      opacity: (!text.trim() || sending) ? 0.4 : 1
+                    }}>
+                    {sending ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Send size={18} color="#fff" />}
+                  </motion.button>
                 </form>
               </div>
             </>
           )}
+        </div>
         </div>
       </div>
     </AppShell>
