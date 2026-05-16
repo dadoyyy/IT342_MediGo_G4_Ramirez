@@ -94,6 +94,8 @@ export const adminApi = {
   rejectSpecializationChange: (requestId, note) => api.put(`/admin/specialization-change-requests/${requestId}/reject`, note ? { note } : {}),
   approveDoctor: (doctorId) => api.put(`/admin/doctors/${doctorId}/approve`),
   rejectDoctor: (doctorId, reason) => api.put(`/admin/doctors/${doctorId}/reject`, { reason }),
+  deleteDoctorAccount: (doctorId, reason) => api.delete(`/admin/doctors/${doctorId}`, { data: { reason } }),
+  deletePatientAccount: (patientId, reason) => api.delete(`/admin/patients/${patientId}`, { data: { reason } }),
   serveDocument: (filename) => api.get(`/admin/documents/${filename}`, { responseType: 'blob' }),
 };
 

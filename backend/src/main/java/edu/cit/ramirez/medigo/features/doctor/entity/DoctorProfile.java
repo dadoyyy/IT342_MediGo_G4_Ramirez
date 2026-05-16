@@ -50,6 +50,9 @@ public class DoctorProfile {
     @Column(name = "education", length = 500)
     private String education;
 
+    @Column(name = "consultation_fee")
+    private Double consultationFee;
+
     // ── Document uploads ──────────────────────────────────────────────────────
     @Column(name = "profile_picture_url", length = 512)
     private String profilePictureUrl;

@@ -10,6 +10,7 @@ import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
+import edu.cit.ramirez.medigo.features.appointment.AppointmentRepository;
 import edu.cit.ramirez.medigo.shared.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ public class AdminService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final edu.cit.ramirez.medigo.features.user.UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
     private final EmailService emailService;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
@@ -37,26 +39,17 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto getAnalytics() {
-        long totalDoctors = userRepository.countByRole("DOCTOR");
+        long verifiedDoctors = doctorProfileRepository.countByVerifiedTrue();
         long totalPatients = userRepository.countByRole("PATIENT");
         long pending = doctorProfileRepository.findByVerifiedFalse().size();
-        return new edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto(totalDoctors, totalPatients, pending);
+        return new edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto(verifiedDoctors, totalPatients, pending);
     }
 
     @Transactional(readOnly = true)
     public List<DoctorProfileDto> getAllDoctors() {
-        return userRepository.findByRoleOrderByIdDesc("DOCTOR").stream()
-                .map(user -> {
-                    DoctorProfile profile = doctorProfileRepository.findByDoctorId(user.getId()).orElse(null);
-                    if (profile != null) return toDto(profile);
-                    // Fallback for doctors without profiles yet
-                    return DoctorProfileDto.builder()
-                            .doctorId(user.getId())
-                            .doctorName(user.getFullName())
-                            .email(user.getEmail())
-                            .verified(false)
-                            .build();
-                })
+        // Only return doctors with verified profiles for the main management list
+        return doctorProfileRepository.searchVerifiedDoctors(null).stream()
+                .map(this::toDto)
                 .toList();
     }
 
@@ -108,7 +101,9 @@ public class AdminService {
         request.setStatus(DoctorSpecializationChangeStatus.APPROVED);
         request.setAdminNote(note != null ? note.trim() : null);
         request.setDecidedAt(java.time.Instant.now());
-        return toChangeRequestDto(doctorChangeRequestRepository.save(request));
+        DoctorSpecializationChangeRequest saved = doctorChangeRequestRepository.save(request);
+        emailService.sendSpecializationApprovalEmail(saved.getDoctor().getEmail(), saved.getDoctor().getFullName(), saved.getRequestedSpecialization());
+        return toChangeRequestDto(saved);
     }
 
     @Transactional
@@ -121,7 +116,9 @@ public class AdminService {
         request.setStatus(DoctorSpecializationChangeStatus.REJECTED);
         request.setAdminNote(note != null ? note.trim() : null);
         request.setDecidedAt(java.time.Instant.now());
-        return toChangeRequestDto(doctorChangeRequestRepository.save(request));
+        DoctorSpecializationChangeRequest saved = doctorChangeRequestRepository.save(request);
+        emailService.sendSpecializationRejectionEmail(saved.getDoctor().getEmail(), saved.getDoctor().getFullName(), saved.getAdminNote());
+        return toChangeRequestDto(saved);
     }
 
     @Transactional
@@ -151,6 +148,54 @@ public class AdminService {
         // Delete the profile so the doctor can re-submit with corrected documents
         doctorProfileRepository.delete(profile);
         return toDto(profile);
+    }
+
+    @Transactional
+    public void deleteDoctorAccount(Long doctorId, String reason) {
+        User user = userRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found."));
+        
+        if (!"DOCTOR".equals(user.getRole())) {
+            throw new BadRequestException("User is not a doctor.");
+        }
+
+        // 1. Notify the doctor BEFORE deletion while we still have their info
+        emailService.sendDoctorDeletionEmail(user.getEmail(), user.getFullName(), reason);
+
+        // 2. Clean up associated data
+        // Delete appointments where this user is the doctor
+        appointmentRepository.findByDoctorId(doctorId).forEach(appointmentRepository::delete);
+        
+        // Delete profile
+        doctorProfileRepository.findByDoctorId(doctorId).ifPresent(doctorProfileRepository::delete);
+        
+        // Delete specialization change requests
+        doctorChangeRequestRepository.findAllByOrderByCreatedAtDesc().stream()
+                .filter(r -> r.getDoctor().getId().equals(doctorId))
+                .forEach(doctorChangeRequestRepository::delete);
+
+        // 3. Delete the user account itself
+        userRepository.delete(user);
+    }
+
+    @Transactional
+    public void deletePatientAccount(Long patientId, String reason) {
+        User user = userRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found."));
+        
+        if (!"PATIENT".equals(user.getRole())) {
+            throw new BadRequestException("User is not a patient.");
+        }
+
+        // 1. Notify the patient
+        emailService.sendPatientDeletionEmail(user.getEmail(), user.getFullName(), reason);
+
+        // 2. Clean up data
+        // Delete appointments where this user is the patient
+        appointmentRepository.findByPatientId(patientId).forEach(appointmentRepository::delete);
+
+        // 3. Delete the user
+        userRepository.delete(user);
     }
 
     /** Serve a document file for admin review — bypasses the DOCTOR-only endpoint. */
@@ -191,6 +236,10 @@ public class AdminService {
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())
                 .governmentIdUrl(profile.getGovernmentIdUrl())
+                .bio(profile.getBio())
+                .yearsOfExperience(profile.getYearsOfExperience())
+                .education(profile.getEducation())
+                .consultationFee(profile.getConsultationFee())
                 .build();
     }
 

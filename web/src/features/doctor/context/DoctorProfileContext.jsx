@@ -76,7 +76,7 @@ export function ProfileCompletionGuard({ children }) {
 
   // Not filled in yet → go to profile setup
   if (!isProfileComplete) {
-    return <Navigate to="/doctor/profile" replace />;
+    return <Navigate to="/doctor/register" replace />;
   }
 
   // Filled in but awaiting admin approval → go to pending page

@@ -60,7 +60,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 20000, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <AnimatePresence>
           {toasts.map(t => {
             const theme = TOAST_THEME[t.type] || TOAST_THEME.success;

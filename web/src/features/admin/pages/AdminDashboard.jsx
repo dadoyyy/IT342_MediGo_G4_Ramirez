@@ -52,12 +52,11 @@ export default function AdminDashboard() {
     const wrapper = canvas.parentElement;
 
     const draw = () => {
-      // Setup high-DPI canvas
       const rect = wrapper.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       
-      // Minimum width to ensure it always scrolls nicely
-      const logicalWidth = Math.max(rect.width, 1000);
+      // Minimum width to ensure it scrolls for better bar spacing
+      const logicalWidth = Math.max(rect.width, 1100);
       const logicalHeight = 300;
 
       canvas.width = logicalWidth * dpr;
@@ -68,12 +67,11 @@ export default function AdminDashboard() {
       const ctx = canvas.getContext('2d');
       ctx.scale(dpr, dpr);
 
-      const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+      const padding = { top: 40, right: 40, bottom: 40, left: 50 };
 
-      // Group by month
+      // Group by month (Last 6 months)
       const monthlyCounts = {};
       const now = new Date();
-      // Initialize last 6 months
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const label = d.toLocaleString('default', { month: 'short' });
@@ -83,24 +81,21 @@ export default function AdminDashboard() {
       allUsers.forEach(u => {
         if (!u.createdAt) return;
         const d = new Date(u.createdAt);
-        // Only count if within last 6 months
         const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + now.getMonth() - d.getMonth();
         if (diffMonths >= 0 && diffMonths <= 5) {
           const label = d.toLocaleString('default', { month: 'short' });
-          if (monthlyCounts[label] !== undefined) {
-            monthlyCounts[label]++;
-          }
+          if (monthlyCounts[label] !== undefined) monthlyCounts[label]++;
         }
       });
 
       const labels = Object.keys(monthlyCounts);
       const data = Object.values(monthlyCounts);
-      const maxVal = Math.max(...data, 10); // at least 10 for Y axis scale
+      const maxVal = Math.max(...data, 10);
 
       ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
-      // Draw grid & Y axis
-      ctx.strokeStyle = 'rgba(43,45,66,0.08)';
+      // ─── Draw Y Axis & Grid ───
+      ctx.strokeStyle = 'rgba(43,45,66,0.05)';
       ctx.fillStyle = '#8D99AE';
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
@@ -110,58 +105,59 @@ export default function AdminDashboard() {
       for (let i = 0; i <= ySteps; i++) {
         const val = Math.round(maxVal * (i / ySteps));
         const y = logicalHeight - padding.bottom - (i / ySteps) * (logicalHeight - padding.top - padding.bottom);
-        
         ctx.beginPath();
         ctx.moveTo(padding.left, y);
         ctx.lineTo(logicalWidth - padding.right, y);
         ctx.stroke();
-
-        ctx.fillText(val.toString(), padding.left - 8, y);
+        ctx.fillText(val.toString(), padding.left - 12, y);
       }
 
-      // Draw X axis & Line
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      const xStep = (logicalWidth - padding.left - padding.right) / (labels.length - 1 || 1);
-
-      ctx.beginPath();
-      labels.forEach((label, i) => {
-        const x = padding.left + i * xStep;
-        const y = logicalHeight - padding.bottom - (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-
-        ctx.fillText(label, x, logicalHeight - padding.bottom + 8);
-      });
-
-      ctx.strokeStyle = '#EF233C';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // Draw points and fill
-      const grad = ctx.createLinearGradient(0, padding.top, 0, logicalHeight - padding.bottom);
-      grad.addColorStop(0, 'rgba(239,35,60,0.15)');
-      grad.addColorStop(1, 'rgba(239,35,60,0)');
-      
-      ctx.lineTo(logicalWidth - padding.right, logicalHeight - padding.bottom);
-      ctx.lineTo(padding.left, logicalHeight - padding.bottom);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      // ─── Draw Bars ───
+      const availableWidth = logicalWidth - padding.left - padding.right;
+      const barCount = labels.length;
+      const groupWidth = availableWidth / barCount;
+      const barWidth = groupWidth * 0.6; // Bar takes 60% of its group space
 
       const points = [];
       labels.forEach((label, i) => {
-        const x = padding.left + i * xStep;
-        const y = logicalHeight - padding.bottom - (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
-        points.push({ x, y, label, value: data[i] });
+        const xCenter = padding.left + (i * groupWidth) + (groupWidth / 2);
+        const xStart = xCenter - (barWidth / 2);
+        const barHeight = (data[i] / maxVal) * (logicalHeight - padding.top - padding.bottom);
+        const yStart = logicalHeight - padding.bottom - barHeight;
 
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#EF233C';
-        ctx.stroke();
+        // Save metadata for tooltip interaction
+        points.push({ x: xCenter, y: yStart, label, value: data[i], rect: { x: xStart, y: yStart, w: barWidth, h: barHeight } });
+
+        // Draw Bar Shadow/Glow (Subtle)
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(239,35,60,0.1)';
+        
+        // Draw Bar with Gradient
+        const barGrad = ctx.createLinearGradient(xStart, yStart, xStart, logicalHeight - padding.bottom);
+        barGrad.addColorStop(0, '#EF233C');
+        barGrad.addColorStop(1, '#D90429');
+        
+        ctx.fillStyle = barGrad;
+        // Rounded corners for bars
+        const r = 8;
+        if (barHeight > 0) {
+          ctx.beginPath();
+          ctx.roundRect(xStart, yStart, barWidth, barHeight, [r, r, 0, 0]);
+          ctx.fill();
+        }
+
+        ctx.shadowBlur = 0; // Reset shadow
+
+        // Draw Value Label on top of bar
+        ctx.fillStyle = '#2B2D42';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(data[i].toString(), xCenter, yStart - 12);
+
+        // Draw X Label (Month)
+        ctx.fillStyle = '#8D99AE';
+        ctx.font = '500 11px Inter, sans-serif';
+        ctx.fillText(label, xCenter, logicalHeight - padding.bottom + 18);
       });
 
       chartDataRef.current = { points, width: logicalWidth };
@@ -282,8 +278,10 @@ export default function AdminDashboard() {
                         position: 'absolute',
                         left: hoveredPoint.x,
                         top: hoveredPoint.y - 45,
-                        transform: hoveredPoint.x > (chartDataRef.current.width - 150) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
-                        marginLeft: hoveredPoint.x > (chartDataRef.current.width - 150) ? -12 : hoveredPoint.x < 150 ? 12 : 0,
+                        // Fix clipping: flip tooltip inward if it's past the 80% mark of the chart width
+                        transform: hoveredPoint.x > (chartDataRef.current.width * 0.8) ? 'translateX(-100%)' : hoveredPoint.x < 150 ? 'translateX(0)' : 'translateX(-50%)',
+                        // Adjust margins based on side to prevent edge-touching
+                        marginLeft: hoveredPoint.x > (chartDataRef.current.width * 0.8) ? -16 : hoveredPoint.x < 150 ? 16 : 0,
                         background: '#FFFFFF',
                         border: '1px solid rgba(239,35,60,0.2)',
                         padding: '8px 12px',

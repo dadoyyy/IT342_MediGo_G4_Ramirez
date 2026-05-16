@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Stethoscope, Building2, MapPin, ArrowRight,
-  CheckCircle, AlertCircle, FileText, Upload, Camera, X, Clock
+  CheckCircle, AlertCircle, FileText, Upload, Camera, X, Clock, Banknote, Activity
 } from 'lucide-react';
 import { authApi, doctorApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
@@ -23,6 +23,7 @@ function validate(form) {
   if (!form.bio || form.bio.trim().length < 20) e.bio = 'Bio must be at least 20 characters.';
   if (!form.yearsOfExperience || isNaN(parseInt(form.yearsOfExperience))) e.yearsOfExperience = 'Valid years of experience is required.';
   if (!form.education || !form.education.trim()) e.education = 'Education / Medical school is required.';
+  if (!form.consultationFee || isNaN(parseFloat(form.consultationFee))) e.consultationFee = 'Valid consultation fee is required.';
   return e;
 }
 
@@ -50,7 +51,8 @@ export default function DoctorProfile() {
     clinicAddress: '',
     bio: '',
     yearsOfExperience: '',
-    education: ''
+    education: '',
+    consultationFee: ''
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [apiError, setApiError] = useState('');
@@ -78,7 +80,8 @@ export default function DoctorProfile() {
                      form.clinicAddress.trim() &&
                      form.bio.trim().length >= 20 &&
                      form.yearsOfExperience !== '' &&
-                     form.education.trim() !== '';
+                     form.education.trim() !== '' &&
+                     form.consultationFee !== '';
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
   const canSave = !!(formFilled && allDocsUploaded && !saving);
 
@@ -105,6 +108,7 @@ export default function DoctorProfile() {
               bio:            p.bio            || f.bio,
               yearsOfExperience: p.yearsOfExperience !== undefined ? p.yearsOfExperience : f.yearsOfExperience,
               education:      p.education      || f.education,
+              consultationFee: p.consultationFee || f.consultationFee,
             }));
             setDocs({
               profile_picture:   p.profilePictureUrl   || null,
@@ -150,6 +154,7 @@ export default function DoctorProfile() {
         bio:            form.bio.trim(),
         yearsOfExperience: parseInt(form.yearsOfExperience),
         education:      form.education.trim(),
+        consultationFee: parseFloat(form.consultationFee)
       });
       setSaveSuccess(true);
       if (!isProfileComplete || !isVerified) {
@@ -371,32 +376,36 @@ export default function DoctorProfile() {
           )}
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22 }}
-          style={{ display: 'grid', gridTemplateColumns: isProfileComplete ? 'repeat(auto-fit, minmax(380px, 1fr))' : '1fr', gap: 20, alignItems: 'start' }}>
-
-          {/* Progress bar */}
-          {!isProfileComplete && (
-            <div style={{ marginBottom: 20, padding: '16px 20px', borderRadius: 14, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.07)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE' }}>PROFILE COMPLETION</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: doneSteps === totalSteps ? '#EF233C' : '#8D99AE' }}>
-                  {doneSteps} / {totalSteps} steps
-                </span>
+        {/* Progress bar (Full Width) */}
+        {!isProfileComplete && (
+          <div style={{ marginBottom: 28, padding: '20px', borderRadius: 16, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.07)', backdropFilter: 'blur(8px)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Activity size={16} style={{ color: '#EF233C' }} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42', letterSpacing: '0.02em' }}>PROFILE COMPLETION PROGRESS</span>
               </div>
-              <div style={{ height: 6, borderRadius: 99, background: 'rgba(43,45,66,0.07)', overflow: 'hidden' }}>
-                <motion.div
-                  animate={{ width: `${(doneSteps / totalSteps) * 100}%` }}
-                  transition={{ duration: 0.4 }}
-                  style={{ height: '100%', borderRadius: 99, background: doneSteps === totalSteps ? 'linear-gradient(90deg, #EF233C, #D90429)' : 'linear-gradient(90deg, #EF233C, #8D99AE)' }}
-                />
-              </div>
-              {doneSteps === totalSteps && (
-                <p style={{ fontSize: 12, color: '#16A34A', marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <CheckCircle size={12} /> All steps complete — you can now submit your profile
-                </p>
-              )}
+              <span style={{ fontSize: 13, fontWeight: 800, color: doneSteps === totalSteps ? '#EF233C' : '#8D99AE' }}>
+                {doneSteps} / {totalSteps} STEPS
+              </span>
             </div>
-          )}
+            <div style={{ height: 10, borderRadius: 99, background: 'rgba(43,45,66,0.07)', overflow: 'hidden', border: '1px solid rgba(43,45,66,0.03)' }}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${(doneSteps / totalSteps) * 100}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #EF233C, #D90429)', boxShadow: '0 0 12px rgba(239,35,60,0.3)' }}
+              />
+            </div>
+            {doneSteps === totalSteps && (
+              <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} style={{ fontSize: 13, color: '#16A34A', marginTop: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <CheckCircle size={14} /> Ready for submission — all required information provided.
+              </motion.p>
+            )}
+          </div>
+        )}
+
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: 24, alignItems: 'start' }}>
 
           {/* ── Profile info card ── */}
           <div className="card" style={{ padding: 28, marginBottom: 20 }}>
@@ -487,22 +496,7 @@ export default function DoctorProfile() {
                   </div>
                 )}
                 
-                {!docs.profile_picture && (
-                  <p style={{ 
-                    fontSize: 11, 
-                    fontWeight: 700, 
-                    color: '#D90429', 
-                    background: 'rgba(217,4,41,0.05)', 
-                    padding: '4px 10px', 
-                    borderRadius: 6,
-                    display: 'inline-block',
-                    marginTop: 10,
-                    letterSpacing: '0.01em',
-                    border: '1px solid rgba(217,4,41,0.1)'
-                  }}>
-                    ⚠️ CRUCIAL: PHOTO REQUIRED FOR VERIFICATION
-                  </p>
-                )}
+
 
                 {docErrors.profile_picture && (
                   <p style={{ fontSize: 11, color: '#D90429', margin: '8px 0 0' }}>⚠ {docErrors.profile_picture}</p>
@@ -543,68 +537,69 @@ export default function DoctorProfile() {
                 </div>
                 <SpecializationSelect
                   value={form.specialization}
-                  onChange={(val) => { setForm(p => ({ ...p, specialization: val })); setFieldErrors(p => ({ ...p, specialization: undefined })); setApiError(''); setSaveSuccess(false); }}
+                  onChange={val => {
+                    setForm(p => ({ ...p, specialization: val }));
+                    setFieldErrors(p => ({ ...p, specialization: undefined }));
+                    setSaveSuccess(false);
+                  }}
                   error={!!fieldErrors.specialization}
-                  disabled={isVerified}
                   placeholder="Select your specializations"
+                  disabled={isVerified}
                 />
                 {isVerified && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                    <p style={{ fontSize: 11, color: 'rgba(141,153,174,0.8)', margin: 0 }}>
-                      Specialization is locked after verification. Use the request option for updates.
-                    </p>
-                    {changeStatus && statusStyles[changeStatus] && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: statusStyles[changeStatus].bg, border: `1px solid ${statusStyles[changeStatus].border}`, color: statusStyles[changeStatus].color }}>
-                        {(() => { const Icon = statusStyles[changeStatus].Icon; return <Icon size={11} />; })()}
-                        {statusStyles[changeStatus].label}
-                      </span>
-                    )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                    <AlertCircle size={14} style={{ color: '#EF233C' }} />
+                    <span style={{ fontSize: 11, color: '#EF233C', fontWeight: 600 }}>SPECIALIZATION LOCKED AFTER VERIFICATION</span>
                   </div>
                 )}
-                {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{fieldErrors.specialization}</p>}
+                {fieldErrors.specialization && <p style={{ fontSize: 12, color: '#D90429', margin: '4px 0 0' }}>{fieldErrors.specialization}</p>}
               </div>
 
-              {/* Clinic fields */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                {[
+                  { name: 'education', label: 'EDUCATION / MEDICAL SCHOOL', Icon: Building2, ph: "e.g. University of Santo Tomas" },
+                  { name: 'yearsOfExperience', label: 'YEARS OF EXPERIENCE', Icon: Clock, ph: "e.g. 5", type: 'number' },
+                  { name: 'consultationFee', label: 'CONSULTATION FEE (₱)', Icon: Banknote, ph: "e.g. 500", type: 'number' },
+                  { name: 'clinicName', label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center" },
+                ].map(({ name, label, Icon, ph, type }) => (
+                  <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', letterSpacing: '0.03em' }}>
+                      {label} <span style={{ color: '#D90429' }}>*</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Icon size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                      <input name={name} type={type || "text"} value={form[name]} onChange={handleChange} placeholder={ph}
+                        className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
+                    </div>
+                    {fieldErrors[name] && <p style={{ fontSize: 12, color: '#D90429', margin: '4px 0 0' }}>{fieldErrors[name]}</p>}
+                  </div>
+                ))}
+              </div>
+
               {[
-                { name: 'education',         label: 'EDUCATION / MEDICAL SCHOOL', Icon: Building2,   ph: "e.g. University of Santo Tomas - Faculty of Medicine", textarea: false },
-                { name: 'yearsOfExperience',  label: 'YEARS OF EXPERIENCE',         Icon: Clock,       ph: "e.g. 5",                                        textarea: false, type: 'number' },
-                { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2,   ph: "e.g. St. Luke's Medical Center",                textarea: false },
-                { name: 'clinicAddress',  label: 'CLINIC ADDRESS',         Icon: MapPin,      ph: 'Full address of your clinic or hospital',        textarea: true  },
-                { name: 'bio',            label: 'PROFESSIONAL BIO',         Icon: FileText,    ph: 'Tell patients about your background, expertise, and care philosophy...', textarea: true },
-              ].map(({ name, label, Icon, ph, textarea, type }) => (
-                <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
+                { name: 'clinicAddress', label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic or hospital' },
+                { name: 'bio', label: 'PROFESSIONAL BIO', Icon: FileText, ph: 'Tell patients about your background, expertise, and care philosophy...', textarea: true },
+              ].map(({ name, label, Icon, ph, textarea }) => (
+                <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', letterSpacing: '0.03em' }}>
                     {label} <span style={{ color: '#D90429' }}>*</span>
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
+                    <Icon size={16} style={{ position: 'absolute', left: 16, top: textarea ? 16 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
                     {textarea ? (
-                      <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={textarea && name === 'bio' ? 5 : 3}
-                        className={`mg-input ${fieldErrors[name] ? 'error' : ''}`}
-                        style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
+                      <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={4}
+                        className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.6 }} />
                     ) : (
-                      <input name={name} type={type || "text"} value={form[name]} onChange={handleChange} placeholder={ph}
-                        className={`mg-input ${fieldErrors[name] ? 'error' : ''}`}
-                        style={{ paddingLeft: 44 }} />
+                      <input name={name} value={form[name]} onChange={handleChange} placeholder={ph}
+                        className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
                     )}
                   </div>
-                  {fieldErrors[name] && <p style={{ fontSize: 12, color: '#D90429', margin: 0 }}>{fieldErrors[name]}</p>}
+                  {fieldErrors[name] && <p style={{ fontSize: 12, color: '#D90429', margin: '4px 0 0' }}>{fieldErrors[name]}</p>}
                 </div>
               ))}
             </form>
 
-            <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="submit"
-                form="profile-form"
-                disabled={!canSave}
-                className="mg-btn"
-                style={{ padding: '12px 18px', opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
-                {saving
-                  ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
-                  : <>Save Changes <ArrowRight size={15} /></>}
-              </button>
-            </div>
+
 
           </div>{/* end profile info card */}
           {/* ── Verification Documents card ── */}

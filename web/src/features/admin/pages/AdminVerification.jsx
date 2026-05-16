@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle, XCircle, Stethoscope, Building2, MapPin,
-  LogOut, ShieldCheck, FileText, X, Check, AlertTriangle
+  LogOut, ShieldCheck, FileText, X, Check, AlertTriangle, Banknote
 } from 'lucide-react';
 import { authApi, adminApi, fetchAuthBlob } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
@@ -348,6 +348,12 @@ export default function AdminVerification() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                               <MapPin size={11} style={{ color: '#8D99AE' }} />
                               <span style={{ fontSize: 12, color: '#8D99AE' }}>{doctor.clinicAddress}</span>
+                            </div>
+                          )}
+                          {doctor.consultationFee && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Banknote size={11} style={{ color: '#16A34A' }} />
+                              <span style={{ fontSize: 12, fontWeight: 700, color: '#16A34A' }}>₱{doctor.consultationFee.toLocaleString()}</span>
                             </div>
                           )}
                         </div>

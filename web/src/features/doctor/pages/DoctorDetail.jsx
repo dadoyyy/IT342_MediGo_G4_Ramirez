@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, BadgeCheck, Calendar, Clock, Stethoscope, CheckCircle, ArrowRight } from 'lucide-react';
+import { ArrowLeft, MapPin, BadgeCheck, Calendar, Clock, Stethoscope, CheckCircle, ArrowRight, Banknote } from 'lucide-react';
 import { doctorApi, appointmentApi, authApi } from '../../../shared/api/api';
+import AuthImage from '../../../shared/ui/AuthImage';
 import axios from 'axios';
 
 function getTodayStr() { return new Date().toISOString().split('T')[0]; }
@@ -122,8 +123,9 @@ export default function DoctorDetail() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
               <div style={{ position: 'relative' }}>
-                <div style={{ width: 120, height: 120, borderRadius: 32, background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, fontWeight: 800, color: '#fff', boxShadow: '0 20px 40px rgba(239,35,60,0.15)' }}>
-                  {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
+                <div style={{ width: 120, height: 120, borderRadius: 32, overflow: 'hidden', background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, fontWeight: 800, color: '#fff', boxShadow: '0 20px 40px rgba(239,35,60,0.15)' }}>
+                  <AuthImage src={doctor.profilePictureUrl} alt={doctor.doctorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    fallback={<>{doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}</>} />
                 </div>
                 <div style={{ position: 'absolute', bottom: -6, right: -6, width: 32, height: 32, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                   <BadgeCheck size={20} style={{ color: '#16A34A' }} />
@@ -152,10 +154,11 @@ export default function DoctorDetail() {
             </motion.div>
 
             {/* Quick Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
               {[
                 { label: 'Experience', value: `${doctor.yearsOfExperience || '0'}+ Years`, icon: <Clock size={18} />, color: '#EF233C' },
                 { label: 'Patients', value: `${doctor.patientCount || '0'}+ Served`, icon: <CheckCircle size={18} />, color: '#16A34A' },
+                { label: 'Consultation Fee', value: `₱${doctor.consultationFee?.toLocaleString() || '---'}`, icon: <Banknote size={18} />, color: '#8D99AE' },
               ].map((stat, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }}
                   style={{ padding: '20px', borderRadius: 24, background: '#fff', border: '1px solid rgba(43,45,66,0.05)', display: 'flex', flexDirection: 'column', gap: 12 }}>

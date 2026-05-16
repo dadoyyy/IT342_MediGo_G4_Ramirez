@@ -77,11 +77,11 @@ export default function NotificationDropdown({
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: open ? 'rgba(239,35,60,0.15)' : 'rgba(255,255,255,0.06)',
-          border: `1px solid ${open ? 'rgba(239,35,60,0.3)' : 'rgba(255,255,255,0.1)'}`,
+          background: open ? 'rgba(239,35,60,0.1)' : 'transparent',
+          border: `1px solid ${open ? 'rgba(239,35,60,0.2)' : 'transparent'}`,
           cursor: 'pointer',
           transition: 'all 0.2s',
-          color: open ? '#EF233C' : 'rgba(237,242,244,0.6)',
+          color: open ? '#EF233C' : '#8D99AE',
         }}
       >
         <Bell size={16} />

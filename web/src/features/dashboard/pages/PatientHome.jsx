@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin, BadgeCheck, ArrowRight, X, Clock, GraduationCap, Building2, Calendar, Stethoscope, ChevronRight, CheckCircle } from 'lucide-react';
+import { Search, MapPin, BadgeCheck, ArrowRight, X, Clock, GraduationCap, Building2, Calendar, Stethoscope, ChevronRight, CheckCircle, Banknote } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import AuthImage from '../../../shared/ui/AuthImage';
 import { AnimatePresence } from 'framer-motion';
 import { authSession } from '../../auth/authSession';
 import MEDICAL_SPECIALIZATIONS from '../../../shared/constants/medicalSpecializations';
@@ -188,8 +189,9 @@ export default function PatientHome() {
                   whileHover={{ y: -6, boxShadow: `0 20px 40px rgba(43,45,66,0.08), 0 0 0 1px ${accent}30` }}>
                   
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, background: `rgba(${rgb},0.06)`, border: `1px solid rgba(${rgb},0.12)`, color: accent }}>
-                      {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
+                    <div style={{ width: 48, height: 48, borderRadius: 14, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, background: `rgba(${rgb},0.06)`, border: `1px solid rgba(${rgb},0.12)`, color: accent }}>
+                      <AuthImage src={doctor.profilePictureUrl} alt={doctor.doctorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        fallback={<>{doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}</>} />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)' }}>
                       <BadgeCheck size={12} style={{ color: '#16A34A' }} />
@@ -221,6 +223,13 @@ export default function PatientHome() {
                         <p style={{ fontSize: 12, color: '#8D99AE', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doctor.clinicName}</p>
                       </div>
                     )}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Banknote size={11} style={{ color: '#16A34A' }} />
+                      </div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: '#16A34A', margin: 0 }}>₱{doctor.consultationFee?.toLocaleString() || '---'}</p>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: accent, marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(43,45,66,0.04)' }}>
@@ -257,8 +266,9 @@ export default function PatientHome() {
               <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px 40px', scrollbarWidth: 'none' }}>
                 {/* Profile Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32, marginTop: 20 }}>
-                  <div style={{ width: 80, height: 80, borderRadius: 24, background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#fff', boxShadow: '0 12px 24px rgba(239,35,60,0.2)' }}>
-                    {selectedDoctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                  <div style={{ width: 80, height: 80, borderRadius: 24, overflow: 'hidden', background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#fff', boxShadow: '0 12px 24px rgba(239,35,60,0.2)' }}>
+                    <AuthImage src={selectedDoctor.profilePictureUrl} alt={selectedDoctor.doctorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      fallback={<>{selectedDoctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</>} />
                   </div>
                   <div>
                     <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2B2D42', margin: '0 0 6px' }}>Dr. {selectedDoctor.doctorName}</h2>
@@ -287,6 +297,20 @@ export default function PatientHome() {
                     <div>
                       <p style={{ fontSize: 11, color: '#8D99AE', margin: 0 }}>Patients</p>
                       <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{selectedDoctor.patientCount || '0'}+ Served</p>
+                    </div>
+                  </div>
+                  <div style={{ padding: 16, borderRadius: 20, background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.1)', display: 'flex', alignItems: 'center', gap: 12, gridColumn: 'span 2' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Banknote size={18} style={{ color: '#16A34A' }} />
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <p style={{ fontSize: 11, color: '#16A34A', fontWeight: 600, margin: 0, textTransform: 'uppercase' }}>Consultation Fee</p>
+                        <p style={{ fontSize: 18, fontWeight: 800, color: '#16A34A', margin: 0 }}>₱{selectedDoctor.consultationFee?.toLocaleString() || '---'}</p>
+                      </div>
+                      <div style={{ padding: '4px 10px', borderRadius: 8, background: '#fff', fontSize: 10, fontWeight: 700, color: '#16A34A', border: '1px solid rgba(22,163,74,0.1)' }}>
+                        PER SESSION
+                      </div>
                     </div>
                   </div>
                 </div>

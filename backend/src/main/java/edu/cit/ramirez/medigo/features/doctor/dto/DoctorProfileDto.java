@@ -26,4 +26,5 @@ public class DoctorProfileDto {
     private String boardCertificateUrl;
     private String governmentIdUrl;
     private Long patientCount;
+    private Double consultationFee;
 }

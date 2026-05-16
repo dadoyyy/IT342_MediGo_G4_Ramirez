@@ -238,6 +238,29 @@ export default function AppShell({ children, user }) {
   /* ── Top Navbar JSX (profile + notifications + logout) ── */
   const topNavbar = (
     <header className="top-navbar">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, color: '#8D99AE', fontWeight: 500 }}>Pages</span>
+        <span style={{ fontSize: 13, color: 'rgba(43,45,66,0.2)', fontWeight: 500 }}>/</span>
+        <span style={{ fontSize: 13, color: '#2B2D42', fontWeight: 600 }}>
+          {(() => {
+            const path = location.pathname;
+            if (path === '/home') return 'Home';
+            if (path === '/appointments') return 'Appointments';
+            if (path === '/chat') return 'Messages';
+            if (path.startsWith('/doctor/dashboard')) return 'Dashboard';
+            if (path.startsWith('/doctor/appointments')) return 'Appointments';
+            if (path.startsWith('/doctor/schedule')) return 'My Schedule';
+            if (path.startsWith('/doctor/profile')) return 'Professional Profile';
+            if (path.startsWith('/doctor/register')) return 'Account Setup';
+            if (path.startsWith('/admin/dashboard')) return 'Dashboard';
+            if (path.startsWith('/admin/verification')) return 'Doctor Verification';
+            if (path.startsWith('/admin/specialization-requests')) return 'Spec. Requests';
+            if (path.startsWith('/admin/doctors')) return 'Doctors List';
+            if (path.startsWith('/admin/patients')) return 'Patients List';
+            return 'Profile';
+          })()}
+        </span>
+      </div>
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {/* Notifications */}
@@ -271,7 +294,7 @@ export default function AppShell({ children, user }) {
             </div>
             <span className="top-navbar-profile-name">{displayName}</span>
             <ChevronDown size={14} style={{
-              color: 'rgba(237,242,244,0.5)',
+              color: '#8D99AE',
               transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />

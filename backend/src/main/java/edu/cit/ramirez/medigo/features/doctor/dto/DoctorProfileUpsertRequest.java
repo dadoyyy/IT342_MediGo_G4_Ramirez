@@ -30,4 +30,6 @@ public class DoctorProfileUpsertRequest {
 
     @Size(max = 500, message = "Education must not exceed 500 characters")
     private String education;
+
+    private Double consultationFee;
 }

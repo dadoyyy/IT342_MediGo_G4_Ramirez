@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Mail, Calendar, Search, X, User, Shield, Info } from 'lucide-react';
+import { Users, Mail, Calendar, Search, X, User, Shield, Info, Trash2, AlertTriangle } from 'lucide-react';
 import { adminApi, authApi } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
 import AppShell from '../../../shared/ui/AppShell';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 export default function AdminPatients() {
   const [user, setUser] = useState(null);
@@ -11,6 +12,9 @@ export default function AdminPatients() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null); // { patient, reason }
+  const [processing, setProcessing] = useState(false);
+  const { addToast } = useToast();
 
   useEffect(() => {
     async function loadData() {
@@ -30,6 +34,25 @@ export default function AdminPatients() {
     p.fullName.toLowerCase().includes(search.toLowerCase()) ||
     p.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  async function handleDelete() {
+    if (!deleteModal.reason?.trim()) {
+      addToast('Please provide a reason for deletion.', 'error');
+      return;
+    }
+    setProcessing(true);
+    try {
+      await adminApi.deletePatientAccount(deleteModal.patient.id, deleteModal.reason);
+      setPatients(prev => prev.filter(p => p.id !== deleteModal.patient.id));
+      addToast(`Account for ${deleteModal.patient.fullName} has been deleted.`, 'success');
+      setDeleteModal(null);
+      setSelectedPatient(null);
+    } catch (err) {
+      addToast('Failed to delete account. Please try again.', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   return (
     <AppShell user={user}>
@@ -120,8 +143,57 @@ export default function AdminPatients() {
                     </div>
                   </div>
                 </div>
-                <div style={{ padding: '20px 32px', background: 'rgba(43,45,66,0.02)', borderTop: '1px solid rgba(43,45,66,0.06)', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button onClick={() => setSelectedPatient(null)} className="mg-btn" style={{ padding: '10px 24px', fontSize: 13 }}>Close Details</button>
+                <div style={{ padding: '20px 32px', background: 'rgba(43,45,66,0.02)', borderTop: '1px solid rgba(43,45,66,0.06)', display: 'flex', justifyContent: 'center' }}>
+                  <button onClick={() => setDeleteModal({ patient: selectedPatient, reason: '' })} 
+                    className="mg-btn"
+                    style={{ width: '100%', padding: '14px', borderRadius: 14, background: '#EF233C', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxShadow: '0 8px 24px rgba(239,35,60,0.25)' }}>
+                    <Trash2 size={18} /> Permanently Delete Account
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Deletion Confirmation Modal */}
+        <AnimatePresence>
+          {deleteModal && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => !processing && setDeleteModal(null)}
+              style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(43,45,66,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+              <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                style={{ background: '#FFFFFF', borderRadius: 24, border: '1px solid rgba(239,35,60,0.15)', width: '100%', maxWidth: 440, padding: 32, boxShadow: '0 24px 64px rgba(43,45,66,0.2)' }}>
+                
+                <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(239,35,60,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '1px solid rgba(239,35,60,0.15)' }}>
+                  <AlertTriangle size={26} style={{ color: '#EF233C' }} />
+                </div>
+
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', textAlign: 'center', margin: '0 0 8px' }}>Delete Patient Account?</h3>
+                <p style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', margin: '0 0 24px', lineHeight: 1.5 }}>
+                  This will permanently delete the account for <strong>{deleteModal.patient.fullName}</strong>. All appointment history will be lost.
+                </p>
+
+                <div style={{ marginBottom: 24 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: '#8D99AE', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>REASON FOR DELETION (WILL BE EMAILED)</label>
+                  <textarea 
+                    value={deleteModal.reason} 
+                    onChange={e => setDeleteModal(p => ({ ...p, reason: e.target.value }))}
+                    placeholder="e.g. Administrative cleanup, Requested by user, Inactivity..."
+                    className="mg-input"
+                    style={{ height: 100, resize: 'none', padding: 12, fontSize: 14 }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={() => setDeleteModal(null)} disabled={processing}
+                    style={{ flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 600, background: 'rgba(43,45,66,0.04)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={handleDelete} disabled={processing}
+                    style={{ flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 600, background: '#EF233C', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    {processing ? <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Yes, Delete'}
+                  </button>
                 </div>
               </motion.div>
             </motion.div>

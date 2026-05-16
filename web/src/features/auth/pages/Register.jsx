@@ -68,6 +68,8 @@ const ROLES = [
 export default function Register() {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const pendingToken = new URLSearchParams(window.location.search).get('pendingToken');
+  
   const [step, setStep] = useState('role');
   const [role, setRole] = useState('');
   const [form, setForm] = useState({ 
@@ -95,7 +97,22 @@ export default function Register() {
     setErrs(p => ({ ...p, [name]: undefined }));
   }
 
-  function handleRoleSelect(r) {
+  async function handleRoleSelect(r) {
+    if (pendingToken) {
+      setLoading(true);
+      try {
+        const res = await authApi.completeOAuth2(pendingToken, r);
+        const token = authResponseAdapter.extractToken(res);
+        authSession.setToken(token);
+        authEvents.emit(authEvents.names.login, { source: 'oauth2' });
+        navigate(r === 'DOCTOR' ? '/doctor/register' : '/dashboard', { replace: true });
+      } catch (err) {
+        addToast('Failed to complete Google sign-in. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     setRole(r);
     setStep('form');
   }
@@ -122,7 +139,7 @@ export default function Register() {
         authSession.setToken(token);
         authEvents.emit(authEvents.names.login, { source: 'register' });
         if (role === 'DOCTOR') {
-          navigate('/doctor/profile', { replace: true });
+          navigate('/doctor/register', { replace: true });
         } else {
           navigate('/login', { state: { registered: true } });
         }
@@ -268,22 +285,26 @@ export default function Register() {
                   ))}
                 </div>
 
-                {/* Google OAuth */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
-                  <span style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or</span>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
-                </div>
-                <button type="button" onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
-                  className="mg-btn-ghost w-full" style={{ padding: '14px' }}>
-                  <svg width="20" height="20" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                  </svg>
-                  <span style={{ fontSize: 15, fontWeight: 600 }}>Sign up with Google</span>
-                </button>
+                {!pendingToken && (
+                  <>
+                    {/* Google OAuth */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
+                      <span style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or</span>
+                      <div style={{ flex: 1, height: 1, background: 'rgba(43,45,66,0.08)' }} />
+                    </div>
+                    <button type="button" onClick={() => { globalThis.location.href = '/oauth2/authorization/google'; }}
+                      className="mg-btn-ghost w-full" style={{ padding: '14px' }}>
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                      </svg>
+                      <span style={{ fontSize: 15, fontWeight: 600 }}>Sign up with Google</span>
+                    </button>
+                  </>
+                )}
 
                 <p style={{ marginTop: 24, textAlign: 'center', fontSize: 15, color: '#6B7280' }}>
                   Already registered?{' '}

@@ -117,4 +117,32 @@ public class AdminController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    /**
+     * Permanently deletes a doctor's account and all associated data.
+     * Body: { "reason": "..." }
+     */
+    @DeleteMapping("/doctors/{doctorId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> deleteDoctorAccount(
+            @PathVariable Long doctorId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Administrative cleanup.";
+        adminService.deleteDoctorAccount(doctorId, reason);
+        return ApiResponse.ok(null);
+    }
+
+    /**
+     * Permanently deletes a patient's account and all associated data.
+     * Body: { "reason": "..." }
+     */
+    @DeleteMapping("/patients/{patientId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> deletePatientAccount(
+            @PathVariable Long patientId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Administrative cleanup.";
+        adminService.deletePatientAccount(patientId, reason);
+        return ApiResponse.ok(null);
+    }
 }

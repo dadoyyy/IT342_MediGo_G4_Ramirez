@@ -86,17 +86,22 @@ public class EmailService {
 
             helper.setFrom(fromEmail);
             helper.setTo(to);
-            helper.setSubject("Update regarding your MediGo Professional Profile");
+            helper.setSubject("MediGo Profile Update: Application Status");
 
             String content = String.format(
-                "<html><body>" +
-                "<h3>Hello, Dr. %s</h3>" +
-                "<p>Thank you for your interest in joining MediGo. After reviewing your application, we were unable to approve your profile at this time.</p>" +
-                "<p><strong>Reason for decision:</strong> %s</p>" +
-                "<p>You may re-submit your application after addressing the feedback above.</p>" +
-                "<p>If you have any questions, please contact our support team.</p>" +
+                "<html><body style='font-family: sans-serif; line-height: 1.6; color: #333;'>" +
+                "<h3 style='color: #D90429;'>Notice regarding your MediGo Profile</h3>" +
+                "<p>Hello, Dr. %s</p>" +
+                "<p>Thank you for your interest in joining MediGo. After reviewing your professional application and credentials, we are unable to approve your profile at this time.</p>" +
+                "<div style='background: #f8f9fa; padding: 16px; border-left: 4px solid #D90429; margin: 20px 0;'>" +
+                "<strong>Reason for decision:</strong><br/>%s" +
+                "</div>" +
+                "<p>You may log back into your account and re-submit your profile once the issues above have been addressed. If you have any questions regarding this decision, please contact our administrative support team.</p>" +
+                "<p>Thank you for your patience.</p>" +
+                "<br/>" +
+                "<p>Best regards,<br/>The MediGo Administrative Team</p>" +
                 "</body></html>",
-                name, reason != null ? reason : "Documents were unclear or invalid."
+                name, reason != null ? reason : "Documents were unclear or did not meet our verification standards."
             );
 
             helper.setText(content, true);
@@ -104,6 +109,138 @@ public class EmailService {
             log.info("Rejection email sent to doctor: {}", to);
         } catch (MessagingException e) {
             log.error("Failed to send rejection email to {}", to, e);
+        }
+    }
+
+    @Async
+    public void sendSpecializationApprovalEmail(String to, String name, String newSpecialization) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("MediGo: Specialization Change Request Approved");
+
+            String content = String.format(
+                "<html><body>" +
+                "<h3>Hello, Dr. %s</h3>" +
+                "<p>Your request to update your medical specialization has been <strong>approved</strong>.</p>" +
+                "<p>Your profile now reflects your new specialization: <strong>%s</strong></p>" +
+                "<p>Thank you for keeping your profile up to date.</p>" +
+                "<br/>" +
+                "<p>Best regards,<br/>The MediGo Team</p>" +
+                "</body></html>",
+                name, newSpecialization
+            );
+
+            helper.setText(content, true);
+            mailSender.send(message);
+            log.info("Specialization approval email sent to doctor: {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send specialization approval email to {}", to, e);
+        }
+    }
+
+    @Async
+    public void sendSpecializationRejectionEmail(String to, String name, String reason) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("MediGo: Specialization Change Request Update");
+
+            String content = String.format(
+                "<html><body style='font-family: sans-serif; line-height: 1.6; color: #333;'>" +
+                "<h3 style='color: #D90429;'>Notice regarding Specialization Update</h3>" +
+                "<p>Hello, Dr. %s</p>" +
+                "<p>We have reviewed your request to change your medical specialization on the MediGo platform.</p>" +
+                "<p>Unfortunately, we are unable to approve this specific change at this time.</p>" +
+                "<div style='background: #f8f9fa; padding: 16px; border-left: 4px solid #D90429; margin: 20px 0;'>" +
+                "<strong>Reason for decision:</strong><br/>%s" +
+                "</div>" +
+                "<p>If you believe this is an error or would like to provide additional documentation, please reach out to our administrative support team.</p>" +
+                "<br/>" +
+                "<p>Best regards,<br/>The MediGo Administrative Team</p>" +
+                "</body></html>",
+                name, reason != null ? reason : "Insufficient documentation or verification provided."
+            );
+
+            helper.setText(content, true);
+            mailSender.send(message);
+            log.info("Specialization rejection email sent to doctor: {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send specialization rejection email to {}", to, e);
+        }
+    }
+
+    @Async
+    public void sendDoctorDeletionEmail(String to, String name, String reason) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("MediGo Account Status: Account Deleted");
+
+            String content = String.format(
+                "<html><body style='font-family: sans-serif; line-height: 1.6; color: #333;'>" +
+                "<h3 style='color: #D90429;'>Notice of Account Deletion</h3>" +
+                "<p>Hello, Dr. %s</p>" +
+                "<p>We are writing to inform you that your MediGo professional account has been deleted by an administrator.</p>" +
+                "<div style='background: #f8f9fa; padding: 16px; border-left: 4px solid #D90429; margin: 20px 0;'>" +
+                "<strong>Reason for deletion:</strong><br/>%s" +
+                "</div>" +
+                "<p>All your profile data, documents, and active schedules have been removed from our system. If this was unexpected, please contact our administrative support team immediately.</p>" +
+                "<p>Thank you for your time with MediGo.</p>" +
+                "<br/>" +
+                "<p>Best regards,<br/>The MediGo Administrative Team</p>" +
+                "</body></html>",
+                name, reason != null ? reason : "Administrative cleanup / Violation of terms."
+            );
+
+            helper.setText(content, true);
+            mailSender.send(message);
+            log.info("Deletion email sent to doctor: {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send deletion email to {}", to, e);
+        }
+    }
+
+    @Async
+    public void sendPatientDeletionEmail(String to, String name, String reason) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("MediGo Account Status: Account Deleted");
+
+            String content = String.format(
+                "<html><body style='font-family: sans-serif; line-height: 1.6; color: #333;'>" +
+                "<h3 style='color: #D90429;'>Notice of Account Deletion</h3>" +
+                "<p>Hello, %s</p>" +
+                "<p>We are writing to inform you that your MediGo patient account has been deleted by an administrator.</p>" +
+                "<div style='background: #f8f9fa; padding: 16px; border-left: 4px solid #D90429; margin: 20px 0;'>" +
+                "<strong>Reason for deletion:</strong><br/>%s" +
+                "</div>" +
+                "<p>All your appointment history and personal health data have been removed from our system. If this was unexpected, please contact our support team.</p>" +
+                "<p>Thank you for being part of MediGo.</p>" +
+                "<br/>" +
+                "<p>Best regards,<br/>The MediGo Administrative Team</p>" +
+                "</body></html>",
+                name, reason != null ? reason : "Administrative cleanup / Inactivity."
+            );
+
+            helper.setText(content, true);
+            mailSender.send(message);
+            log.info("Deletion email sent to patient: {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send deletion email to {}", to, e);
         }
     }
 }

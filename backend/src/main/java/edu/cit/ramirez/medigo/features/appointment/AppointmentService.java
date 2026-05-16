@@ -85,6 +85,7 @@ public class AppointmentService {
         profile.setBio(request.getBio() == null ? null : request.getBio().trim());
         profile.setYearsOfExperience(request.getYearsOfExperience());
         profile.setEducation(request.getEducation() == null ? null : request.getEducation().trim());
+        profile.setConsultationFee(request.getConsultationFee());
         // Do NOT set verified here — admin must approve via /admin/doctors/{id}/approve
 
         DoctorProfile saved = doctorProfileRepository.save(profile);
@@ -456,6 +457,7 @@ public class AppointmentService {
                 .yearsOfExperience(profile.getYearsOfExperience())
                 .education(profile.getEducation())
                 .patientCount(completedCount)
+                .consultationFee(profile.getConsultationFee())
                 .build();
     }
 
