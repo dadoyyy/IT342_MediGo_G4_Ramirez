@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin, BadgeCheck, ArrowRight, X, Clock, GraduationCap, Building2, Calendar, Stethoscope, ChevronRight } from 'lucide-react';
+import { Search, MapPin, BadgeCheck, ArrowRight, X, Clock, GraduationCap, Building2, Calendar, Stethoscope, ChevronRight, CheckCircle } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import { AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ import MEDICAL_SPECIALIZATIONS from '../../../shared/constants/medicalSpecializa
 const SPECIALTIES = ['All', ...MEDICAL_SPECIALIZATIONS];
 const ACCENT_PALETTE = ['#EF233C', '#8D99AE', '#D90429'];
 const ACCENTS = SPECIALTIES.map((_, i) => ACCENT_PALETTE[i % ACCENT_PALETTE.length]);
+
 
 const container = { animate: { transition: { staggerChildren: 0.06 } } };
 const cardItem = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
@@ -24,6 +25,11 @@ export default function PatientHome() {
   const [searching, setSearching] = useState(false);
   const [activeSpecialty, setActiveSpecialty] = useState('All');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  
+  // Advanced Filter State
+  const [filters, setFilters] = useState({
+    consultationType: 'All' // 'All', 'Online', 'In-Person'
+  });
 
   useEffect(() => { authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {}); }, []);
 
@@ -43,9 +49,33 @@ export default function PatientHome() {
     return () => clearTimeout(t);
   }, [query, searchDoctors]);
 
-  const filtered = activeSpecialty === 'All'
-    ? doctors
-    : doctors.filter(d => d.specialization?.toLowerCase().includes(activeSpecialty.toLowerCase()));
+  const filtered = doctors.filter(doctor => {
+    // 1. Specialty Filter
+    if (activeSpecialty !== 'All') {
+      const docSpecs = (doctor.specialization || '').toLowerCase();
+      if (!docSpecs.includes(activeSpecialty.toLowerCase())) return false;
+    }
+
+    // 2. Query Search (Name or Clinic)
+    if (query) {
+      const q = query.toLowerCase().trim();
+      const nameMatch = doctor.doctorName?.toLowerCase().includes(q);
+      const clinicMatch = doctor.clinicName?.toLowerCase().includes(q);
+      
+      if (!nameMatch && !clinicMatch) return false;
+    }
+
+    // 3. Consultation Type (Mock logic for local testing using slots)
+    const allSlots = JSON.parse(localStorage.getItem('medigo_doctor_slots') || '[]');
+    const doctorSlots = allSlots.filter(s => Number(s.doctorId) === Number(doctor.doctorId));
+    
+    if (filters.consultationType !== 'All') {
+      const typeMatch = doctorSlots.some(s => s.type === filters.consultationType);
+      if (!typeMatch) return false;
+    }
+
+    return true;
+  });
 
   const firstName = user?.fullName?.split(' ')[0] || '';
 
@@ -59,18 +89,53 @@ export default function PatientHome() {
           <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Browse verified specialists and book your appointment in seconds</p>
         </motion.div>
 
-        {/* Search */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-          style={{ position: 'relative', marginBottom: 20 }}>
-          <Search size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)}
-            placeholder="Search doctors by name or specialization…"
-            className="mg-input" style={{ paddingLeft: 44 }} />
-        </motion.div>
+        {/* Search & Advanced Filters Container */}
+        <div style={{ marginBottom: 32 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+            style={{ position: 'relative', marginBottom: 16 }}>
+            <Search size={15} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+            <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+              placeholder="Search by name or clinic/hospital name…"
+              className="mg-input" style={{ paddingLeft: 44 }} />
+          </motion.div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
+            {/* Consultation Type Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#8D99AE', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Consultation:</span>
+              <div style={{ display: 'flex', background: 'rgba(43,45,66,0.04)', padding: 4, borderRadius: 10 }}>
+                {['All', 'Online', 'In-Person'].map(type => (
+                  <button key={type} 
+                    onClick={() => setFilters(p => ({ ...p, consultationType: type }))}
+                    style={{
+                      padding: '6px 12px', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                      background: filters.consultationType === type ? '#fff' : 'transparent',
+                      color: filters.consultationType === type ? '#EF233C' : '#8D99AE',
+                      boxShadow: filters.consultationType === type ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'all 0.2s'
+                    }}>
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Specialty pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.12 }}
-          style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', marginBottom: 32, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'thin', scrollbarColor: 'rgba(43,45,66,0.12) transparent' }}>
+          style={{ 
+            display: 'flex', 
+            gap: 8, 
+            flexWrap: 'nowrap', 
+            marginBottom: 24, 
+            overflowX: 'auto', 
+            paddingBottom: 12, 
+            WebkitOverflowScrolling: 'touch',
+            msOverflowStyle: 'auto',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#EF233C transparent'
+          }}>
           {SPECIALTIES.map(s => (
             <button key={s} onClick={() => setActiveSpecialty(s)}
               style={activeSpecialty === s
