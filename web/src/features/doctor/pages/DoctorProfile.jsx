@@ -20,6 +20,9 @@ function validate(form) {
   if (!form.specialization || form.specialization.length === 0) e.specialization = 'At least one specialization is required.';
   if (!form.clinicName.trim()) e.clinicName = 'Clinic / hospital name is required.';
   if (!form.clinicAddress.trim()) e.clinicAddress = 'Clinic address is required.';
+  if (!form.bio || form.bio.trim().length < 20) e.bio = 'Bio must be at least 20 characters.';
+  if (!form.yearsOfExperience || isNaN(parseInt(form.yearsOfExperience))) e.yearsOfExperience = 'Valid years of experience is required.';
+  if (!form.education || !form.education.trim()) e.education = 'Education / Medical school is required.';
   return e;
 }
 
@@ -41,7 +44,14 @@ export default function DoctorProfile() {
   const { isProfileComplete, isVerified, markProfileComplete, updateProfilePicture } = useDoctorProfile();
   const [user, setUser] = useState(null);
 
-  const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
+  const [form, setForm] = useState({
+    specialization: [],
+    clinicName: '',
+    clinicAddress: '',
+    bio: '',
+    yearsOfExperience: '',
+    education: ''
+  });
   const [fieldErrors, setFieldErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -63,7 +73,12 @@ export default function DoctorProfile() {
   const [changeRequests, setChangeRequests] = useState([]);
   const [changeRequestForm, setChangeRequestForm] = useState({ specialization: [], reason: '' });
 
-  const formFilled = form.specialization.length > 0 && form.clinicName.trim() && form.clinicAddress.trim();
+  const formFilled = form.specialization.length > 0 && 
+                     form.clinicName.trim() && 
+                     form.clinicAddress.trim() &&
+                     form.bio.trim().length >= 20 &&
+                     form.yearsOfExperience !== '' &&
+                     form.education.trim() !== '';
   const allDocsUploaded = REQUIRED_DOCS.every(k => !!docs[k]);
   const canSave = !!(formFilled && allDocsUploaded && !saving);
 
@@ -87,6 +102,9 @@ export default function DoctorProfile() {
               specialization: p.specialization ? p.specialization.split(',').map(s => s.trim()).filter(Boolean) : f.specialization,
               clinicName:     p.clinicName     || f.clinicName,
               clinicAddress:  p.clinicAddress  || f.clinicAddress,
+              bio:            p.bio            || f.bio,
+              yearsOfExperience: p.yearsOfExperience !== undefined ? p.yearsOfExperience : f.yearsOfExperience,
+              education:      p.education      || f.education,
             }));
             setDocs({
               profile_picture:   p.profilePictureUrl   || null,
@@ -129,6 +147,9 @@ export default function DoctorProfile() {
         specialization: form.specialization.join(', '),
         clinicName:     form.clinicName.trim(),
         clinicAddress:  form.clinicAddress.trim(),
+        bio:            form.bio.trim(),
+        yearsOfExperience: parseInt(form.yearsOfExperience),
+        education:      form.education.trim(),
       });
       setSaveSuccess(true);
       if (!isProfileComplete || !isVerified) {
@@ -383,14 +404,24 @@ export default function DoctorProfile() {
             {/* Avatar + identity */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
               <div style={{ position: 'relative', flexShrink: 0 }}>
-                <div
+                <motion.div
                   onClick={() => avatarInputRef.current?.click()}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={!avatarUrl ? { 
+                    boxShadow: [
+                      '0 0 0 0px rgba(239,35,60,0)',
+                      '0 0 0 10px rgba(239,35,60,0.1)',
+                      '0 0 0 0px rgba(239,35,60,0)'
+                    ]
+                  } : {}}
+                  transition={{ repeat: Infinity, duration: 2 }}
                   style={{
-                    width: 72, height: 72, borderRadius: 20, overflow: 'hidden',
+                    width: 88, height: 88, borderRadius: 24, overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', position: 'relative',
                     background: avatarUrl ? 'transparent' : 'linear-gradient(135deg, rgba(239,35,60,0.12), rgba(155,140,255,0.15))',
-                    border: avatarUrl ? '2px solid rgba(239,35,60,0.3)' : '2px dashed rgba(239,35,60,0.2)',
+                    border: avatarUrl ? '3px solid #EF233C' : '3px dashed rgba(239,35,60,0.3)',
                     transition: 'all 0.2s',
                   }}>
                   {avatarUrl
@@ -411,15 +442,15 @@ export default function DoctorProfile() {
                     <Camera size={16} style={{ color: '#fff' }} />
                     <span style={{ fontSize: 9, color: '#fff', fontWeight: 600 }}>CHANGE</span>
                   </div>
-                </div>
+                </motion.div>
                 {docUploading.profile_picture && (
-                  <div style={{ position: 'absolute', inset: 0, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(43,45,66,0.7)' }}>
+                  <div style={{ position: 'absolute', inset: 0, borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(43,45,66,0.7)' }}>
                     <span className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
                   </div>
                 )}
                 {docs.profile_picture && !docUploading.profile_picture && (
-                  <div style={{ position: 'absolute', bottom: -4, right: -4, width: 20, height: 20, borderRadius: '50%', background: '#EF233C', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1020' }}>
-                    <CheckCircle size={11} style={{ color: '#fff' }} />
+                  <div style={{ position: 'absolute', bottom: -4, right: -4, width: 24, height: 24, borderRadius: '50%', background: '#EF233C', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #0B1020', zIndex: 2 }}>
+                    <CheckCircle size={14} style={{ color: '#fff' }} />
                   </div>
                 )}
                 <input ref={avatarInputRef} type="file" accept=".jpg,.jpeg,.png" style={{ display: 'none' }}
@@ -427,13 +458,54 @@ export default function DoctorProfile() {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#2B2D42', margin: '0 0 2px' }}>Dr. {user?.fullName}</p>
-                <p style={{ fontSize: 13, color: '#8D99AE', margin: '0 0 6px' }}>{user?.email}</p>
-                <p style={{ fontSize: 11, color: docs.profile_picture ? '#EF233C' : 'rgba(141,153,174,0.7)', margin: 0 }}>
-                  {docs.profile_picture ? '✓ Profile photo uploaded' : 'Click the avatar to upload your profile photo *'}
-                </p>
+                <p style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Dr. {user?.fullName}</p>
+                <p style={{ fontSize: 14, color: '#8D99AE', margin: '0 0 10px' }}>{user?.email}</p>
+                
+                {!docs.profile_picture ? (
+                  <motion.div 
+                    animate={{ x: [0, 2, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: 6, 
+                      padding: '6px 12px', 
+                      borderRadius: 8, 
+                      background: 'rgba(217,4,41,0.08)', 
+                      border: '1px solid rgba(217,4,41,0.2)',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    <Camera size={14} style={{ color: '#D90429' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#D90429' }}>UPLOAD PHOTO *</span>
+                  </motion.div>
+                ) : (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)' }}>
+                    <CheckCircle size={14} style={{ color: '#16A34A' }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#16A34A' }}>PHOTO UPLOADED</span>
+                  </div>
+                )}
+                
+                {!docs.profile_picture && (
+                  <p style={{ 
+                    fontSize: 11, 
+                    fontWeight: 700, 
+                    color: '#D90429', 
+                    background: 'rgba(217,4,41,0.05)', 
+                    padding: '4px 10px', 
+                    borderRadius: 6,
+                    display: 'inline-block',
+                    marginTop: 10,
+                    letterSpacing: '0.01em',
+                    border: '1px solid rgba(217,4,41,0.1)'
+                  }}>
+                    ⚠️ CRUCIAL: PHOTO REQUIRED FOR VERIFICATION
+                  </p>
+                )}
+
                 {docErrors.profile_picture && (
-                  <p style={{ fontSize: 11, color: '#D90429', margin: '4px 0 0' }}>⚠ {docErrors.profile_picture}</p>
+                  <p style={{ fontSize: 11, color: '#D90429', margin: '8px 0 0' }}>⚠ {docErrors.profile_picture}</p>
                 )}
               </div>
             </div>
@@ -494,9 +566,12 @@ export default function DoctorProfile() {
 
               {/* Clinic fields */}
               {[
+                { name: 'education',         label: 'EDUCATION / MEDICAL SCHOOL', Icon: Building2,   ph: "e.g. University of Santo Tomas - Faculty of Medicine", textarea: false },
+                { name: 'yearsOfExperience',  label: 'YEARS OF EXPERIENCE',         Icon: Clock,       ph: "e.g. 5",                                        textarea: false, type: 'number' },
                 { name: 'clinicName',     label: 'CLINIC / HOSPITAL NAME', Icon: Building2,   ph: "e.g. St. Luke's Medical Center",                textarea: false },
                 { name: 'clinicAddress',  label: 'CLINIC ADDRESS',         Icon: MapPin,      ph: 'Full address of your clinic or hospital',        textarea: true  },
-              ].map(({ name, label, Icon, ph, textarea }) => (
+                { name: 'bio',            label: 'PROFESSIONAL BIO',         Icon: FileText,    ph: 'Tell patients about your background, expertise, and care philosophy...', textarea: true },
+              ].map(({ name, label, Icon, ph, textarea, type }) => (
                 <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.05em' }}>
                     {label} <span style={{ color: '#D90429' }}>*</span>
@@ -504,11 +579,11 @@ export default function DoctorProfile() {
                   <div style={{ position: 'relative' }}>
                     <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
                     {textarea ? (
-                      <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
+                      <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={textarea && name === 'bio' ? 5 : 3}
                         className={`mg-input ${fieldErrors[name] ? 'error' : ''}`}
                         style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
                     ) : (
-                      <input name={name} type="text" value={form[name]} onChange={handleChange} placeholder={ph}
+                      <input name={name} type={type || "text"} value={form[name]} onChange={handleChange} placeholder={ph}
                         className={`mg-input ${fieldErrors[name] ? 'error' : ''}`}
                         style={{ paddingLeft: 44 }} />
                     )}
@@ -646,7 +721,7 @@ export default function DoctorProfile() {
                   style={{ width: '100%', padding: 14, opacity: canSave ? 1 : 0.45, cursor: canSave ? 'pointer' : 'not-allowed' }}>
                   {saving
                     ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Saving…</>
-                    : <>{!isProfileComplete ? 'Submit Profile for Review' : 'Save Changes'} <ArrowRight size={15} /></>}
+                    : <><CheckCircle size={15} /> SUBMIT PROFILE FOR APPROVAL</>}
                 </button>
               </div>
             )}

@@ -82,6 +82,9 @@ public class AppointmentService {
         }
         profile.setClinicName(request.getClinicName().trim());
         profile.setClinicAddress(request.getClinicAddress().trim());
+        profile.setBio(request.getBio() == null ? null : request.getBio().trim());
+        profile.setYearsOfExperience(request.getYearsOfExperience());
+        profile.setEducation(request.getEducation() == null ? null : request.getEducation().trim());
         // Do NOT set verified here — admin must approve via /admin/doctors/{id}/approve
 
         DoctorProfile saved = doctorProfileRepository.save(profile);
@@ -447,6 +450,9 @@ public class AppointmentService {
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())
                 .governmentIdUrl(profile.getGovernmentIdUrl())
+                .bio(profile.getBio())
+                .yearsOfExperience(profile.getYearsOfExperience())
+                .education(profile.getEducation())
                 .build();
     }
 

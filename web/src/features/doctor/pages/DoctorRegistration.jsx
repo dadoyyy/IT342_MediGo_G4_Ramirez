@@ -23,13 +23,32 @@ function validate(form, addToast) {
     e.clinicAddress = 'Clinic address is required.';
     addToast(e.clinicAddress, 'error');
   }
+  if (!form.bio || form.bio.trim().length < 20) {
+    e.bio = 'Please provide a short professional bio (at least 20 characters).';
+    addToast(e.bio, 'error');
+  }
+  if (!form.yearsOfExperience || parseInt(form.yearsOfExperience) < 0) {
+    e.yearsOfExperience = 'Please enter valid years of experience.';
+    addToast(e.yearsOfExperience, 'error');
+  }
+  if (!form.education || !form.education.trim()) {
+    e.education = 'Education / Medical school is required.';
+    addToast(e.education, 'error');
+  }
   return e;
 }
 
 export default function DoctorRegistration() {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const [form, setForm] = useState({ specialization: [], clinicName: '', clinicAddress: '' });
+  const [form, setForm] = useState({
+    specialization: [],
+    clinicName: '',
+    clinicAddress: '',
+    bio: '',
+    yearsOfExperience: '',
+    education: ''
+  });
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -43,6 +62,9 @@ export default function DoctorRegistration() {
           specialization: p.specialization ? p.specialization.split(',').map(s => s.trim()).filter(Boolean) : [],
           clinicName: p.clinicName || '',
           clinicAddress: p.clinicAddress || '',
+          bio: p.bio || '',
+          yearsOfExperience: p.yearsOfExperience || '',
+          education: p.education || '',
         });
       })
       .catch(() => {})
@@ -61,7 +83,14 @@ export default function DoctorRegistration() {
     if (Object.keys(errors).length) { setFieldErrors(errors); return; }
     setLoading(true);
     try {
-      await doctorApi.upsertMyProfile({ specialization: form.specialization.join(', '), clinicName: form.clinicName.trim(), clinicAddress: form.clinicAddress.trim() });
+      await doctorApi.upsertMyProfile({
+        specialization: form.specialization.join(', '),
+        clinicName: form.clinicName.trim(),
+        clinicAddress: form.clinicAddress.trim(),
+        bio: form.bio.trim(),
+        yearsOfExperience: parseInt(form.yearsOfExperience),
+        education: form.education.trim()
+      });
       addToast('Practice profile saved successfully!', 'success');
       navigate('/doctor/profile', { replace: true });
     } catch (err) {
@@ -118,9 +147,12 @@ export default function DoctorRegistration() {
             </div>
 
             {[
+              { name: 'education', label: 'EDUCATION / MEDICAL SCHOOL', Icon: Building2, ph: "e.g. University of Santo Tomas - Faculty of Medicine", textarea: false },
+              { name: 'yearsOfExperience', label: 'YEARS OF EXPERIENCE', Icon: Clock, ph: "e.g. 5", textarea: false, type: 'number' },
               { name: 'clinicName', label: 'CLINIC / HOSPITAL NAME', Icon: Building2, ph: "e.g. St. Luke's Medical Center", textarea: false },
               { name: 'clinicAddress', label: 'CLINIC ADDRESS', Icon: MapPin, ph: 'Full address of your clinic', textarea: true },
-            ].map(({ name, label, Icon, ph, textarea }) => (
+              { name: 'bio', label: 'PROFESSIONAL BIO', Icon: FileText, ph: 'Tell patients about your background, expertise, and care philosophy...', textarea: true },
+            ].map(({ name, label, Icon, ph, textarea, type }) => (
               <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', letterSpacing: '0.04em' }}>
                   {label} <span style={{ color: '#D90429' }}>*</span>
@@ -128,10 +160,10 @@ export default function DoctorRegistration() {
                 <div style={{ position: 'relative' }}>
                   <Icon size={15} style={{ position: 'absolute', left: 16, top: textarea ? 14 : '50%', transform: textarea ? 'none' : 'translateY(-50%)', color: '#8D99AE' }} />
                   {textarea ? (
-                    <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={3}
+                    <textarea name={name} value={form[name]} onChange={handleChange} placeholder={ph} rows={textarea && name === 'bio' ? 5 : 3}
                       className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44, resize: 'none', lineHeight: 1.5 }} />
                   ) : (
-                    <input name={name} type="text" value={form[name]} onChange={handleChange} placeholder={ph}
+                    <input name={name} type={type || "text"} value={form[name]} onChange={handleChange} placeholder={ph}
                       className={`mg-input ${fieldErrors[name] ? 'error' : ''}`} style={{ paddingLeft: 44 }} />
                   )}
                 </div>
@@ -140,7 +172,7 @@ export default function DoctorRegistration() {
             ))}
 
             <button type="submit" disabled={loading} className="mg-btn w-full" style={{ padding: 15, marginTop: 4 }}>
-              {loading ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Submitting…</> : <>Save Profile <ArrowRight size={15} /></>}
+              {loading ? <><span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />Processing…</> : <>Proceed to Verification <ArrowRight size={15} /></>}
             </button>
           </form>
         </motion.div>

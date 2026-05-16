@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { authApi, adminApi, fetchAuthBlob } from '../../../shared/api/api';
 import { authSession } from '../../auth/authSession';
-import { authEvents } from '../../auth/authEventBus';
+import axios from 'axios';
+import { useToast } from '../../../shared/ui/ToastProvider';
 import AuthImage from '../../../shared/ui/AuthImage';
 import AppShell from '../../../shared/ui/AppShell';
 
@@ -27,26 +28,25 @@ function adminDocUrl(storedUrl) {
 
 export default function AdminVerification() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [user, setUser] = useState(null);
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(null);
-  const [toast, setToast] = useState(null);
 
   // Reject modal state
   const [rejectModal, setRejectModal] = useState(null); // { doctor }
   const [rejectReason, setRejectReason] = useState('');
   const [docChecks, setDocChecks] = useState({}); // { medicalLicenseUrl: true|false|null }
 
+  // Approve modal state
+  const [approveModal, setApproveModal] = useState(null); // { doctor }
+
   // Document viewer modal
   const [docViewer, setDocViewer] = useState(null); // { url, label }
   const [docViewerLoading, setDocViewerLoading] = useState(false);
   const [docViewerBlobUrl, setDocViewerBlobUrl] = useState(null);
 
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  }
 
   useEffect(() => {
     authApi.me().then(r => {
@@ -61,13 +61,16 @@ export default function AdminVerification() {
     }).catch(() => {}).finally(() => setLoading(false));
   }, [navigate]);
 
-  async function handleApprove(doctorId) {
+  async function handleApprove() {
+    if (!approveModal) return;
+    const { doctorId } = approveModal.doctor;
     setProcessing(doctorId);
     try {
       await adminApi.approveDoctor(doctorId);
       setPending(prev => prev.filter(d => d.doctorId !== doctorId));
-      showToast('Doctor approved successfully.', 'success');
-    } catch { showToast('Action failed. Please try again.', 'error'); }
+      addToast('Doctor approved successfully.', 'success');
+      setApproveModal(null);
+    } catch { addToast('Action failed. Please try again.', 'error'); }
     finally { setProcessing(null); }
   }
 
@@ -95,9 +98,9 @@ export default function AdminVerification() {
     try {
       await adminApi.rejectDoctor(doctor.doctorId, fullReason || 'Registration rejected by admin.');
       setPending(prev => prev.filter(d => d.doctorId !== doctor.doctorId));
-      showToast('Doctor rejected.', 'error');
+      addToast('Doctor rejected.', 'error');
       setRejectModal(null);
-    } catch { showToast('Action failed. Please try again.', 'error'); }
+    } catch { addToast('Action failed. Please try again.', 'error'); }
     finally { setProcessing(null); }
   }
 
@@ -111,7 +114,7 @@ export default function AdminVerification() {
       const blobUrl = await fetchAuthBlob(url);
       setDocViewerBlobUrl(blobUrl);
     } catch {
-      showToast('Could not load document.', 'error');
+      addToast('Could not load document.', 'error');
       setDocViewer(null);
     } finally {
       setDocViewerLoading(false);
@@ -130,15 +133,6 @@ export default function AdminVerification() {
     <AppShell user={user}>
       <div style={{ padding: '28px 28px 40px' }}>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999, padding: '12px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, backdropFilter: 'blur(12px)', ...(toast.type === 'success' ? { background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: '#16A34A' } : { background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.2)', color: '#D90429' }) }}>
-            {toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Document viewer modal */}
       <AnimatePresence>
@@ -256,6 +250,40 @@ export default function AdminVerification() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Approve modal */}
+      <AnimatePresence>
+        {approveModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setApproveModal(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(34,197,94,0.15)', width: '100%', maxWidth: 440, padding: 28, boxShadow: '0 24px 64px rgba(43,45,66,0.15)', textAlign: 'center' }}>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(34,197,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '1px solid rgba(34,197,94,0.15)' }}>
+                <CheckCircle size={32} style={{ color: '#16A34A' }} />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', margin: '0 0 8px' }}>Approve Registration?</h3>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', lineHeight: 1.5 }}>
+                You are about to verify <strong>Dr. {approveModal.doctor.doctorName}</strong>. This will grant them full access to the platform and notify them via email.
+              </p>
+
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => setApproveModal(null)}
+                  style={{ flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 600, background: 'rgba(43,45,66,0.04)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={handleApprove} disabled={processing === approveModal.doctor.doctorId}
+                  style={{ flex: 1, padding: '12px 0', borderRadius: 12, fontSize: 14, fontWeight: 600, background: '#16A34A', border: 'none', color: '#fff', cursor: 'pointer', opacity: processing === approveModal.doctor.doctorId ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  {processing === approveModal.doctor.doctorId ? (
+                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  ) : 'Yes, Approve'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
         {/* Page Header */}
@@ -330,12 +358,9 @@ export default function AdminVerification() {
                         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(217,4,41,0.06)', border: '1px solid rgba(217,4,41,0.15)', color: '#D90429', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
                         <XCircle size={14} /> Reject
                       </button>
-                      <button onClick={() => handleApprove(doctor.doctorId)} disabled={processing === doctor.doctorId}
+                      <button onClick={() => setApproveModal({ doctor })} disabled={processing === doctor.doctorId}
                         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', color: '#16A34A', cursor: 'pointer', opacity: processing === doctor.doctorId ? 0.5 : 1, transition: 'all 0.2s' }}>
-                        {processing === doctor.doctorId
-                          ? <span className="w-3 h-3 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(34,197,94,0.3)', borderTopColor: '#16A34A' }} />
-                          : <CheckCircle size={14} />}
-                        Approve
+                        <CheckCircle size={14} /> Approve
                       </button>
                     </div>
                   </div>
@@ -349,12 +374,28 @@ export default function AdminVerification() {
                           const url = doctor[key];
                           if (!url) return null;
                           return (
-                            <button key={key}
+                            <motion.button key={key}
                               onClick={() => openDocViewer(url, label)}
-                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, background: 'rgba(141,153,174,0.06)', border: '1px solid rgba(141,153,174,0.15)', color: '#8D99AE', cursor: 'pointer', transition: 'all 0.2s' }}>
-                              <FileText size={12} />
+                              whileHover={{ scale: 1.05, backgroundColor: 'rgba(239,35,60,0.05)', borderColor: 'rgba(239,35,60,0.3)' }}
+                              whileTap={{ scale: 0.95 }}
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 8, 
+                                padding: '8px 14px', 
+                                borderRadius: 10, 
+                                fontSize: 12, 
+                                fontWeight: 600, 
+                                background: '#fff', 
+                                border: '1px solid rgba(239,35,60,0.15)', 
+                                color: '#2B2D42', 
+                                cursor: 'pointer', 
+                                transition: 'all 0.2s',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                              }}>
+                              <FileText size={14} style={{ color: '#EF233C' }} />
                               {label}
-                            </button>
+                            </motion.button>
                           );
                         })}
                       </div>

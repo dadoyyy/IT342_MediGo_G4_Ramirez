@@ -10,6 +10,7 @@ import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
+import edu.cit.ramirez.medigo.shared.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -29,6 +30,7 @@ public class AdminService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final edu.cit.ramirez.medigo.features.user.UserRepository userRepository;
+    private final EmailService emailService;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
     private String uploadDir;
@@ -128,7 +130,12 @@ public class AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
         profile.setVerified(true);
         profile.setRejectionReason(null);
-        return toDto(doctorProfileRepository.save(profile));
+        DoctorProfile saved = doctorProfileRepository.save(profile);
+        
+        // Notify the doctor via email
+        emailService.sendDoctorApprovalEmail(saved.getDoctor().getEmail(), saved.getDoctor().getFullName());
+        
+        return toDto(saved);
     }
 
     @Transactional
@@ -137,6 +144,10 @@ public class AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
         profile.setVerified(false);
         profile.setRejectionReason(reason != null ? reason.trim() : null);
+        
+        // Notify the doctor via email
+        emailService.sendDoctorRejectionEmail(profile.getDoctor().getEmail(), profile.getDoctor().getFullName(), profile.getRejectionReason());
+        
         // Delete the profile so the doctor can re-submit with corrected documents
         doctorProfileRepository.delete(profile);
         return toDto(profile);

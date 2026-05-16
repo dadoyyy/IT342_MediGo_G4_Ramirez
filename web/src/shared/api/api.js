@@ -48,6 +48,7 @@ export const authApi = {
   logout:         ()                     => api.post('/auth/logout'),
   completeOAuth2: (pendingToken, role)   => api.post('/auth/oauth2/complete', { pendingToken, role }),
   me:             ()                     => api.get('/auth/me'),
+  verifyEmail:    (token)                => api.get('/auth/verify-email', { params: { token } }),
 };
 
 export const doctorApi = {

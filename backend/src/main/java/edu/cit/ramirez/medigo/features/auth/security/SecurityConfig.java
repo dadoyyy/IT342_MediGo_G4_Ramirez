@@ -42,7 +42,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login",
-                                 "/api/v1/auth/logout", "/api/v1/auth/oauth2/complete").permitAll()
+                                 "/api/v1/auth/logout", "/api/v1/auth/oauth2/complete",
+                                 "/api/v1/auth/verify-email").permitAll()
                         .requestMatchers("/api/v1/doctors/search", "/api/v1/appointments").authenticated()
                         .requestMatchers("/api/v1/doctors/me/profile").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/doctors/me/documents").hasRole("DOCTOR")

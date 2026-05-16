@@ -6,6 +6,7 @@ import Login        from './features/auth/pages/Login';
 import Register     from './features/auth/pages/Register';
 import AuthCallback from './features/auth/pages/AuthCallback';
 import SelectRole   from './features/auth/pages/SelectRole';
+import VerifyEmail  from './features/auth/pages/VerifyEmail';
 import { authSession } from './features/auth/authSession';
 import { authEvents } from './features/auth/authEventBus';
 import { ToastProvider, useToast } from './shared/ui/ToastProvider';
@@ -95,6 +96,7 @@ function App() {
           <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorSchedule /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
           <Route path="/auth/callback"   element={<AuthCallback />} />
           <Route path="/auth/select-role" element={<SelectRole />} />
+          <Route path="/verify-email"    element={<VerifyEmail />} />
           <Route path="*"                element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

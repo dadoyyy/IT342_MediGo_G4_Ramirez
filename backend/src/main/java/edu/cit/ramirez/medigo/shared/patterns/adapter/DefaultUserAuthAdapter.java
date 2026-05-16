@@ -15,6 +15,10 @@ public class DefaultUserAuthAdapter implements UserAuthAdapter {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole())
+                .birthDate(user.getBirthDate())
+                .gender(user.getGender())
+                .contactNumber(user.getContactNumber())
+                .address(user.getAddress())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

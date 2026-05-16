@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Stethoscope, ShieldCheck, Activity, Heart, ChevronLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Stethoscope, ShieldCheck, Activity, Heart, ChevronLeft, Calendar, Smartphone, MapPin } from 'lucide-react';
 import { authApi } from '../../../shared/api/api';
 import { authSession } from '../authSession';
 import { authResponseAdapter } from '../authResponseAdapter';
@@ -22,6 +22,17 @@ function validate(f, addToast) {
   else if (f.password.length < 8) e.password = 'Min. 8 characters.';
   else if (!PW_RE.test(f.password)) e.password = 'Requires uppercase, lowercase & special character.';
   if (f.password !== f.confirmPassword) e.confirmPassword = 'Passwords do not match.';
+  
+  if (f.role === 'PATIENT') {
+    if (!f.birthDate) e.birthDate = 'Required.';
+    if (!f.gender) e.gender = 'Required.';
+    if (!f.contactNumber.trim()) e.contactNumber = 'Required.';
+  }
+
+  if (!f.privacyConsent) {
+    e.privacyConsent = 'You must agree to continue.';
+    addToast('Please accept the privacy consent.', 'error');
+  }
 
   if (Object.keys(e).length > 0) {
     addToast('Please correct the errors in the form.', 'error');
@@ -59,15 +70,28 @@ export default function Register() {
   const { addToast } = useToast();
   const [step, setStep] = useState('role');
   const [role, setRole] = useState('');
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState({ 
+    firstName: '', 
+    lastName: '', 
+    email: '', 
+    password: '', 
+    confirmPassword: '',
+    birthDate: '',
+    gender: '',
+    contactNumber: '',
+    address: '',
+    privacyConsent: false
+  });
   const [errs, setErrs] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [showCf, setShowCf] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   function onChange(e) {
-    const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
     setErrs(p => ({ ...p, [name]: undefined }));
   }
 
@@ -88,17 +112,24 @@ export default function Register() {
         email: form.email.trim(),
         password: form.password,
         role,
+        birthDate: role === 'PATIENT' ? form.birthDate : undefined,
+        gender: role === 'PATIENT' ? form.gender : undefined,
+        contactNumber: role === 'PATIENT' ? form.contactNumber.trim() : undefined,
+        address: role === 'PATIENT' ? form.address.trim() : undefined,
       });
       const token = authResponseAdapter.extractToken(res);
       if (token) {
         authSession.setToken(token);
         authEvents.emit(authEvents.names.login, { source: 'register' });
-      }
-      addToast('Account created successfully! Welcome to MediGo.', 'success');
-      if (role === 'DOCTOR') {
-        navigate('/doctor/profile', { replace: true });
+        if (role === 'DOCTOR') {
+          navigate('/doctor/profile', { replace: true });
+        } else {
+          navigate('/login', { state: { registered: true } });
+        }
       } else {
-        navigate('/login', { state: { registered: true } });
+        setRegisteredEmail(form.email.trim());
+        setIsSuccess(true);
+        addToast('Registration successful! Please check your Gmail for verification.', 'success');
       }
     } catch (err) {
       let msg = 'Registration failed.';
@@ -192,17 +223,19 @@ export default function Register() {
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative', background: '#EDF2F4' }}>
+      <div style={{ flex: 1, height: '100vh', overflowY: 'auto', position: 'relative', background: '#EDF2F4', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(239,35,60,0.03) 0%, transparent 70%)' }} />
-
-        <div style={{ width: '100%', maxWidth: 480, position: 'relative', zIndex: 1 }}>
+        
+        <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 24px', position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '100%', maxWidth: 480 }}>
 
           {/* Mobile logo (hidden on desktop if branding is above) */}
 
           <AnimatePresence mode="wait">
 
             {/* ── STEP 1: Role selection ── */}
-            {step === 'role' && (
+            {step === 'role' && !isSuccess && (
               <motion.div key="role"
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}>
@@ -260,7 +293,7 @@ export default function Register() {
             )}
 
             {/* ── STEP 2: Registration form ── */}
-            {step === 'form' && (
+            {step === 'form' && !isSuccess && (
               <motion.div key="form"
                 initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.4, ease: "easeInOut" }}
@@ -292,7 +325,9 @@ export default function Register() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     {[['firstName','First Name','John','given-name'],['lastName','Last Name','Doe','family-name']].map(([name,label,ph,ac]) => (
                       <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>{label}</label>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                          {label} <span style={{ color: '#D90429' }}>*</span>
+                        </label>
                         <div style={{ position: 'relative' }}>
                           <User size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                           <input name={name} type="text" value={form[name]} onChange={onChange}
@@ -303,9 +338,68 @@ export default function Register() {
                       </div>
                     ))}
                   </div>
+                  
+                  {role === 'PATIENT' && (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                            Birthdate <span style={{ color: '#D90429' }}>*</span>
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <Calendar size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                            <input name="birthDate" type="date" value={form.birthDate} onChange={onChange}
+                              className={`mg-input ${errs.birthDate ? 'error' : ''}`} style={{ paddingLeft: 44, fontSize: 15 }} />
+                          </div>
+                          {errs.birthDate && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs.birthDate}</p>}
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                            Gender <span style={{ color: '#D90429' }}>*</span>
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <select name="gender" value={form.gender} onChange={onChange}
+                              className={`mg-input ${errs.gender ? 'error' : ''}`} style={{ paddingLeft: 16, fontSize: 15 }}>
+                              <option value="">Select</option>
+                              <option value="MALE">Male</option>
+                              <option value="FEMALE">Female</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          </div>
+                          {errs.gender && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs.gender}</p>}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                          Contact Number <span style={{ color: '#D90429' }}>*</span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <Smartphone size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                          <input name="contactNumber" type="tel" value={form.contactNumber} onChange={onChange}
+                            placeholder="+63 9xx xxx xxxx"
+                            className={`mg-input ${errs.contactNumber ? 'error' : ''}`} style={{ paddingLeft: 48, fontSize: 15 }} />
+                        </div>
+                        {errs.contactNumber && <p style={{ fontSize: 13, color: '#D90429', margin: '2px 0 0', fontWeight: 500 }}>{errs.contactNumber}</p>}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>Address (Optional)</label>
+                        <div style={{ position: 'relative' }}>
+                          <MapPin size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
+                          <input name="address" type="text" value={form.address} onChange={onChange}
+                            placeholder="Current address"
+                            className="mg-input" style={{ paddingLeft: 48, fontSize: 15 }} />
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>Email Address</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                      Email Address <span style={{ color: '#D90429' }}>*</span>
+                    </label>
                     <div style={{ position: 'relative' }}>
                       <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                       <input name="email" type="email" value={form.email} onChange={onChange}
@@ -320,7 +414,9 @@ export default function Register() {
                     ['confirmPassword','Confirm Password','Match password exactly','new-password',showCf,setShowCf],
                   ].map(([name,label,ph,ac,show,setShow]) => (
                     <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>{label}</label>
+                      <label style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', letterSpacing: '0.02em' }}>
+                        {label} <span style={{ color: '#D90429' }}>*</span>
+                      </label>
                       <div style={{ position: 'relative' }}>
                         <Lock size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
                         <input name={name} type={show ? 'text' : 'password'} value={form[name]} onChange={onChange}
@@ -335,6 +431,15 @@ export default function Register() {
                     </div>
                   ))}
 
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginTop: 4 }}>
+                    <input name="privacyConsent" type="checkbox" checked={form.privacyConsent} onChange={onChange}
+                      id="privacyConsent" style={{ marginTop: 4, cursor: 'pointer' }} />
+                    <label htmlFor="privacyConsent" style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.5, cursor: 'pointer' }}>
+                      I agree to the <span style={{ color: '#EF233C', fontWeight: 600 }}>Privacy Policy</span> and consent to the collection of my health data for consultation purposes. <span style={{ color: '#D90429' }}>*</span>
+                    </label>
+                  </div>
+                  {errs.privacyConsent && <p style={{ fontSize: 13, color: '#D90429', margin: '-12px 0 0', fontWeight: 500 }}>{errs.privacyConsent}</p>}
+
                   <button type="submit" disabled={loading} className="mg-btn w-full" style={{ marginTop: 8, padding: '16px', fontSize: 16 }}>
                     {loading
                       ? <><span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing…</>
@@ -345,7 +450,30 @@ export default function Register() {
               </motion.div>
             )}
 
+            {/* ── STEP 3: Verification pending ── */}
+            {isSuccess && (
+              <motion.div key="success"
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                className="glass" style={{ padding: '48px 40px', borderRadius: 24, textAlign: 'center' }}>
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,35,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                  <Mail size={32} style={{ color: '#EF233C' }} />
+                </div>
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: '#2B2D42', marginBottom: 12 }}>Verify your email</h2>
+                <p style={{ color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
+                  We've sent a verification link to <strong style={{ color: '#2B2D42' }}>{registeredEmail}</strong>.<br/>
+                  Please check your Gmail inbox and click the link to activate your account.
+                </p>
+                <div style={{ padding: '16px', background: 'rgba(43,45,66,0.03)', borderRadius: 12, marginBottom: 32, fontSize: 13, color: '#8D99AE' }}>
+                  <p style={{ margin: 0 }}>Only Gmail or Medigo accounts can be used for verification on this system.</p>
+                </div>
+                <Link to="/login" className="mg-btn w-full" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none' }}>
+                  Continue to Login <ArrowRight size={18} />
+                </Link>
+              </motion.div>
+            )}
+
           </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

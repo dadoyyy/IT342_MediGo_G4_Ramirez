@@ -22,4 +22,12 @@ public class DoctorProfileUpsertRequest {
     @NotBlank(message = "Clinic address is required")
     @Size(max = 255, message = "Clinic address must not exceed 255 characters")
     private String clinicAddress;
+
+    @Size(max = 2000, message = "Bio must not exceed 2000 characters")
+    private String bio;
+
+    private Integer yearsOfExperience;
+
+    @Size(max = 500, message = "Education must not exceed 500 characters")
+    private String education;
 }
