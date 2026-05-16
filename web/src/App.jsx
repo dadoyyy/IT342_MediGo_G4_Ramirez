@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 
 // ── Auth feature ──────────────────────────────────────────────────────────
@@ -54,15 +54,31 @@ function AuthToastListener() {
   return null;
 }
 
+function AuthenticatedLayout() {
+  return (
+    <ProtectedRoute>
+      <DoctorProfileProvider>
+        <Outlet />
+      </DoctorProfileProvider>
+    </ProtectedRoute>
+  );
+}
+
+function DoctorRoutes() {
+  return (
+    <ProfileCompletionGuard>
+      <Outlet />
+    </ProfileCompletionGuard>
+  );
+}
+
 function ChatRouteWrapper() {
   const role = authSession.getUser()?.role;
   if (role === 'DOCTOR') {
     return (
-      <DoctorProfileProvider>
-        <ProfileCompletionGuard>
-          <ChatInterface />
-        </ProfileCompletionGuard>
-      </DoctorProfileProvider>
+      <ProfileCompletionGuard>
+        <ChatInterface />
+      </ProfileCompletionGuard>
     );
   }
   return <ChatInterface />;
@@ -79,20 +95,30 @@ function App() {
           <Route path="/doctor/register" element={<DoctorRegistration />} />
           <Route path="/doctor/profile"  element={<ProtectedRoute><DoctorProfileProvider><DoctorProfile /></DoctorProfileProvider></ProtectedRoute>} />
           <Route path="/login"           element={<Login />} />
-          <Route path="/dashboard"       element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/home"            element={<ProtectedRoute><PatientHome /></ProtectedRoute>} />
-          <Route path="/doctor/:doctorId" element={<ProtectedRoute><DoctorDetail /></ProtectedRoute>} />
-          <Route path="/appointments"    element={<ProtectedRoute><MyAppointments /></ProtectedRoute>} />
-          <Route path="/pending-approval" element={<PendingApproval />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
-          <Route path="/admin/doctors" element={<ProtectedRoute><AdminDoctors /></ProtectedRoute>} />
-          <Route path="/admin/patients" element={<ProtectedRoute><AdminPatients /></ProtectedRoute>} />
-          <Route path="/admin/specialization-requests" element={<ProtectedRoute><AdminSpecializationRequests /></ProtectedRoute>} />
-          <Route path="/chat"            element={<ProtectedRoute><ChatRouteWrapper /></ProtectedRoute>} />
-          <Route path="/doctor/dashboard" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorDashboard /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
-          <Route path="/doctor/appointments" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorAppointments /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
-          <Route path="/doctor/schedule" element={<ProtectedRoute><DoctorProfileProvider><ProfileCompletionGuard><DoctorSchedule /></ProfileCompletionGuard></DoctorProfileProvider></ProtectedRoute>} />
+          
+          {/* All protected routes share the same persistent provider if doctor */}
+          <Route element={<AuthenticatedLayout />}>
+            <Route path="/dashboard"       element={<Dashboard />} />
+            <Route path="/home"            element={<PatientHome />} />
+            <Route path="/doctor/:doctorId" element={<DoctorDetail />} />
+            <Route path="/appointments"    element={<MyAppointments />} />
+            <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/verification" element={<AdminVerification />} />
+            <Route path="/admin/doctors" element={<AdminDoctors />} />
+            <Route path="/admin/patients" element={<AdminPatients />} />
+            <Route path="/admin/specialization-requests" element={<AdminSpecializationRequests />} />
+            
+            <Route path="/chat" element={<ChatRouteWrapper />} />
+
+            {/* Doctor-only routes that require completion/verification */}
+            <Route element={<DoctorRoutes />}>
+              <Route path="/doctor/dashboard"    element={<DoctorDashboard />} />
+              <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+              <Route path="/doctor/schedule"     element={<DoctorSchedule />} />
+            </Route>
+          </Route>
+          
           <Route path="/auth/callback"   element={<AuthCallback />} />
           <Route path="/verify-email"    element={<VerifyEmail />} />
           <Route path="*"                element={<Navigate to="/login" replace />} />

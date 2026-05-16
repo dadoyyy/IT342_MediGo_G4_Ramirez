@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MapPin, BadgeCheck, Calendar, Clock, Stethoscope, CheckCircle, ArrowRight, Banknote } from 'lucide-react';
 import { doctorApi, appointmentApi, authApi } from '../../../shared/api/api';
+import AppShell from '../../../shared/ui/AppShell';
 import AuthImage from '../../../shared/ui/AuthImage';
 import axios from 'axios';
 
@@ -20,7 +21,10 @@ export default function DoctorDetail() {
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
+    authApi.me().then(res => setUser(res.data?.data ?? res.data)).catch(() => {});
     doctorApi.search('').then(res => {
       const list = res.data?.data ?? res.data;
       setDoctor((Array.isArray(list) ? list : []).find(d => String(d.doctorId) === String(doctorId)) || null);
@@ -96,24 +100,8 @@ export default function DoctorDetail() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F9FA' }}>
-      {/* Sticky Top Nav */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(43,45,66,0.05)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button onClick={() => navigate(-1)} style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1px solid rgba(43,45,66,0.08)', color: '#2B2D42', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-            <ArrowLeft size={16} />
-          </button>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42' }}>Doctor Profile</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 24, height: 24, borderRadius: 6, background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Stethoscope size={12} color="#fff" strokeWidth={2.5} />
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.02em' }}>MediGo</span>
-        </div>
-      </header>
-
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 80px' }}>
+    <AppShell user={user}>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 28px 80px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32, alignItems: 'start' }}>
           
           {/* Main Column */}
@@ -322,6 +310,6 @@ export default function DoctorDetail() {
           </div>
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

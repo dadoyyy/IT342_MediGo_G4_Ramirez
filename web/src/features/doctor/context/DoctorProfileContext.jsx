@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { doctorApi } from '../../../shared/api/api';
+import { authSession } from '../../auth/authSession';
+import AppShell from '../../../shared/ui/AppShell';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -16,6 +18,11 @@ export function DoctorProfileProvider({ children }) {
   const [profileVersion, setProfileVersion] = useState(0);
 
   async function fetchProfile() {
+    const user = authSession.getUser();
+    if (user?.role !== 'DOCTOR') {
+      setIsLoading(false);
+      return;
+    }
     try {
       const res = await doctorApi.getMyProfile();
       const profile = res.data?.data ?? res.data;
@@ -62,15 +69,19 @@ export function DoctorProfileProvider({ children }) {
 
 export function ProfileCompletionGuard({ children }) {
   const { isProfileComplete, isVerified, isLoading } = useContext(DoctorProfileContext);
+  const user = authSession.getUser();
 
   if (isLoading) {
+    // Render the AppShell with a loader inside so the sidebar/navbar don't flicker away
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
-        <div
-          className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }}
-        />
-      </div>
+      <AppShell user={user}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#EDF2F4' }}>
+          <div
+            className="w-8 h-8 rounded-full border-2 animate-spin"
+            style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }}
+          />
+        </div>
+      </AppShell>
     );
   }
 
