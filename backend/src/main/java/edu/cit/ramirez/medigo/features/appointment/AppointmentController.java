@@ -147,4 +147,30 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentStatusUpdateRequest body) {
         return ApiResponse.ok(appointmentService.updateStatus(principal.getName(), id, body));
     }
+
+    @Value("${app.consultation.upload.dir:uploads/consultation-docs}")
+    private String consultationUploadDir;
+
+    @PostMapping(value = "/appointments/docs/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<String> uploadConsultationDoc(@RequestParam("file") MultipartFile file) throws java.io.IOException {
+        return ApiResponse.ok(appointmentService.uploadConsultationDocument(file));
+    }
+
+    @GetMapping("/appointments/docs/view/{filename:.+}")
+    public ResponseEntity<Resource> serveConsultationDoc(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get(consultationUploadDir).resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

@@ -4,6 +4,7 @@ import edu.cit.ramirez.medigo.features.appointment.dto.*;
 import edu.cit.ramirez.medigo.features.appointment.entity.*;
 import edu.cit.ramirez.medigo.features.doctor.DoctorProfileRepository;
 import edu.cit.ramirez.medigo.features.doctor.DoctorSpecializationChangeRequestRepository;
+import edu.cit.ramirez.medigo.features.appointment.AppointmentDocumentRepository;
 import edu.cit.ramirez.medigo.features.chat.ChatMessageRepository;
 import edu.cit.ramirez.medigo.features.chat.entity.ChatMessage;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
@@ -45,10 +46,14 @@ public class AppointmentService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentDocumentRepository appointmentDocumentRepository;
     private final ChatMessageRepository chatMessageRepository;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
     private String uploadDir;
+
+    @Value("${app.consultation.upload.dir:uploads/consultation-docs}")
+    private String consultationUploadDir;
 
     @PostConstruct
     public void logUploadDir() {
@@ -310,39 +315,122 @@ public class AppointmentService {
 
         if (target == AppointmentStatus.CONFIRMED && previous != AppointmentStatus.CONFIRMED) {
             sendConfirmationMessage(saved);
+        } else if (target == AppointmentStatus.COMPLETED && previous != AppointmentStatus.COMPLETED) {
+            if (request.getDocumentUrls() != null) {
+                for (String url : request.getDocumentUrls()) {
+                    String fileName = url.substring(url.lastIndexOf("/") + 1);
+                    AppointmentDocument doc = AppointmentDocument.builder()
+                            .appointment(saved)
+                            .fileName(fileName)
+                            .fileUrl(url)
+                            .documentType("CONSULTATION_RESULT")
+                            .build();
+                    appointmentDocumentRepository.save(doc);
+                }
+            }
+            sendCompletionMessage(saved, request.getMedicalNotes(), request.getFollowUpAt());
         }
 
         return toAppointmentDto(saved);
     }
 
+    public String uploadConsultationDocument(MultipartFile file) throws IOException {
+        Path root = Paths.get(consultationUploadDir);
+        if (!Files.exists(root)) Files.createDirectories(root);
+
+        String originalName = file.getOriginalFilename();
+        String extension = "";
+        if (originalName != null && originalName.contains(".")) {
+            extension = originalName.substring(originalName.lastIndexOf("."));
+        }
+        String fileName = UUID.randomUUID().toString() + extension;
+        Files.copy(file.getInputStream(), root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+        return "/api/v1/appointments/docs/view/" + fileName;
+    }
+
+    private void sendCompletionMessage(Appointment appointment, String notes, String followUp) {
+        StringBuilder content = new StringBuilder("[APPT_COMPLETED]")
+                .append("|Doctor=").append(appointment.getDoctor().getFullName())
+                .append("|Patient=").append(appointment.getPatient().getFullName())
+                .append("|Consultation=").append(appointment.getAppointmentType());
+
+        if (notes != null && !notes.isBlank()) {
+            content.append("|Medical Notes=").append(notes.trim());
+        }
+        if (followUp != null && !followUp.isBlank()) {
+            content.append("|Follow-up=").append(followUp.trim());
+        }
+
+        // Add Document Links
+        List<AppointmentDocument> docs = appointmentDocumentRepository.findByAppointmentId(appointment.getId());
+        if (!docs.isEmpty()) {
+            StringBuilder docLinks = new StringBuilder();
+            for (int i = 0; i < docs.size(); i++) {
+                if (i > 0) docLinks.append(";");
+                docLinks.append("Result ").append(i + 1).append(":").append(docs.get(i).getFileUrl());
+            }
+            content.append("|Digital Records=").append(docLinks.toString());
+        }
+
+        // Standard post-consultation instructions
+        content.append("|Instructions=").append("Your prescription and digital medical records are processed and available for download in this summary.");
+
+        ChatMessage message = new ChatMessage();
+        message.setSender(appointment.getDoctor());
+        message.setReceiver(appointment.getPatient());
+        message.setAppointment(appointment);
+        message.setContent(content.toString());
+        chatMessageRepository.save(message);
+    }
+
     private void sendConfirmationMessage(Appointment appointment) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a", Locale.ENGLISH);
-        String when = appointment.getAppointmentAt() == null
-                ? ""
-                : appointment.getAppointmentAt().format(formatter);
+        String when = appointment.getAppointmentAt() == null ? "" : appointment.getAppointmentAt().format(formatter);
+
+        User patient = appointment.getPatient();
+        String patientDetails = patient.getFullName();
+        if (patient.getBirthDate() != null) {
+            int age = java.time.Period.between(patient.getBirthDate(), java.time.LocalDate.now()).getYears();
+            patientDetails += " (" + age + "y";
+            if (patient.getGender() != null) {
+                patientDetails += ", " + patient.getGender();
+            }
+            patientDetails += ")";
+        } else if (patient.getGender() != null) {
+            patientDetails += " (" + patient.getGender() + ")";
+        }
 
         DoctorProfile profile = doctorProfileRepository.findByDoctorId(appointment.getDoctor().getId()).orElse(null);
-        String location = "";
+        String location = "TBA";
+        String instructions = "Please arrive 15 minutes before your scheduled appointment.";
+
         if (profile != null) {
-            String clinicName = profile.getClinicName() == null ? "" : profile.getClinicName().trim();
-            String clinicAddress = profile.getClinicAddress() == null ? "" : profile.getClinicAddress().trim();
-            if (!clinicName.isBlank() && !clinicAddress.isBlank()) {
-                location = clinicName + " - " + clinicAddress;
-            } else if (!clinicName.isBlank()) {
-                location = clinicName;
-            } else if (!clinicAddress.isBlank()) {
-                location = clinicAddress;
+            boolean isOnline = "Online".equalsIgnoreCase(appointment.getAppointmentType());
+            if (isOnline) {
+                location = "Online Meeting (Link will be sent via chat)";
+                instructions = "Ensure you have a stable internet connection. The telehealth meeting link will be shared here 5 minutes before your session.";
+            } else {
+                String clinicName = profile.getClinicName() == null ? "" : profile.getClinicName().trim();
+                String clinicAddress = profile.getClinicAddress() == null ? "" : profile.getClinicAddress().trim();
+                if (!clinicName.isBlank() && !clinicAddress.isBlank()) {
+                    location = clinicName + " - " + clinicAddress;
+                } else if (!clinicName.isBlank()) {
+                    location = clinicName;
+                } else if (!clinicAddress.isBlank()) {
+                    location = clinicAddress;
+                }
+                instructions = "Please bring a valid ID and arrive 15 minutes early at the clinic for documentation.";
             }
         }
 
         StringBuilder content = new StringBuilder("[APPT_CONFIRMED]")
                 .append("|Doctor=").append(appointment.getDoctor().getFullName())
-                .append("|Patient=").append(appointment.getPatient().getFullName())
+                .append("|Patient=").append(patientDetails)
                 .append("|When=").append(when)
-                .append("|Type=").append(appointment.getAppointmentType());
-        if (!location.isBlank()) {
-            content.append("|Location=").append(location);
-        }
+                .append("|Type=").append(appointment.getAppointmentType())
+                .append("|Location=").append(location)
+                .append("|Instructions=").append(instructions);
 
         ChatMessage message = new ChatMessage();
         message.setSender(appointment.getDoctor());
@@ -479,10 +567,18 @@ public class AppointmentService {
     }
 
     private AppointmentDto toAppointmentDto(Appointment appointment) {
+        User patient = appointment.getPatient();
+        Integer age = null;
+        if (patient.getBirthDate() != null) {
+            age = java.time.Period.between(patient.getBirthDate(), java.time.LocalDate.now()).getYears();
+        }
+
         return AppointmentDto.builder()
                 .id(appointment.getId())
-                .patientId(appointment.getPatient().getId())
-                .patientName(appointment.getPatient().getFullName())
+                .patientId(patient.getId())
+                .patientName(patient.getFullName())
+                .patientAge(age)
+                .patientGender(patient.getGender())
                 .doctorId(appointment.getDoctor().getId())
                 .doctorName(appointment.getDoctor().getFullName())
                 .appointmentAt(appointment.getAppointmentAt())

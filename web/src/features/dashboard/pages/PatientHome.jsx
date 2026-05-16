@@ -21,15 +21,24 @@ export default function PatientHome() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [doctors, setDoctors] = useState([]);
-  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
-  const [activeSpecialty, setActiveSpecialty] = useState('All');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  
-  // Advanced Filter State
-  const [filters, setFilters] = useState({
-    consultationType: 'All' // 'All', 'Online', 'In-Person'
+
+  // Advanced Filter State (Persisted with Safety Guard)
+  const [filters, setFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem('medigo_search_filters');
+      return saved ? JSON.parse(saved) : { consultationType: 'All' };
+    } catch { return { consultationType: 'All' }; }
+  });
+
+  const [activeSpecialty, setActiveSpecialty] = useState(() => {
+    return localStorage.getItem('medigo_search_specialty') || 'All';
+  });
+
+  const [query, setQuery] = useState(() => {
+    return localStorage.getItem('medigo_search_query') || '';
   });
 
   useEffect(() => { authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {}); }, []);
@@ -43,6 +52,12 @@ export default function PatientHome() {
     } catch { setDoctors([]); }
     finally { setSearching(false); setLoading(false); }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('medigo_search_query', query);
+    localStorage.setItem('medigo_search_specialty', activeSpecialty);
+    localStorage.setItem('medigo_search_filters', JSON.stringify(filters));
+  }, [query, activeSpecialty, filters]);
 
   useEffect(() => { searchDoctors(''); }, [searchDoctors]);
   useEffect(() => {

@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageSquare, Phone, Video, MoreVertical, CheckCheck, Clock } from 'lucide-react';
-import { chatApi, authApi } from '../../../shared/api/api';
+import { Send, Search, MessageSquare, Phone, Video, MoreVertical, CheckCheck, FileText, Clock } from 'lucide-react';
+import { chatApi, authApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import AuthImage from '../../../shared/ui/AuthImage';
 
 const APPT_CONFIRM_TAG = '[APPT_CONFIRMED]';
+const APPT_COMPLETE_TAG = '[APPT_COMPLETED]';
 
-function parseAppointmentConfirmation(content) {
-  if (!content || !content.startsWith(APPT_CONFIRM_TAG)) return null;
-  const data = {};
+function parseAppointmentAlert(content) {
+  if (!content) return null;
+  const isConfirm = content.startsWith(APPT_CONFIRM_TAG);
+  const isComplete = content.startsWith(APPT_COMPLETE_TAG);
+  if (!isConfirm && !isComplete) return null;
+
+  const data = { _type: isConfirm ? 'CONFIRMED' : 'COMPLETED' };
   content.split('|').slice(1).forEach(part => {
     const idx = part.indexOf('=');
     if (idx > 0) {
@@ -87,6 +92,15 @@ export default function ChatInterface() {
     }
   }, [messages]);
 
+  const handleViewDoc = async (url) => {
+    try {
+      const blobUrl = await fetchAuthBlob(url);
+      window.open(blobUrl, '_blank');
+    } catch {
+      alert('Failed to load document.');
+    }
+  };
+
   async function handleSend(e) {
     if (e) e.preventDefault();
     if (!text.trim() || !selected || sending) return;
@@ -112,10 +126,10 @@ export default function ChatInterface() {
   }, {});
 
   const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-  const lastIncomingConfirmation = lastMsg && String(lastMsg.senderId) !== String(me?.id)
-    ? parseAppointmentConfirmation(lastMsg.content)
+  const lastIncomingAlert = lastMsg && String(lastMsg.senderId) !== String(me?.id)
+    ? parseAppointmentAlert(lastMsg.content)
     : null;
-  const showQuickReplies = me?.role === 'PATIENT' && Boolean(lastIncomingConfirmation);
+  const showQuickReplies = me?.role === 'PATIENT' && Boolean(lastIncomingAlert?._type === 'CONFIRMED');
   const quickReplies = [
     'Thank you, doctor. I confirm my attendance.',
     'Is there anything I should prepare for my visit?',
@@ -184,12 +198,19 @@ export default function ChatInterface() {
                         boxShadow: isSelected ? '0 10px 20px rgba(239,35,60,0.04)' : 'none'
                       }}>
                       <div style={{ position: 'relative', flexShrink: 0 }}>
+                        {c.unread > 0 && (
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            style={{ position: 'absolute', inset: -4, borderRadius: 22, background: 'rgba(239,35,60,0.15)', zIndex: 0 }}
+                          />
+                        )}
                         <div style={{ 
                           width: 52, height: 52, borderRadius: 18, overflow: 'hidden', 
                           background: 'linear-gradient(135deg, rgba(239,35,60,0.08), rgba(43,45,66,0.05))', 
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          border: isSelected ? '2px solid #EF233C' : '2px solid transparent',
-                          padding: 2
+                          border: isSelected ? '2px solid #EF233C' : (c.unread > 0 ? '2px solid rgba(239,35,60,0.4)' : '2px solid transparent'),
+                          padding: 2, position: 'relative', zIndex: 1
                         }}>
                           <div style={{ width: '100%', height: '100%', borderRadius: 14, overflow: 'hidden', background: '#fff' }}>
                             <AuthImage src={c.profilePictureUrl} alt={c.firstName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -197,7 +218,7 @@ export default function ChatInterface() {
                           </div>
                         </div>
                         {c.online && (
-                          <div style={{ position: 'absolute', bottom: 1, right: 1, width: 14, height: 14, borderRadius: '50%', background: '#22C55E', border: '3px solid #fff', boxShadow: '0 2px 4px rgba(34,197,94,0.3)' }} />
+                          <div style={{ position: 'absolute', bottom: 1, right: 1, width: 14, height: 14, borderRadius: '50%', background: '#22C55E', border: '3px solid #fff', boxShadow: '0 2px 4px rgba(34,197,94,0.3)', zIndex: 2 }} />
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -285,7 +306,7 @@ export default function ChatInterface() {
                     
                     {msgs.map((msg, i) => {
                       const isMe = String(msg.senderId) === String(me?.id);
-                      const apptData = parseAppointmentConfirmation(msg.content);
+                      const apptData = parseAppointmentAlert(msg.content);
                       
                       return (
                         <motion.div 
@@ -300,7 +321,7 @@ export default function ChatInterface() {
                           
                           <div style={{ 
                             maxWidth: '75%', 
-                            padding: apptData ? '20px' : '12px 18px', 
+                            padding: apptData ? '24px' : '12px 18px', 
                             borderRadius: 20, 
                             fontSize: 14,
                             lineHeight: 1.6,
@@ -311,20 +332,62 @@ export default function ChatInterface() {
                             border: apptData ? '1px solid rgba(43,45,66,0.08)' : (isMe ? 'none' : '1px solid rgba(43,45,66,0.05)')
                           }}>
                             {apptData ? (
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid rgba(43,45,66,0.06)' }}>
-                                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(34,197,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <CheckCheck size={16} style={{ color: '#16A34A' }} />
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 14, borderBottom: '1px solid rgba(43,45,66,0.06)' }}>
+                                  <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(34,197,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <CheckCheck size={18} style={{ color: '#16A34A' }} />
                                   </div>
-                                  <p style={{ fontSize: 14, fontWeight: 800, margin: 0, color: '#2B2D42' }}>Appointment Confirmed</p>
+                                  <div>
+                                    <p style={{ fontSize: 14, fontWeight: 900, margin: 0, color: '#2B2D42', letterSpacing: '-0.02em' }}>
+                                      {apptData._type === 'CONFIRMED' ? 'Appointment Confirmed' : 'Consultation Summary'}
+                                    </p>
+                                    <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Medigo Clinical Records</p>
+                                  </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                  {Object.entries(apptData).map(([key, val]) => (
-                                    <div key={key}>
-                                      <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>{key}</p>
-                                      <p style={{ fontSize: 12, fontWeight: 600, color: '#2B2D42', margin: 0 }}>{val}</p>
-                                    </div>
-                                  ))}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                  {Object.entries(apptData).map(([key, val]) => {
+                                    if (key === '_type') return null;
+                                    const isFullWidth = key === 'Instructions' || key === 'Location' || key === 'Medical Notes' || key === 'Digital Records';
+                                    
+                                    if (key === 'Digital Records' && val) {
+                                      const links = val.split(';').filter(l => l && l.includes(':'));
+                                      if (links.length === 0) return null;
+                                      
+                                      return (
+                                        <div key={key} style={{ gridColumn: 'span 2' }}>
+                                          <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 800, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.04em' }}>{key}</p>
+                                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                            {links.map((link, idx) => {
+                                              const parts = link.split(/:(.+)/);
+                                              const name = parts[0];
+                                              const url = parts[1];
+                                              if (!url) return null;
+                                              
+                                              return (
+                                                <button key={idx} onClick={() => handleViewDoc(url)}
+                                                  style={{ 
+                                                    display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', 
+                                                    borderRadius: 12, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.1)',
+                                                    color: '#EF233C', fontSize: 12, fontWeight: 800,
+                                                    transition: 'all 0.2s', cursor: 'pointer', outline: 'none'
+                                                  }}>
+                                                  <FileText size={16} />
+                                                  {name || 'View Document'}
+                                                </button>
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+
+                                    return (
+                                      <div key={key} style={{ gridColumn: isFullWidth ? 'span 2' : 'auto' }}>
+                                        <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4, letterSpacing: '0.04em' }}>{key}</p>
+                                        <p style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42', margin: 0, lineHeight: 1.5 }}>{val}</p>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             ) : (

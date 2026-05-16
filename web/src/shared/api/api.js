@@ -74,6 +74,13 @@ export const appointmentApi = {
   cancel: (id) => api.put(`/appointments/${id}/cancel`),
   delete: (id) => api.delete(`/appointments/${id}`),
   updateStatus: (id, payload) => api.put(`/appointments/${id}/status`, payload),
+  uploadConsultationDoc: (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post('/appointments/docs/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const chatApi = {

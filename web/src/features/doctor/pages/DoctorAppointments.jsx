@@ -37,6 +37,10 @@ export default function DoctorAppointments() {
   const [updating, setUpdating] = useState(null);
   const [activeTab, setActiveTab] = useState('pending');
   const [expandedId, setExpandedId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ show: false, appt: null, targetStatus: null });
+  const [completeModal, setCompleteModal] = useState({ show: false, appt: null });
+  const [completionData, setCompletionData] = useState({ medicalNotes: '', followUpAt: '', documentUrls: [] });
+  const [uploadingDoc, setUploadingDoc] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -49,12 +53,45 @@ export default function DoctorAppointments() {
     load();
   }, []);
 
-  async function updateStatus(id, status) {
-    setUpdating(id);
-    try { await appointmentApi.updateStatus(id, { status }); setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a)); }
+  async function updateStatus(targetAppt = null, status = null, extra = {}) {
+    const appt = targetAppt || confirmModal.appt;
+    const targetStatus = status || confirmModal.targetStatus;
+    if (!appt || !targetStatus) return;
+
+    setUpdating(appt.id);
+    setConfirmModal({ show: false, appt: null, targetStatus: null });
+    setCompleteModal({ show: false, appt: null });
+    
+    try { 
+      await appointmentApi.updateStatus(appt.id, { 
+        status: targetStatus,
+        ...extra
+      }); 
+      setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: targetStatus } : a)); 
+      setCompletionData({ medicalNotes: '', followUpAt: '', documentUrls: [] });
+    }
     catch { alert('Failed to update appointment status.'); }
     finally { setUpdating(null); }
   }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploadingDoc(true);
+    try {
+      const res = await appointmentApi.uploadConsultationDoc(file);
+      const url = res.data?.data ?? res.data;
+      setCompletionData(prev => ({
+        ...prev,
+        documentUrls: [...prev.documentUrls, url]
+      }));
+    } catch {
+      alert('Failed to upload document.');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
 
   const displayed = (() => {
     if (activeTab === 'pending') return appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL');
@@ -68,6 +105,144 @@ export default function DoctorAppointments() {
 
   return (
     <AppShell user={user}>
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.show && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              style={{ background: '#FFFFFF', borderRadius: 32, width: '100%', maxWidth: 420, padding: 32, textAlign: 'center', boxShadow: '0 32px 80px rgba(43,45,66,0.2)' }}>
+              <div style={{ 
+                width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+                background: confirmModal.targetStatus === 'CONFIRMED' ? 'rgba(34,197,94,0.06)' : 'rgba(239,35,60,0.06)',
+                border: confirmModal.targetStatus === 'CONFIRMED' ? '1px solid rgba(34,197,94,0.15)' : '1px solid rgba(239,35,60,0.15)'
+              }}>
+                {confirmModal.targetStatus === 'CONFIRMED' ? <CheckCircle size={28} style={{ color: '#16A34A' }} /> : <XCircle size={28} style={{ color: '#EF233C' }} />}
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+                {confirmModal.targetStatus === 'CONFIRMED' ? 'Confirm Appointment?' : 'Decline Appointment?'}
+              </h3>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', lineHeight: 1.6 }}>
+                You are about to {confirmModal.targetStatus === 'CONFIRMED' ? 'confirm' : 'decline'} the consultation request from <strong>{confirmModal.appt?.patientName}</strong> on <strong>{fmtDt(confirmModal.appt?.appointmentAt)}</strong>.
+              </p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => setConfirmModal({ show: false, appt: null, targetStatus: null })} 
+                  className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13, borderRadius: 12 }}>Cancel</button>
+                <button onClick={() => updateStatus()} 
+                  style={{ 
+                    flex: 1, padding: 12, fontSize: 13, borderRadius: 12, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 800,
+                    background: confirmModal.targetStatus === 'CONFIRMED' ? '#16A34A' : '#EF233C',
+                    boxShadow: confirmModal.targetStatus === 'CONFIRMED' ? '0 8px 20px rgba(22,163,74,0.2)' : '0 8px 20px rgba(239,35,60,0.2)'
+                  }}>
+                  {confirmModal.targetStatus === 'CONFIRMED' ? 'Yes, Confirm' : 'Yes, Decline'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Completion Results Modal */}
+      <AnimatePresence>
+        {completeModal.show && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              style={{ background: '#FFFFFF', borderRadius: 32, width: '100%', maxWidth: 500, padding: 32, boxShadow: '0 32px 80px rgba(43,45,66,0.2)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ 
+                  width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+                  background: 'rgba(52,168,83,0.06)', border: '1px solid rgba(52,168,83,0.15)'
+                }}>
+                  <Activity size={28} style={{ color: '#34A853' }} />
+                </div>
+                <h3 style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Complete Consultation</h3>
+                <p style={{ fontSize: 14, color: '#6B7280', margin: 0, lineHeight: 1.6 }}>Please provide the post-consultation results for <strong>{completeModal.appt?.patientName}</strong>.</p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Medical Notes & Summary</label>
+                  <textarea 
+                    value={completionData.medicalNotes}
+                    onChange={e => setCompletionData(p => ({ ...p, medicalNotes: e.target.value }))}
+                    placeholder="Provide a summary of the consultation, diagnosis, and recommendations..."
+                    style={{ 
+                      width: '100%', padding: '16px', borderRadius: 16, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, minHeight: 120, resize: 'none', color: '#2B2D42', fontWeight: 500
+                    }} 
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Follow-up Schedule (Optional)</label>
+                  <input 
+                    type="date"
+                    value={completionData.followUpAt}
+                    onChange={e => setCompletionData(p => ({ ...p, followUpAt: e.target.value }))}
+                    style={{ 
+                      width: '100%', padding: '14px 16px', borderRadius: 16, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, color: '#2B2D42', fontWeight: 600
+                    }} 
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Upload Documents (PDF)</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <label style={{ 
+                      width: '100%', padding: '16px', borderRadius: 16, background: '#F8F9FA', border: '1px dashed rgba(43,45,66,0.15)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: uploadingDoc ? 'wait' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={uploadingDoc} style={{ display: 'none' }} />
+                      <FileText size={18} style={{ color: '#EF233C' }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42' }}>
+                        {uploadingDoc ? 'Uploading...' : 'Click to upload Prescription or Results'}
+                      </span>
+                    </label>
+                    
+                    {completionData.documentUrls.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {completionData.documentUrls.map((url, idx) => (
+                          <div key={idx} style={{ 
+                            padding: '12px 16px', borderRadius: 12, background: 'rgba(52,168,83,0.05)', border: '1px solid rgba(52,168,83,0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <FileText size={14} style={{ color: '#34A853' }} />
+                              <span style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42' }}>Digital_Record_{idx + 1}.pdf</span>
+                            </div>
+                            <button onClick={() => setCompletionData(p => ({ ...p, documentUrls: p.documentUrls.filter((_, i) => i !== idx) }))}
+                              style={{ border: 'none', background: 'none', color: '#EF233C', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
+                              <XCircle size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                <button onClick={() => setCompleteModal({ show: false, appt: null })} 
+                  className="mg-btn-ghost" style={{ flex: 1, padding: 14, fontSize: 13, borderRadius: 12 }}>Cancel</button>
+                <button onClick={() => updateStatus(completeModal.appt, 'COMPLETED', completionData)} 
+                  disabled={!completionData.medicalNotes.trim() || updating}
+                  style={{ 
+                    flex: 1, padding: 14, fontSize: 13, borderRadius: 12, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 800,
+                    background: '#34A853', boxShadow: '0 8px 20px rgba(52,168,83,0.2)',
+                    opacity: !completionData.medicalNotes.trim() || updating ? 0.5 : 1
+                  }}>
+                  {updating ? 'Finalizing...' : 'Finalize & Complete'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
@@ -168,7 +343,7 @@ export default function DoctorAppointments() {
                       {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
                         <div style={{ display: 'flex', gap: 8 }}>
                           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                            onClick={e => { e.stopPropagation(); updateStatus(appt.id, 'CONFIRMED'); }} disabled={updating === appt.id}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'CONFIRMED' }); }} disabled={updating === appt.id}
                             style={{ 
                               padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
                               background: '#EF233C', color: '#fff', border: 'none', cursor: 'pointer',
@@ -177,7 +352,7 @@ export default function DoctorAppointments() {
                             Confirm
                           </motion.button>
                           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                            onClick={e => { e.stopPropagation(); updateStatus(appt.id, 'REJECTED'); }} disabled={updating === appt.id}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'REJECTED' }); }} disabled={updating === appt.id}
                             style={{ 
                               padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
                               background: 'rgba(43,45,66,0.05)', color: '#2B2D42', border: '1px solid rgba(43,45,66,0.1)', cursor: 'pointer'
@@ -188,7 +363,7 @@ export default function DoctorAppointments() {
                       )}
                       {appt.status === 'CONFIRMED' && (
                         <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                          onClick={e => { e.stopPropagation(); updateStatus(appt.id, 'COMPLETED'); }} disabled={updating === appt.id}
+                          onClick={e => { e.stopPropagation(); setCompleteModal({ show: true, appt }); }} disabled={updating === appt.id}
                           style={{ 
                             padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
                             background: '#34A853', color: '#fff', border: 'none', cursor: 'pointer',
@@ -210,9 +385,21 @@ export default function DoctorAppointments() {
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 32 }}>
                             <div>
                               <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', letterSpacing: '0.1em', marginBottom: 12, textTransform: 'uppercase' }}>Patient Details</p>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={16} style={{ color: '#2B2D42' }} /></div>
-                                <span style={{ fontSize: 15, color: '#2B2D42', fontWeight: 800 }}>{appt.patientName || '—'}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                  <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={16} style={{ color: '#2B2D42' }} /></div>
+                                  <span style={{ fontSize: 15, color: '#2B2D42', fontWeight: 800 }}>{appt.patientName || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: 24, paddingLeft: 48 }}>
+                                  <div>
+                                    <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', textTransform: 'uppercase', margin: '0 0 2px' }}>Age</p>
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{appt.patientAge || '—'} yrs</p>
+                                  </div>
+                                  <div>
+                                    <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', textTransform: 'uppercase', margin: '0 0 2px' }}>Gender</p>
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{appt.patientGender || '—'}</p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                             <div>
@@ -243,7 +430,7 @@ export default function DoctorAppointments() {
                             </div>
                           )}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 32, paddingTop: 20, borderTop: '1px dashed rgba(43,45,66,0.1)' }}>
-                            <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600 }}>ID: #{appt.id.slice(-8).toUpperCase()}</p>
+                            <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600 }}>ID: #{String(appt.id).slice(-8).toUpperCase()}</p>
                             <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600 }}>Requested: {fmtDt(appt.createdAt)}</p>
                           </div>
                         </div>

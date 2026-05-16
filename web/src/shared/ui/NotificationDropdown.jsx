@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authSession } from '../../features/auth/authSession';
 import {
   Bell,
   CheckCircle,
@@ -35,13 +37,6 @@ function timeAgo(ts) {
 
 /**
  * A bell icon + dropdown that shows notifications.
- *
- * Props:
- *  - notifications (array)  — from useNotifications
- *  - unreadCount   (number) — count of unread
- *  - onMarkRead    (fn)     — markRead(id)
- *  - onMarkAllRead (fn)     — markAllRead()
- *  - loading       (bool)
  */
 export default function NotificationDropdown({
   notifications = [],
@@ -52,6 +47,22 @@ export default function NotificationDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleNotificationClick = (n) => {
+    if (!n.read) onMarkRead?.(n.id);
+    
+    setOpen(false);
+    
+    // Smart routing based on role and notification type
+    const role = authSession.getUser()?.role || 'PATIENT';
+    
+    if (role === 'DOCTOR') {
+      navigate('/doctor/appointments');
+    } else {
+      navigate('/appointments');
+    }
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -267,9 +278,7 @@ export default function NotificationDropdown({
                   return (
                     <button
                       key={n.id}
-                      onClick={() => {
-                        if (!n.read) onMarkRead?.(n.id);
-                      }}
+                      onClick={() => handleNotificationClick(n)}
                       style={{
                         display: 'flex',
                         alignItems: 'flex-start',
@@ -284,7 +293,7 @@ export default function NotificationDropdown({
                           i < notifications.length - 1
                             ? '1px solid rgba(43,45,66,0.04)'
                             : 'none',
-                        cursor: n.read ? 'default' : 'pointer',
+                        cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'background 0.15s',
                       }}
