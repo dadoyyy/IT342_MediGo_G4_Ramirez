@@ -436,6 +436,8 @@ public class AppointmentService {
 
     private DoctorProfileDto toDoctorProfileDto(DoctorProfile profile) {
         User doctor = profile.getDoctor();
+        long completedCount = appointmentRepository.countByDoctorIdAndStatus(doctor.getId(), AppointmentStatus.COMPLETED);
+
         return DoctorProfileDto.builder()
                 .doctorId(doctor.getId())
                 .doctorName(doctor.getFullName())
@@ -453,6 +455,7 @@ public class AppointmentService {
                 .bio(profile.getBio())
                 .yearsOfExperience(profile.getYearsOfExperience())
                 .education(profile.getEducation())
+                .patientCount(completedCount)
                 .build();
     }
 

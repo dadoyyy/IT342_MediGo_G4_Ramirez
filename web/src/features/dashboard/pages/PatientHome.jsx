@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin, BadgeCheck, ArrowRight } from 'lucide-react';
+import { Search, MapPin, BadgeCheck, ArrowRight, X, Clock, GraduationCap, Building2, Calendar, Stethoscope, ChevronRight } from 'lucide-react';
 import { authApi, doctorApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
+import { AnimatePresence } from 'framer-motion';
 import { authSession } from '../../auth/authSession';
 import MEDICAL_SPECIALIZATIONS from '../../../shared/constants/medicalSpecializations';
 
@@ -22,6 +23,7 @@ export default function PatientHome() {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [activeSpecialty, setActiveSpecialty] = useState('All');
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => { authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {}); }, []);
 
@@ -101,45 +103,178 @@ export default function PatientHome() {
               const accent = ACCENTS[idx % ACCENTS.length];
               const rgb = accent === '#EF233C' ? '239,35,60' : accent === '#8D99AE' ? '141,153,174' : '217,4,41';
               return (
-                <motion.button key={doctor.doctorId} variants={cardItem}
-                  onClick={() => navigate(`/doctor/${doctor.doctorId}`)}
+                <motion.div key={doctor.doctorId} variants={cardItem}
+                  onClick={() => setSelectedDoctor(doctor)}
                   className="card"
-                  style={{ padding: 20, textAlign: 'left', cursor: 'pointer', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(43,45,66,0.07)', borderRadius: 16, position: 'relative', overflow: 'hidden', transition: 'all 0.25s ease' }}
-                  whileHover={{ y: -3, boxShadow: `0 16px 40px rgba(43,45,66,0.1), 0 0 24px rgba(${rgb},0.06)` }}
-                  transition={{ duration: 0.2 }}>
-                  {/* Top accent line */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }} />
-
-                  {/* Avatar */}
-                  <div style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, fontSize: 13, fontWeight: 700, background: `rgba(${rgb},0.08)`, border: `1px solid rgba(${rgb},0.15)`, color: accent }}>
-                    {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
-                  </div>
-
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', marginBottom: 2 }}>Dr. {doctor.doctorName}</p>
-                  {doctor.specialization && (
-                    <p style={{ fontSize: 12, fontWeight: 500, color: accent, marginBottom: 8 }}>{doctor.specialization}</p>
-                  )}
-                  {doctor.clinicName && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12 }}>
-                      <MapPin size={10} style={{ color: '#8D99AE', flexShrink: 0 }} />
-                      <p style={{ fontSize: 12, color: '#8D99AE', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doctor.clinicName}</p>
+                  style={{ 
+                    padding: 24, 
+                    textAlign: 'left', 
+                    cursor: 'pointer', 
+                    background: '#FFFFFF', 
+                    border: '1px solid rgba(43,45,66,0.06)', 
+                    borderRadius: 20, 
+                    position: 'relative', 
+                    overflow: 'hidden', 
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%'
+                  }}
+                  whileHover={{ y: -6, boxShadow: `0 20px 40px rgba(43,45,66,0.08), 0 0 0 1px ${accent}30` }}>
+                  
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, background: `rgba(${rgb},0.06)`, border: `1px solid rgba(${rgb},0.12)`, color: accent }}>
+                      {doctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'DR'}
                     </div>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(43,45,66,0.06)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <BadgeCheck size={11} style={{ color: '#EF233C' }} />
-                      <span style={{ fontSize: 11, fontWeight: 500, color: '#8D99AE' }}>Verified</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: accent }}>
-                      Book <ArrowRight size={11} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)' }}>
+                      <BadgeCheck size={12} style={{ color: '#16A34A' }} />
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Verified</span>
                     </div>
                   </div>
-                </motion.button>
+
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: '#2B2D42', marginBottom: 4 }}>Dr. {doctor.doctorName}</p>
+                    
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+                      {(doctor.specialization || '').split(',').slice(0, 2).map((s, i) => (
+                        <span key={i} style={{ fontSize: 10, fontWeight: 600, padding: '4px 8px', borderRadius: 6, background: i === 0 ? `rgba(${rgb},0.08)` : 'rgba(141,153,174,0.08)', color: i === 0 ? accent : '#8D99AE', border: i === 0 ? `1px solid rgba(${rgb},0.12)` : '1px solid rgba(141,153,174,0.12)' }}>
+                          {s.trim()}
+                        </span>
+                      ))}
+                      {(doctor.specialization || '').split(',').length > 2 && (
+                        <span style={{ fontSize: 10, fontWeight: 600, padding: '4px 8px', borderRadius: 6, background: 'rgba(43,45,66,0.03)', color: '#8D99AE' }}>
+                          +{(doctor.specialization || '').split(',').length - 2} more
+                        </span>
+                      )}
+                    </div>
+
+                    {doctor.clinicName && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                        <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(141,153,174,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Building2 size={11} style={{ color: '#8D99AE' }} />
+                        </div>
+                        <p style={{ fontSize: 12, color: '#8D99AE', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doctor.clinicName}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: accent, marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(43,45,66,0.04)' }}>
+                    View Profile <ChevronRight size={14} />
+                  </div>
+                </motion.div>
               );
             })}
           </motion.div>
         )}
       </div>
+
+      {/* Doctor Profile Quick View Modal */}
+      <AnimatePresence>
+        {selectedDoctor && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setSelectedDoctor(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(43,45,66,0.4)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#F8F9FA', width: '100%', maxWidth: 540, height: '90vh', borderTopLeftRadius: 32, borderTopRightRadius: 32, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 -20px 40px rgba(0,0,0,0.1)' }}>
+              
+              {/* Modal Drag Handle & Close */}
+              <div style={{ padding: '12px 24px', display: 'flex', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(43,45,66,0.1)' }} />
+                <button onClick={() => setSelectedDoctor(null)}
+                  style={{ position: 'absolute', right: 20, top: 12, width: 32, height: 32, borderRadius: '50%', background: 'rgba(43,45,66,0.05)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <X size={18} style={{ color: '#8D99AE' }} />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0 28px 40px', scrollbarWidth: 'none' }}>
+                {/* Profile Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32, marginTop: 20 }}>
+                  <div style={{ width: 80, height: 80, borderRadius: 24, background: 'linear-gradient(135deg, #EF233C, #D90429)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#fff', boxShadow: '0 12px 24px rgba(239,35,60,0.2)' }}>
+                    {selectedDoctor.doctorName?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2B2D42', margin: '0 0 6px' }}>Dr. {selectedDoctor.doctorName}</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {(selectedDoctor.specialization || '').split(',').map((s, i) => (
+                        <span key={i} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 8, background: 'rgba(239,35,60,0.08)', color: '#EF233C' }}>{s.trim()}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+                  <div style={{ padding: 16, borderRadius: 20, background: '#fff', border: '1px solid rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,35,60,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Clock size={16} style={{ color: '#EF233C' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 11, color: '#8D99AE', margin: 0 }}>Experience</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{selectedDoctor.yearsOfExperience || '5+'} Years</p>
+                    </div>
+                  </div>
+                  <div style={{ padding: 16, borderRadius: 20, background: '#fff', border: '1px solid rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(22,163,74,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckCircle size={16} style={{ color: '#16A34A' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 11, color: '#8D99AE', margin: 0 }}>Patients</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{selectedDoctor.patientCount || '0'}+ Served</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* About Section */}
+                <div style={{ marginBottom: 32 }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 4, height: 16, background: '#EF233C', borderRadius: 2 }} />
+                    About Doctor
+                  </h3>
+                  <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.7, margin: 0 }}>
+                    {selectedDoctor.bio || `Dr. ${selectedDoctor.doctorName} is a highly skilled professional with expertise in ${selectedDoctor.specialization}. Dedicated to providing the best patient care and clinical excellence.`}
+                  </p>
+                </div>
+
+                {/* Background Details */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#fff', border: '1px solid rgba(43,45,66,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <GraduationCap size={18} style={{ color: '#8D99AE' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', marginBottom: 4 }}>EDUCATION</p>
+                      <p style={{ fontSize: 14, color: '#2B2D42', fontWeight: 500, margin: 0 }}>{selectedDoctor.education || 'Medical Degree from Top Institution'}</p>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#fff', border: '1px solid rgba(43,45,66,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Building2 size={18} style={{ color: '#8D99AE' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: '#8D99AE', marginBottom: 4 }}>CLINIC LOCATION</p>
+                      <p style={{ fontSize: 14, color: '#2B2D42', fontWeight: 500, margin: 0 }}>{selectedDoctor.clinicName}</p>
+                      <p style={{ fontSize: 12, color: '#8D99AE', margin: '4px 0 0' }}>{selectedDoctor.clinicAddress}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div style={{ padding: '24px 28px', background: '#fff', borderTop: '1px solid rgba(43,45,66,0.05)' }}>
+                <button onClick={() => navigate(`/doctor/${selectedDoctor.doctorId}`)}
+                  style={{ width: '100%', padding: '16px', borderRadius: 16, background: 'linear-gradient(135deg, #EF233C, #D90429)', border: 'none', color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(239,35,60,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                  <Calendar size={18} />
+                  Book Appointment Now
+                </button>
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }

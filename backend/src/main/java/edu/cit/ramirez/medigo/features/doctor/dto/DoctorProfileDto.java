@@ -25,4 +25,5 @@ public class DoctorProfileDto {
     private String prcIdUrl;
     private String boardCertificateUrl;
     private String governmentIdUrl;
+    private Long patientCount;
 }
