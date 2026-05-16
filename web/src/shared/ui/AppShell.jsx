@@ -216,6 +216,17 @@ export default function AppShell({ children, user }) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  const pulseStyle = `
+    @keyframes pulse-red {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239,35,60,0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239,35,60,0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239,35,60,0); }
+    }
+    .pulse-dot {
+      animation: pulse-red 2s infinite;
+    }
+  `;
+
   function handleLogout() {
     authApi.logout().catch(() => {});
     authSession.clearSession();
@@ -274,31 +285,39 @@ export default function AppShell({ children, user }) {
 
         {/* Profile dropdown */}
         <div ref={profileDropdownRef} style={{ position: 'relative' }}>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,1)' }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setProfileDropdownOpen(o => !o)}
-            className="top-navbar-profile-btn"
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: 10, padding: '6px 12px 6px 6px',
+              borderRadius: 20, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(43,45,66,0.08)', cursor: 'pointer', transition: 'all 0.2s',
+              boxShadow: '0 4px 12px rgba(43,45,66,0.03)'
+            }}
           >
             <div style={{
-              width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+              width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
               background: 'linear-gradient(135deg, #EF233C, #D90429)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#fff',
+              fontSize: 12, fontWeight: 800, color: '#fff',
+              border: '2px solid #fff', boxShadow: '0 0 10px rgba(239,35,60,0.2)'
             }}>
               <AuthImage
                 key={profileVersion}
                 src={profilePictureUrl}
                 alt="avatar"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                fallback={<span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</span>}
+                fallback={<span style={{ fontSize: 12, fontWeight: 800, color: '#fff' }}>{initials}</span>}
               />
             </div>
-            <span className="top-navbar-profile-name">{displayName}</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#2B2D42', letterSpacing: '-0.01em' }}>{displayName}</span>
             <ChevronDown size={14} style={{
               color: '#8D99AE',
               transition: 'transform 0.2s',
               transform: profileDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
             }} />
-          </button>
+          </motion.button>
 
           {/* Profile dropdown menu */}
           <AnimatePresence>
@@ -399,6 +418,7 @@ export default function AppShell({ children, user }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#EDF2F4' }}>
+      <style>{pulseStyle}</style>
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 flex-shrink-0 relative" style={sidebarStyle}>

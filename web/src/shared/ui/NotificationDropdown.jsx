@@ -88,6 +88,7 @@ export default function NotificationDropdown({
         {/* Unread badge */}
         {unreadCount > 0 && (
           <span
+            className="pulse-dot"
             style={{
               position: 'absolute',
               top: -3,

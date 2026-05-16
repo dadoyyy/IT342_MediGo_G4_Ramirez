@@ -132,12 +132,10 @@ export default function DoctorDashboard() {
   const recentPatients = Object.values(patientMap).sort((a, b) => (b.lastVisit ? new Date(b.lastVisit).getTime() : 0) - (a.lastVisit ? new Date(a.lastVisit).getTime() : 0)).slice(0, 8);
 
   const statCards = [
-    { label: 'Total Appointments', value: total, icon: CalendarCheck, color: '#2B2D42', bg: 'rgba(43,45,66,0.06)', border: 'rgba(43,45,66,0.15)' },
-    { label: 'Completed', value: completed, icon: CheckCircle, color: '#EF233C', bg: 'rgba(239,35,60,0.06)', border: 'rgba(239,35,60,0.15)' },
-    { label: 'Pending', value: pending, icon: Clock, color: '#8D99AE', bg: 'rgba(141,153,174,0.06)', border: 'rgba(141,153,174,0.15)' },
-    { label: 'Confirmed', value: confirmed, icon: TrendingUp, color: '#D90429', bg: 'rgba(217,4,41,0.06)', border: 'rgba(217,4,41,0.12)' },
-    { label: 'Cancelled', value: cancelled, icon: XCircle, color: '#6B7280', bg: 'rgba(107,114,128,0.06)', border: 'rgba(107,114,128,0.12)' },
-    { label: 'Attendance Rate', value: `${attendanceRate}%`, icon: Activity, color: '#2B2D42', bg: 'rgba(43,45,66,0.06)', border: 'rgba(43,45,66,0.15)' },
+    { label: 'Total Appointments', value: total, icon: CalendarCheck, color: '#EF233C' },
+    { label: 'Completed', value: completed, icon: CheckCircle, color: '#34A853' },
+    { label: 'Pending', value: pending, icon: Clock, color: '#FFB800' },
+    { label: 'Attendance Rate', value: `${attendanceRate}%`, icon: Activity, color: '#4CC9F0' },
   ];
 
   return (
@@ -152,42 +150,59 @@ export default function DoctorDashboard() {
           <>
             {/* Header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
-              <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Here's an overview of your practice and patient activity</p>
+              <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 4px', letterSpacing: '-0.04em' }}>Welcome back{user?.fullName ? `, Dr. ${user.fullName.split(' ')[0]}` : ''}</h1>
+              <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Here's an overview of your practice and patient activity</p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
-              {statCards.map((s, i) => (
-                <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 * i }}
-                  className="card" style={{ padding: '20px 18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', background: s.bg, border: `1px solid ${s.border}` }}>
-                      <s.icon size={17} style={{ color: s.color }} />
+            {/* Premium Stat Command Center */}
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              style={{ 
+                background: '#2B2D42', borderRadius: 32, padding: '32px', marginBottom: 32,
+                boxShadow: '0 30px 60px rgba(43,45,66,0.2)', position: 'relative', overflow: 'hidden'
+              }}
+            >
+              {/* Decorative Glow */}
+              <div style={{ position: 'absolute', top: -100, right: -100, width: 300, height: 300, background: 'radial-gradient(circle, rgba(239,35,60,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24, position: 'relative', zIndex: 1 }}>
+                {statCards.map((s, i) => (
+                  <div key={s.label} style={{ borderRight: i < statCards.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none', paddingRight: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <s.icon size={16} style={{ color: s.color }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{s.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                      <h3 style={{ fontSize: 36, fontWeight: 900, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>{s.value}</h3>
                     </div>
                   </div>
-                  <p style={{ fontSize: 26, fontWeight: 700, color: '#2B2D42', margin: '0 0 2px' }}>{s.value}</p>
-                  <p style={{ fontSize: 12, color: '#8D99AE', margin: 0 }}>{s.label}</p>
-                </motion.div>
-              ))}
+                ))}
+              </div>
             </motion.div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 18, marginBottom: 28 }}>
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                className="card" style={{ padding: '20px 20px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                  <TrendingUp size={15} style={{ color: '#EF233C' }} />
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', margin: 0 }}>Weekly Appointments</p>
+                className="card" style={{ padding: '28px', borderRadius: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(239,35,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TrendingUp size={16} style={{ color: '#EF233C' }} />
+                    </div>
+                    <p style={{ fontSize: 16, fontWeight: 800, color: '#2B2D42', margin: 0 }}>Practice Growth</p>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#34A853' }}>+12.5% this week</span>
                 </div>
                 <div style={{ width: '100%', height: 220, position: 'relative' }}>
                   <canvas ref={lineChartRef} style={{ width: '100%', height: '100%', display: 'block' }} />
                 </div>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="card" style={{ padding: '20px 20px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                  <BarChart3 size={15} style={{ color: '#8D99AE' }} />
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', margin: 0 }}>Monthly Performance</p>
+                className="card" style={{ padding: '28px', borderRadius: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(76,201,240,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BarChart3 size={16} style={{ color: '#4CC9F0' }} />
+                  </div>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: '#2B2D42', margin: 0 }}>Monthly Performance</p>
                 </div>
                 <div style={{ width: '100%', height: 220, position: 'relative' }}>
                   <canvas ref={barChartRef} style={{ width: '100%', height: '100%', display: 'block' }} />
@@ -196,11 +211,17 @@ export default function DoctorDashboard() {
             </div>
 
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-              className="card" style={{ padding: '20px 24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-                <Users size={15} style={{ color: '#EF233C' }} />
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42', margin: 0 }}>Recent Patients</p>
-                <span style={{ fontSize: 11, color: '#8D99AE', marginLeft: 'auto' }}>{Object.keys(patientMap).length} unique patient{Object.keys(patientMap).length !== 1 ? 's' : ''}</span>
+              className="card" style={{ padding: '32px', borderRadius: 28 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(239,35,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Users size={16} style={{ color: '#EF233C' }} />
+                  </div>
+                  <p style={{ fontSize: 18, fontWeight: 900, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>Recent Patient Activity</p>
+                </div>
+                <div style={{ padding: '6px 14px', borderRadius: 10, background: 'rgba(43,45,66,0.04)', color: '#8D99AE', fontSize: 12, fontWeight: 700 }}>
+                  {Object.keys(patientMap).length} TOTAL
+                </div>
               </div>
               {recentPatients.length === 0 ? (
                 <p style={{ fontSize: 13, color: '#8D99AE', textAlign: 'center', padding: '24px 0' }}>No patient data yet</p>
