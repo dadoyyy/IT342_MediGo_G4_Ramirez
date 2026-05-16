@@ -265,7 +265,7 @@ export default function DoctorProfile() {
   };
 
   return (
-    <AppShell>
+    <AppShell user={user}>
       <AnimatePresence>
         {docViewer && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -354,53 +354,49 @@ export default function DoctorProfile() {
       <div style={{ padding: '28px 28px 40px' }}>
 
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>
-            {isProfileComplete ? 'Your professional profile' : 'Complete your professional profile'}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+            Professional Profile
           </h1>
-          <p style={{ fontSize: 13, color: '#8D99AE', margin: '0 0 16px' }}>
-            {isProfileComplete
-              ? 'Keep your credentials and practice details up to date'
-              : 'Fill in your details and upload documents to get verified and start accepting patients'}
-          </p>
-          {!isProfileComplete && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', borderRadius: 14, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
-              <AlertCircle size={18} style={{ color: '#EF233C', flexShrink: 0, marginTop: 1 }} />
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#EF233C', margin: '0 0 2px' }}>Action required</p>
-                <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>
-                  Fill in all fields, upload your profile photo, and attach all required documents before submitting.
-                </p>
-              </div>
-            </div>
-          )}
+          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Manage your clinical credentials and public identity</p>
         </motion.div>
+
+        {!isProfileComplete && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '20px 24px', borderRadius: 24, background: 'rgba(239,35,60,0.04)', border: '1px solid rgba(239,35,60,0.12)', marginBottom: 32 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(239,35,60,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertCircle size={20} style={{ color: '#EF233C' }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 15, fontWeight: 900, color: '#EF233C', margin: '0 0 4px', letterSpacing: '-0.01em' }}>Action Required: Profile Incomplete</p>
+              <p style={{ fontSize: 13, color: '#8D99AE', margin: 0, fontWeight: 600, lineHeight: 1.5 }}>
+                To start accepting patient consultations, please complete all mandatory fields and upload your medical credentials for clinical verification.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Progress bar (Full Width) */}
         {!isProfileComplete && (
-          <div style={{ marginBottom: 28, padding: '20px', borderRadius: 16, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.07)', backdropFilter: 'blur(8px)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Activity size={16} style={{ color: '#EF233C' }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42', letterSpacing: '0.02em' }}>PROFILE COMPLETION PROGRESS</span>
+          <div style={{ marginBottom: 32, padding: '28px', borderRadius: 32, background: '#2B2D42', boxShadow: '0 20px 40px rgba(43,45,66,0.15)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: -100, right: -100, width: 300, height: 300, background: 'radial-gradient(circle, rgba(239,35,60,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Activity size={18} style={{ color: '#EF233C' }} />
+                <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Onboarding Status</span>
               </div>
-              <span style={{ fontSize: 13, fontWeight: 800, color: doneSteps === totalSteps ? '#EF233C' : '#8D99AE' }}>
-                {doneSteps} / {totalSteps} STEPS
+              <span style={{ fontSize: 14, fontWeight: 900, color: '#FFFFFF' }}>
+                {Math.round((doneSteps / totalSteps) * 100)}% COMPLETE
               </span>
             </div>
-            <div style={{ height: 10, borderRadius: 99, background: 'rgba(43,45,66,0.07)', overflow: 'hidden', border: '1px solid rgba(43,45,66,0.03)' }}>
+            <div style={{ height: 12, borderRadius: 99, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.03)' }}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(doneSteps / totalSteps) * 100}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #EF233C, #D90429)', boxShadow: '0 0 12px rgba(239,35,60,0.3)' }}
+                transition={{ duration: 1, ease: "circOut" }}
+                style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #EF233C, #D90429)', boxShadow: '0 0 20px rgba(239,35,60,0.4)' }}
               />
             </div>
-            {doneSteps === totalSteps && (
-              <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} style={{ fontSize: 13, color: '#16A34A', marginTop: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <CheckCircle size={14} /> Ready for submission — all required information provided.
-              </motion.p>
-            )}
           </div>
         )}
 
@@ -408,7 +404,7 @@ export default function DoctorProfile() {
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: 24, alignItems: 'start' }}>
 
           {/* ── Profile info card ── */}
-          <div className="card" style={{ padding: 28, marginBottom: 20 }}>
+          <div className="card" style={{ padding: 32, borderRadius: 32, border: '1px solid rgba(43,45,66,0.06)' }}>
 
             {/* Avatar + identity */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
@@ -467,39 +463,37 @@ export default function DoctorProfile() {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Dr. {user?.fullName}</p>
-                <p style={{ fontSize: 14, color: '#8D99AE', margin: '0 0 10px' }}>{user?.email}</p>
+                <p style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Dr. {user?.fullName}</p>
+                <p style={{ fontSize: 13, color: '#8D99AE', margin: '0 0 14px', fontWeight: 600 }}>{user?.email}</p>
                 
                 {!docs.profile_picture ? (
                   <motion.div 
-                    animate={{ x: [0, 2, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     style={{ 
                       display: 'inline-flex', 
                       alignItems: 'center', 
-                      gap: 6, 
-                      padding: '6px 12px', 
-                      borderRadius: 8, 
-                      background: 'rgba(217,4,41,0.08)', 
-                      border: '1px solid rgba(217,4,41,0.2)',
+                      gap: 8, 
+                      padding: '8px 16px', 
+                      borderRadius: 12, 
+                      background: '#EF233C', 
+                      boxShadow: '0 6px 16px rgba(239,35,60,0.2)',
                       cursor: 'pointer'
                     }}
                     onClick={() => avatarInputRef.current?.click()}
                   >
-                    <Camera size={14} style={{ color: '#D90429' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#D90429' }}>UPLOAD PHOTO *</span>
+                    <Camera size={14} color="#fff" />
+                    <span style={{ fontSize: 11, fontWeight: 900, color: '#fff', letterSpacing: '0.02em' }}>UPLOAD PHOTO</span>
                   </motion.div>
                 ) : (
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)' }}>
-                    <CheckCircle size={14} style={{ color: '#16A34A' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#16A34A' }}>PHOTO UPLOADED</span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 12, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                    <CheckCircle size={14} style={{ color: '#22C55E' }} />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: '#22C55E' }}>PHOTO VERIFIED</span>
                   </div>
                 )}
                 
-
-
                 {docErrors.profile_picture && (
-                  <p style={{ fontSize: 11, color: '#D90429', margin: '8px 0 0' }}>⚠ {docErrors.profile_picture}</p>
+                  <p style={{ fontSize: 11, color: '#D90429', margin: '10px 0 0', fontWeight: 600 }}>⚠ {docErrors.profile_picture}</p>
                 )}
               </div>
             </div>
@@ -603,7 +597,7 @@ export default function DoctorProfile() {
 
           </div>{/* end profile info card */}
           {/* ── Verification Documents card ── */}
-          <div className="card" style={{ padding: 28 }}>
+          <div className="card" style={{ padding: 32, borderRadius: 32, border: '1px solid rgba(43,45,66,0.06)' }}>
             <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(43,45,66,0.07)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <p style={{ fontSize: 15, fontWeight: 700, color: '#2B2D42', margin: 0, flex: 1 }}>Verification Documents</p>
