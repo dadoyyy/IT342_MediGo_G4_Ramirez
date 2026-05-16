@@ -155,7 +155,7 @@ export default function PatientHome() {
           {SPECIALTIES.map(s => (
             <button key={s} onClick={() => setActiveSpecialty(s)}
               style={activeSpecialty === s
-                ? { padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 800, background: '#2B2D42', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(43,45,66,0.15)', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
+                ? { padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 700, background: '#2B2D42', color: '#fff', border: '1px solid #2B2D42', cursor: 'pointer', boxShadow: '0 8px 20px rgba(43,45,66,0.15)', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
                 : { padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 700, background: '#fff', border: '1px solid rgba(43,45,66,0.06)', color: '#8D99AE', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap', flexShrink: 0 }
               }>
               {s}

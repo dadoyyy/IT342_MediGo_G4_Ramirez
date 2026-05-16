@@ -31,10 +31,14 @@ export default function MyAppointments() {
 
   useEffect(() => {
     authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {});
+    
+    setLoading(true);
     appointmentApi.listMine().then(r => {
       const list = r.data?.data ?? r.data;
       setAppointments(Array.isArray(list) ? list : []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => {
+      setAppointments([]);
+    }).finally(() => setLoading(false));
   }, []);
 
   async function handleCancel(id) {
@@ -57,22 +61,30 @@ export default function MyAppointments() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2D42', margin: '0 0 4px' }}>Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''}</h1>
-            <p style={{ fontSize: 13, color: '#8D99AE', margin: 0 }}>Track, manage, and stay on top of all your medical appointments</p>
+            <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+              Your Consultations
+            </h1>
+            <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Track your medical journey and manage your appointments</p>
           </div>
-          <button onClick={() => navigate('/home')} className="mg-btn" style={{ padding: '10px 16px', fontSize: 13 }}>
-            <Plus size={14} /> Book New
-          </button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/home')} 
+            className="mg-btn" 
+            style={{ padding: '12px 24px', fontSize: 13, borderRadius: 16, display: 'flex', alignItems: 'center', gap: 10 }}
+          >
+            <Plus size={16} /> New Booking
+          </motion.button>
         </motion.div>
 
         {/* Filters */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.08 }}
-          style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+          style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
               style={filter === f
-                ? { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 600, background: 'linear-gradient(135deg, #EF233C, #D90429)', color: '#fff', border: 'none', cursor: 'pointer', boxShadow: '0 2px 12px rgba(239,35,60,0.25)', transition: 'all 0.2s' }
-                : { padding: '6px 14px', borderRadius: 99, fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(43,45,66,0.1)', color: '#6B7280', cursor: 'pointer', transition: 'all 0.2s' }
+                ? { padding: '10px 20px', borderRadius: 16, fontSize: 12, fontWeight: 700, background: '#2B2D42', color: '#fff', border: '1px solid #2B2D42', cursor: 'pointer', boxShadow: '0 8px 20px rgba(43,45,66,0.15)', transition: 'all 0.2s' }
+                : { padding: '10px 20px', borderRadius: 16, fontSize: 12, fontWeight: 700, background: '#fff', border: '1px solid rgba(43,45,66,0.06)', color: '#8D99AE', cursor: 'pointer', transition: 'all 0.2s' }
               }>
               {f === 'ALL' ? `All (${appointments.length})` : STATUS_META[f]?.label}
             </button>
@@ -96,42 +108,75 @@ export default function MyAppointments() {
             </button>
           </motion.div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {displayed.map((appt, i) => {
               const meta = STATUS_META[appt.status] || { label: appt.status, cls: 'badge-cancelled' };
               const canCancel = appt.status === 'PENDING_DOCTOR_APPROVAL' || appt.status === 'CONFIRMED';
+              
+              const statusColors = {
+                PENDING_DOCTOR_APPROVAL: { bg: 'rgba(245,158,11,0.08)', text: '#D97706', border: 'rgba(245,158,11,0.2)' },
+                CONFIRMED: { bg: 'rgba(34,197,94,0.08)', text: '#16A34A', border: 'rgba(34,197,94,0.2)' },
+                COMPLETED: { bg: 'rgba(59,130,246,0.08)', text: '#2563EB', border: 'rgba(59,130,246,0.2)' },
+                CANCELLED: { bg: 'rgba(239,35,60,0.08)', text: '#EF233C', border: 'rgba(239,35,60,0.2)' },
+                REJECTED: { bg: 'rgba(43,45,66,0.08)', text: '#2B2D42', border: 'rgba(43,45,66,0.2)' },
+              }[appt.status] || { bg: 'rgba(43,45,66,0.05)', text: '#8D99AE', border: 'rgba(43,45,66,0.1)' };
+
               return (
                 <motion.div key={appt.id}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
-                  className="card" style={{ padding: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flex: 1, minWidth: 0 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.2)' }}>
-                        <Stethoscope size={16} style={{ color: '#EF233C' }} />
+                  className="card" style={{ padding: 32, borderRadius: 32, border: '1px solid rgba(43,45,66,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, flex: 1, minWidth: 0 }}>
+                      <div style={{ width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'rgba(239,35,60,0.04)', border: '1px solid rgba(239,35,60,0.1)' }}>
+                        <Stethoscope size={24} style={{ color: '#EF233C' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ marginBottom: 6 }}>
-                          <span className={`badge ${meta.cls}`}>{meta.label}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <span style={{ 
+                            fontSize: 10, 
+                            fontWeight: 900, 
+                            padding: '4px 12px', 
+                            borderRadius: 8, 
+                            background: statusColors.bg, 
+                            color: statusColors.text, 
+                            border: `1px solid ${statusColors.border}`,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em'
+                          }}>
+                            {meta.label}
+                          </span>
+                          {appt.appointmentType && (
+                            <span style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', textTransform: 'uppercase' }}>
+                              • {appt.appointmentType} Consultation
+                            </span>
+                          )}
                         </div>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#2B2D42' }}>Dr. {appt.doctorName}</p>
-                        {appt.appointmentType && (
-                          <p style={{ fontSize: 12, fontWeight: 500, color: '#EF233C', marginTop: 2 }}>{appt.appointmentType}</p>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                          <Clock size={11} style={{ color: '#8D99AE' }} />
-                          <span style={{ fontSize: 12, color: '#8D99AE' }}>{fmtDt(appt.appointmentAt)}</span>
+                        <p style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', marginBottom: 4, letterSpacing: '-0.02em' }}>Dr. {appt.doctorName}</p>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 10, background: 'rgba(43,45,66,0.03)', border: '1px solid rgba(43,45,66,0.05)' }}>
+                            <Clock size={13} style={{ color: '#8D99AE' }} />
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42' }}>{fmtDt(appt.appointmentAt)}</span>
+                          </div>
                         </div>
+
                         {appt.notes && (
-                          <p style={{ fontSize: 12, color: '#8D99AE', marginTop: 8, fontStyle: 'italic' }}>"{appt.notes}"</p>
+                          <div style={{ marginTop: 20, padding: '12px 16px', borderRadius: 16, background: 'rgba(43,45,66,0.02)', borderLeft: '3px solid #EF233C' }}>
+                            <p style={{ fontSize: 13, color: '#6B7280', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>"{appt.notes}"</p>
+                          </div>
                         )}
                       </div>
                     </div>
                     {canCancel && (
-                      <button onClick={() => handleCancel(appt.id)} disabled={cancelling === appt.id}
-                        style={{ fontSize: 12, fontWeight: 600, color: '#D90429', background: 'none', border: 'none', padding: 0, flexShrink: 0, cursor: 'pointer' }}>
-                        {cancelling === appt.id ? 'Cancelling…' : 'Cancel'}
-                      </button>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, color: '#EF233C' }}
+                        onClick={() => handleCancel(appt.id)} 
+                        disabled={cancelling === appt.id}
+                        style={{ fontSize: 12, fontWeight: 800, color: '#8D99AE', background: 'none', border: 'none', padding: '8px', flexShrink: 0, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                      >
+                        {cancelling === appt.id ? 'Processing…' : 'Cancel Appointment'}
+                      </motion.button>
                     )}
                   </div>
                 </motion.div>
