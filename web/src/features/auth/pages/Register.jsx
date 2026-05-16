@@ -43,7 +43,7 @@ function validate(f, addToast) {
 const PERKS = [
   { icon: ShieldCheck, text: 'Bank-grade security & verified professionals', color: '#EF233C' },
   { icon: Activity,    text: 'Real-time appointment synchronization',        color: '#D90429' },
-  { icon: Heart,       text: 'Comprehensive personalized health insights',       color: '#8D99AE' },
+  { icon: Heart,       text: 'Comprehensive personalized health insights',       color: '#EF233C' },
 ];
 
 const ROLES = [
