@@ -48,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        binding.tvErrorCard.visibility = android.view.View.GONE
         setLoading(true)
         ApiClient.authApi.login(LoginRequest(email, password))
             .enqueue(object : Callback<ApiEnvelope<AuthResponse>> {
@@ -76,17 +77,15 @@ class LoginActivity : AppCompatActivity() {
                             response.errorBody(),
                             "Invalid email or password"
                         )
-                        Toast.makeText(this@LoginActivity, message, Toast.LENGTH_LONG).show()
+                        binding.tvErrorCard.text = message
+                        binding.tvErrorCard.visibility = android.view.View.VISIBLE
                     }
                 }
 
                 override fun onFailure(call: Call<ApiEnvelope<AuthResponse>>, t: Throwable) {
                     setLoading(false)
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "Cannot connect to backend. Check BASE_URL/network.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    binding.tvErrorCard.text = "Cannot connect to backend. Check your network or server."
+                    binding.tvErrorCard.visibility = android.view.View.VISIBLE
                 }
             })
     }

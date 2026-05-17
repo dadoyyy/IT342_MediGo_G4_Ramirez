@@ -16,16 +16,19 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".DashboardActivity"
+            android:name=".features.dashboard.DashboardActivity"
             android:exported="false" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".features.auth.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".features.auth.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".features.auth.EmailVerificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.dashboard.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

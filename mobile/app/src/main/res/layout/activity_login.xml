@@ -3,66 +3,89 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/gray_100">
+    android:background="@color/gray_50">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="28dp"
+        android:gravity="center_vertical">
 
-        <!-- Header -->
+        <!-- Logo / Brand Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="32dp">
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="40dp">
 
             <TextView
-                style="@style/TextHeading1"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome Back" />
+                android:text="MediGo"
+                android:textSize="36dp"
+                android:textColor="@color/primary"
+                android:fontFamily="sans-serif-black"
+                android:textStyle="bold"
+                android:letterSpacing="-0.03" />
 
             <TextView
-                style="@style/TextCaption"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
+                android:text="Healthcare Booking System"
+                android:textSize="13sp"
                 android:textColor="@color/text_secondary"
-                android:text="Sign in to continue" />
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.08"
+                android:textAllCaps="true" />
         </LinearLayout>
 
-        <!-- Email Field -->
-        <FrameLayout
+        <!-- Welcome Text -->
+        <TextView
+            style="@style/TextHeading1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/surface"
-            android:elevation="1dp">
-            <EditText
-                android:id="@+id/etEmail"
-                style="@style/EditTextInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Email"
-                android:inputType="textEmailAddress" />
-        </FrameLayout>
+            android:text="Welcome Back"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            style="@style/TextBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign in to manage your medical consultations."
+            android:layout_marginBottom="24dp" />
+
+        <!-- Collapsible Premium Error Message Card -->
+        <TextView
+            android:id="@+id/tvErrorCard"
+            style="@style/ErrorMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp"
+            android:text="Error message goes here." />
+
+        <!-- Email Field -->
+        <EditText
+            android:id="@+id/etEmail"
+            style="@style/EditTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="14dp" />
 
         <!-- Password Field -->
-        <FrameLayout
+        <EditText
+            android:id="@+id/etPassword"
+            style="@style/EditTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@color/surface"
-            android:elevation="1dp">
-            <EditText
-                android:id="@+id/etPassword"
-                style="@style/EditTextInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textPassword" />
-        </FrameLayout>
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:layout_marginBottom="24dp" />
 
         <!-- Login Button -->
         <Button
@@ -70,7 +93,7 @@
             style="@style/ButtonPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Login" />
+            android:text="Sign In" />
 
         <!-- Register Link -->
         <LinearLayout
@@ -78,20 +101,22 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="32dp">
 
             <TextView
                 style="@style/TextCaption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No account yet? " />
+                android:textColor="@color/text_secondary"
+                android:text="New to MediGo? " />
 
             <TextView
                 android:id="@+id/tvGoToRegister"
                 style="@style/TextLink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Register" />
+                android:text="Create Account" />
         </LinearLayout>
+
     </LinearLayout>
 </ScrollView>
