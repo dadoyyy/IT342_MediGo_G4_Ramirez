@@ -19,7 +19,7 @@ data class DoctorProfileDto(
     val governmentIdUrl: String?,
     val patientCount: Long?,
     val consultationFee: Double?
-)
+) : java.io.Serializable
 
 data class AppointmentDto(
     val id: Long,
@@ -34,4 +34,14 @@ data class AppointmentDto(
     val notes: String?,
     val status: String,
     val createdAt: String
+)
+
+data class DoctorProfileUpsertRequest(
+    val specialization: String,
+    val clinicName: String,
+    val clinicAddress: String,
+    val bio: String?,
+    val yearsOfExperience: Int?,
+    val education: String?,
+    val consultationFee: Double?
 )

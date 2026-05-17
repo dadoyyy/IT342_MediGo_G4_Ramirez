@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/gray_50">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            style="@style/TextHeading1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Practice Profile" />
+
+        <TextView
+            style="@style/TextBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="4dp"
+            android:text="Configure your medical practice and specialization credentials." />
+
+        <!-- Collapsible Error Card -->
+        <TextView
+            android:id="@+id/tvErrorCard"
+            style="@style/ErrorMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
+
+        <!-- Specialization Input -->
+        <TextView
+            style="@style/TextCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Medical Specialization" />
+
+        <Spinner
+            android:id="@+id/spinnerSpecialization"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/bg_input"
+            android:spinnerMode="dropdown" />
+
+        <!-- Years of Experience & Consultation Fee (Side by Side) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <!-- Years of Experience -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    style="@style/TextCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Experience (Years)" />
+
+                <EditText
+                    android:id="@+id/etExperience"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="e.g. 5"
+                    android:inputType="number"
+                    android:importantForAutofill="no" />
+            </LinearLayout>
+
+            <!-- Consultation Fee -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    style="@style/TextCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Consultation Fee (₱)" />
+
+                <EditText
+                    android:id="@+id/etConsultationFee"
+                    style="@style/InputField"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="e.g. 500"
+                    android:inputType="numberDecimal"
+                    android:importantForAutofill="no" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Clinic Name -->
+        <TextView
+            style="@style/TextCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Clinic Name" />
+
+        <EditText
+            android:id="@+id/etClinicName"
+            style="@style/InputField"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:hint="e.g. MediGo Specialist Clinic"
+            android:inputType="textPostalAddress"
+            android:importantForAutofill="no" />
+
+        <!-- Clinic Address -->
+        <TextView
+            style="@style/TextCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Clinic Address" />
+
+        <EditText
+            android:id="@+id/etClinicAddress"
+            style="@style/InputField"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:hint="e.g. Room 402, Medical Arts Bldg"
+            android:inputType="textPostalAddress"
+            android:importantForAutofill="no" />
+
+        <!-- Professional Bio -->
+        <TextView
+            style="@style/TextCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Professional Biography" />
+
+        <EditText
+            android:id="@+id/etBio"
+            style="@style/InputField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="100dp"
+            android:gravity="top|start"
+            android:layout_marginTop="8dp"
+            android:padding="16dp"
+            android:hint="Briefly introduce your focus areas and clinical expertise..."
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            android:importantForAutofill="no" />
+
+        <!-- Education -->
+        <TextView
+            style="@style/TextCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Medical Education" />
+
+        <EditText
+            android:id="@+id/etEducation"
+            style="@style/InputField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:gravity="top|start"
+            android:layout_marginTop="8dp"
+            android:padding="16dp"
+            android:hint="e.g. Doctor of Medicine (MD) - Cebu Institute of Medicine"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"
+            android:importantForAutofill="no" />
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSaveProfile"
+            style="@style/ButtonPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Practice Profile" />
+
+    </LinearLayout>
+</ScrollView>

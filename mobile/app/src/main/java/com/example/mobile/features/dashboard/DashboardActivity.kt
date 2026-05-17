@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat
 import com.example.mobile.R
 import com.example.mobile.databinding.ActivityDashboardBinding
 import com.example.mobile.features.auth.LoginActivity
+import com.example.mobile.features.doctor.DoctorProfileActivity
+import com.example.mobile.features.patient.SearchDoctorsActivity
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.DoctorProfileDto
 import com.example.mobile.shared.api.ApiClient
@@ -38,8 +40,14 @@ class DashboardActivity : AppCompatActivity() {
         TokenHolder.setToken(sessionManager.token().orEmpty())
 
         setupToolbar()
-        loadDashboardData()
         setupClickListeners()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (sessionManager.isLoggedIn()) {
+            loadDashboardData()
+        }
     }
 
     private fun setupToolbar() {
@@ -152,7 +160,7 @@ class DashboardActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         // Patient Actions
         binding.cardBookConsultation.setOnClickListener {
-            Toast.makeText(this, "Book Consultation: Opening verified doctor listing...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, SearchDoctorsActivity::class.java))
         }
         binding.cardMySchedule.setOnClickListener {
             Toast.makeText(this, "My Appointments: Opening schedule tracker...", Toast.LENGTH_SHORT).show()
@@ -163,7 +171,7 @@ class DashboardActivity : AppCompatActivity() {
 
         // Doctor Actions
         binding.cardDoctorProfile.setOnClickListener {
-            Toast.makeText(this, "Practice Profile: Loading license credentials...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, DoctorProfileActivity::class.java))
         }
         binding.cardConsultationQueue.setOnClickListener {
             Toast.makeText(this, "Appointments Queue: Opening active patient booking queue...", Toast.LENGTH_SHORT).show()
@@ -173,7 +181,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.btnStatusAction.setOnClickListener {
-            Toast.makeText(this, "Opening practice credentials setup...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, DoctorProfileActivity::class.java))
         }
     }
 
