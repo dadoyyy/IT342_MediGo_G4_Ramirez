@@ -26,6 +26,20 @@ function parseAppointmentAlert(content) {
   return data;
 }
 
+function formatLastMessagePreview(lastMsg) {
+  if (!lastMsg) return '';
+  if (lastMsg.startsWith(APPT_CONFIRM_TAG)) {
+    return '📅 Consultation Confirmed';
+  }
+  if (lastMsg.startsWith(APPT_COMPLETE_TAG)) {
+    return '✅ Consultation Completed';
+  }
+  if (lastMsg.startsWith(APPT_CANCELLED_TAG)) {
+    return '❌ Consultation Cancelled';
+  }
+  return lastMsg;
+}
+
 function fmtTime(ts) {
   if (!ts) return '';
   return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -244,7 +258,7 @@ export default function ChatInterface() {
                           )}
                         </div>
                         <p style={{ fontSize: 12, color: isSelected ? '#EF233C' : '#8D99AE', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
-                          {c.lastMsg || c.role || 'Patient'}
+                          {formatLastMessagePreview(c.lastMsg) || c.role || 'Patient'}
                         </p>
                       </div>
                     </motion.button>
