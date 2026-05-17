@@ -11,6 +11,9 @@ import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import edu.cit.ramirez.medigo.features.appointment.AppointmentRepository;
+import edu.cit.ramirez.medigo.features.appointment.AppointmentDocumentRepository;
+import edu.cit.ramirez.medigo.features.appointment.entity.Appointment;
+import edu.cit.ramirez.medigo.features.chat.ChatMessageRepository;
 import edu.cit.ramirez.medigo.shared.mail.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,8 @@ public class AdminService {
     private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final edu.cit.ramirez.medigo.features.user.UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final AppointmentDocumentRepository appointmentDocumentRepository;
     private final EmailService emailService;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
@@ -163,13 +168,33 @@ public class AdminService {
         emailService.sendDoctorDeletionEmail(user.getEmail(), user.getFullName(), reason);
 
         // 2. Clean up associated data
-        // Delete appointments where this user is the doctor
-        appointmentRepository.findByDoctorId(doctorId).forEach(appointmentRepository::delete);
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(doctorId);
+
+        // A. Delete appointment documents linked to the doctor's appointments
+        for (Appointment app : appointments) {
+            appointmentDocumentRepository.findByAppointmentId(app.getId())
+                    .forEach(appointmentDocumentRepository::delete);
+        }
+
+        // B. Delete chat messages associated with the doctor's appointments
+        for (Appointment app : appointments) {
+            chatMessageRepository.findAll().stream()
+                    .filter(m -> m.getAppointment() != null && m.getAppointment().getId().equals(app.getId()))
+                    .forEach(chatMessageRepository::delete);
+        }
+
+        // C. Delete all chat messages where doctor is sender or receiver
+        chatMessageRepository.findAll().stream()
+                .filter(m -> m.getSender().getId().equals(doctorId) || m.getReceiver().getId().equals(doctorId))
+                .forEach(chatMessageRepository::delete);
+
+        // D. Delete the appointments themselves
+        appointments.forEach(appointmentRepository::delete);
         
-        // Delete profile
+        // E. Delete profile
         doctorProfileRepository.findByDoctorId(doctorId).ifPresent(doctorProfileRepository::delete);
         
-        // Delete specialization change requests
+        // F. Delete specialization change requests
         doctorChangeRequestRepository.findAllByOrderByCreatedAtDesc().stream()
                 .filter(r -> r.getDoctor().getId().equals(doctorId))
                 .forEach(doctorChangeRequestRepository::delete);
@@ -191,8 +216,28 @@ public class AdminService {
         emailService.sendPatientDeletionEmail(user.getEmail(), user.getFullName(), reason);
 
         // 2. Clean up data
-        // Delete appointments where this user is the patient
-        appointmentRepository.findByPatientId(patientId).forEach(appointmentRepository::delete);
+        List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
+
+        // A. Delete appointment documents linked to the patient's appointments
+        for (Appointment app : appointments) {
+            appointmentDocumentRepository.findByAppointmentId(app.getId())
+                    .forEach(appointmentDocumentRepository::delete);
+        }
+
+        // B. Delete chat messages associated with the patient's appointments
+        for (Appointment app : appointments) {
+            chatMessageRepository.findAll().stream()
+                    .filter(m -> m.getAppointment() != null && m.getAppointment().getId().equals(app.getId()))
+                    .forEach(chatMessageRepository::delete);
+        }
+
+        // C. Delete all chat messages where patient is sender or receiver
+        chatMessageRepository.findAll().stream()
+                .filter(m -> m.getSender().getId().equals(patientId) || m.getReceiver().getId().equals(patientId))
+                .forEach(chatMessageRepository::delete);
+
+        // D. Delete the appointments themselves
+        appointments.forEach(appointmentRepository::delete);
 
         // 3. Delete the user
         userRepository.delete(user);

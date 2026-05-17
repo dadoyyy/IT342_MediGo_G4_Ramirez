@@ -6,6 +6,8 @@ import edu.cit.ramirez.medigo.features.chat.dto.ChatContactDto;
 import edu.cit.ramirez.medigo.features.chat.dto.ChatMessageDto;
 import edu.cit.ramirez.medigo.features.chat.dto.ChatSendRequest;
 import edu.cit.ramirez.medigo.features.chat.entity.ChatMessage;
+import edu.cit.ramirez.medigo.features.doctor.DoctorProfileRepository;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.UserRepository;
 import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
@@ -26,6 +28,7 @@ public class ChatService {
         private final UserRepository userRepository;
         private final AppointmentRepository appointmentRepository;
         private final ChatMessageRepository chatMessageRepository;
+        private final DoctorProfileRepository doctorProfileRepository;
 
         /**
          * Returns the list of users the current user is allowed to chat with.
@@ -43,7 +46,7 @@ public class ChatService {
                                 .filter(u -> q.isBlank()
                                                 || u.getFullName().toLowerCase(Locale.ROOT).contains(q)
                                                 || u.getEmail().toLowerCase(Locale.ROOT).contains(q))
-                                .map(this::toContactDto)
+                                .map(u -> toContactDto(current, u))
                                 .toList();
         }
 
@@ -143,11 +146,31 @@ public class ChatService {
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
         }
 
-        private ChatContactDto toContactDto(User user) {
+        private ChatContactDto toContactDto(User current, User user) {
                 String fullName = user.getFullName() == null ? "" : user.getFullName().trim();
                 int spaceIdx = fullName.indexOf(' ');
                 String firstName = spaceIdx > 0 ? fullName.substring(0, spaceIdx) : fullName;
                 String lastName = spaceIdx > 0 ? fullName.substring(spaceIdx + 1) : "";
+
+                String profilePictureUrl = null;
+                if ("DOCTOR".equalsIgnoreCase(user.getRole())) {
+                        profilePictureUrl = doctorProfileRepository.findByDoctorId(user.getId())
+                                        .map(DoctorProfile::getProfilePictureUrl)
+                                        .orElse(null);
+                }
+
+                // Get latest message
+                List<ChatMessage> messages = chatMessageRepository.findLatestMessagesBetween(current.getId(), user.getId());
+                String lastMsg = null;
+                Instant lastMsgAt = null;
+                if (!messages.isEmpty()) {
+                        ChatMessage latest = messages.get(0);
+                        lastMsg = latest.getContent();
+                        lastMsgAt = latest.getSentAt();
+                }
+
+                // Get unread count from this contact to current user
+                long unread = chatMessageRepository.countUnreadFromSender(user.getId(), current.getId());
 
                 return ChatContactDto.builder()
                                 .userId(user.getId()) // frontend uses userId
@@ -157,6 +180,10 @@ public class ChatService {
                                 .lastName(lastName)
                                 .email(user.getEmail())
                                 .role(user.getRole())
+                                .profilePictureUrl(profilePictureUrl)
+                                .lastMsg(lastMsg)
+                                .lastMsgAt(lastMsgAt)
+                                .unread(unread)
                                 .build();
         }
 

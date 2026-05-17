@@ -12,6 +12,14 @@ const RULES_KEY = 'medigo_doctor_rules';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+function getLocalDayOfWeek(dateStr) {
+  if (!dateStr) return -1;
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return -1;
+  const localDate = new Date(parts[0], parts[1] - 1, parts[2]);
+  return localDate.getDay();
+}
+
 export default function DoctorSchedule() {
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -71,7 +79,7 @@ export default function DoctorSchedule() {
       
       // Smart Rule: Auto-set type when date changes
       if (name === 'date' && value) {
-        const day = new Date(value).getDay();
+        const day = getLocalDayOfWeek(value);
         const ruleType = dayRules[day];
         if (ruleType) newForm.type = ruleType;
       }
@@ -82,6 +90,10 @@ export default function DoctorSchedule() {
 
   function updateDayRule(dayIndex, type) {
     setDayRules(p => ({ ...p, [dayIndex]: type }));
+    if (type === 'Day-off') {
+      // Automatically clean up existing slots on this day of the week
+      setSlots(p => p.filter(s => getLocalDayOfWeek(s.date) !== dayIndex));
+    }
     addToast(`${DAYS[dayIndex]} set to ${type} by default.`, 'success');
   }
 
@@ -96,6 +108,12 @@ export default function DoctorSchedule() {
     // Basic validation: end time > start time
     if (form.endTime <= form.startTime) {
       addToast('End time must be after start time.', 'error');
+      return;
+    }
+
+    const dayOfWeek = getLocalDayOfWeek(form.date);
+    if (dayRules[dayOfWeek] === 'Day-off') {
+      addToast('Cannot add availability slots on your scheduled day-off.', 'error');
       return;
     }
 
@@ -126,6 +144,12 @@ export default function DoctorSchedule() {
     }
     if (form.endTime <= form.startTime) {
       addToast('End time must be after start time.', 'error');
+      return;
+    }
+
+    const dayOfWeek = getLocalDayOfWeek(form.date);
+    if (dayRules[dayOfWeek] === 'Day-off') {
+      addToast('Cannot edit availability slots on your scheduled day-off.', 'error');
       return;
     }
 
@@ -515,7 +539,7 @@ export default function DoctorSchedule() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Date</label>
                   <input type="date" name="date" value={form.date} onChange={onChange} min={today} className="mg-input" required />
-                  {form.date && dayRules[new Date(form.date).getDay()] === 'Day-off' && (
+                  {form.date && dayRules[getLocalDayOfWeek(form.date)] === 'Day-off' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, color: '#D97706' }}>
                       <AlertCircle size={12} />
                       <span style={{ fontSize: 11, fontWeight: 600 }}>Note: This is your scheduled day-off.</span>

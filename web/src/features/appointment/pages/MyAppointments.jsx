@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, Plus, Stethoscope } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Clock, Plus, Stethoscope, AlertCircle } from 'lucide-react';
 import { authApi, appointmentApi } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import { authSession } from '../../auth/authSession';
+import { useToast } from '../../../shared/ui/ToastProvider';
 
 const STATUS_META = {
   PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', cls: 'badge-pending' },
@@ -28,6 +29,9 @@ export default function MyAppointments() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null);
   const [filter, setFilter] = useState('ALL');
+  const { addToast } = useToast();
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedApptId, setSelectedApptId] = useState(null);
 
   useEffect(() => {
     authApi.me().then(r => { const u = r.data?.data ?? r.data; setUser(u); authSession.setUser(u); }).catch(() => {});
@@ -41,17 +45,35 @@ export default function MyAppointments() {
     }).finally(() => setLoading(false));
   }, []);
 
-  async function handleCancel(id) {
-    if (!window.confirm('Cancel this appointment?')) return;
-    setCancelling(id);
+  function triggerCancel(id) {
+    setSelectedApptId(id);
+    setShowCancelModal(true);
+  }
+
+  async function confirmCancel() {
+    if (!selectedApptId) return;
+    setCancelling(selectedApptId);
+    setShowCancelModal(false);
     try {
-      await appointmentApi.cancel(id);
-      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CANCELLED' } : a));
-    } catch { alert('Failed to cancel.'); }
-    finally { setCancelling(null); }
+      await appointmentApi.cancel(selectedApptId);
+      setAppointments(prev => prev.map(a => a.id === selectedApptId ? { ...a, status: 'CANCELLED' } : a));
+      addToast('Appointment cancelled successfully.', 'success');
+    } catch {
+      addToast('Failed to cancel appointment. Please try again.', 'error');
+    } finally {
+      setCancelling(null);
+      setSelectedApptId(null);
+    }
   }
 
   const displayed = filter === 'ALL' ? appointments : appointments.filter(a => a.status === filter);
+
+  const sortedDisplayed = [...displayed].sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.appointmentAt || 0).getTime();
+    const timeB = new Date(b.createdAt || b.appointmentAt || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return b.id - a.id;
+  });
 
   return (
     <AppShell user={user}>
@@ -96,7 +118,7 @@ export default function MyAppointments() {
             <div className="w-8 h-8 rounded-full border-2 animate-spin"
               style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
           </div>
-        ) : displayed.length === 0 ? (
+        ) : sortedDisplayed.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.12)' }}>
               <Calendar size={22} style={{ color: 'rgba(239,35,60,0.4)' }} />
@@ -109,7 +131,7 @@ export default function MyAppointments() {
           </motion.div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {displayed.map((appt, i) => {
+            {sortedDisplayed.map((appt, i) => {
               const meta = STATUS_META[appt.status] || { label: appt.status, cls: 'badge-cancelled' };
               const canCancel = appt.status === 'PENDING_DOCTOR_APPROVAL' || appt.status === 'CONFIRMED';
               
@@ -171,7 +193,7 @@ export default function MyAppointments() {
                     {canCancel && (
                       <motion.button 
                         whileHover={{ scale: 1.05, color: '#EF233C' }}
-                        onClick={() => handleCancel(appt.id)} 
+                        onClick={() => triggerCancel(appt.id)} 
                         disabled={cancelling === appt.id}
                         style={{ fontSize: 12, fontWeight: 800, color: '#8D99AE', background: 'none', border: 'none', padding: '8px', flexShrink: 0, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.04em' }}
                       >
@@ -185,6 +207,56 @@ export default function MyAppointments() {
           </div>
         )}
       </div>
+
+      {/* Cancellation Confirmation Modal */}
+      <AnimatePresence>
+        {showCancelModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="logout-modal-overlay"
+            onClick={() => setShowCancelModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="logout-modal"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="logout-modal-icon" style={{ background: 'rgba(239,35,60,0.08)', borderColor: 'rgba(239,35,60,0.15)' }}>
+                <AlertCircle size={24} style={{ color: '#EF233C' }} />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#2B2D42', margin: '0 0 6px', textAlign: 'center' }}>
+                Cancel Consultation?
+              </h3>
+              <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 24px', textAlign: 'center', lineHeight: 1.5 }}>
+                Are you sure you want to cancel this consultation? This action cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: 10, width: '100%' }}>
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="mg-btn-ghost"
+                  style={{ flex: 1, padding: '11px 20px', borderRadius: 12 }}
+                >
+                  No, Keep
+                </button>
+                <button
+                  onClick={confirmCancel}
+                  style={{
+                    flex: 1, padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600,
+                    background: 'linear-gradient(135deg, #EF233C, #D90429)', border: 'none',
+                    color: '#fff', cursor: 'pointer', transition: 'all 0.2s',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }

@@ -41,6 +41,7 @@ export default function DoctorAppointments() {
   const [completeModal, setCompleteModal] = useState({ show: false, appt: null });
   const [completionData, setCompletionData] = useState({ medicalNotes: '', followUpAt: '', documentUrls: [] });
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -59,12 +60,15 @@ export default function DoctorAppointments() {
     if (!appt || !targetStatus) return;
 
     setUpdating(appt.id);
+    const reasonPayload = (targetStatus === 'REJECTED' || targetStatus === 'CANCELLED') ? { reason: cancellationReason } : {};
     setConfirmModal({ show: false, appt: null, targetStatus: null });
     setCompleteModal({ show: false, appt: null });
+    setCancellationReason('');
     
     try { 
       await appointmentApi.updateStatus(appt.id, { 
         status: targetStatus,
+        ...reasonPayload,
         ...extra
       }); 
       setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: targetStatus } : a)); 
@@ -98,7 +102,12 @@ export default function DoctorAppointments() {
     if (activeTab === 'confirmed') return appointments.filter(a => a.status === 'CONFIRMED');
     return appointments.filter(a => ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(a.status));
   })();
-  const sorted = [...displayed].sort((a, b) => (b.appointmentAt ? new Date(b.appointmentAt).getTime() : 0) - (a.appointmentAt ? new Date(a.appointmentAt).getTime() : 0));
+  const sorted = [...displayed].sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.appointmentAt || 0).getTime();
+    const timeB = new Date(b.createdAt || b.appointmentAt || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return b.id - a.id;
+  });
   const pendingCount = appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL').length;
   const confirmedCount = appointments.filter(a => a.status === 'CONFIRMED').length;
   const historyCount = appointments.filter(a => ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(a.status)).length;
@@ -120,21 +129,39 @@ export default function DoctorAppointments() {
                 {confirmModal.targetStatus === 'CONFIRMED' ? <CheckCircle size={28} style={{ color: '#16A34A' }} /> : <XCircle size={28} style={{ color: '#EF233C' }} />}
               </div>
               <h3 style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-                {confirmModal.targetStatus === 'CONFIRMED' ? 'Confirm Appointment?' : 'Decline Appointment?'}
+                {confirmModal.targetStatus === 'CONFIRMED' ? 'Confirm Appointment?' : confirmModal.targetStatus === 'CANCELLED' ? 'Cancel Appointment?' : 'Decline Appointment?'}
               </h3>
               <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', lineHeight: 1.6 }}>
-                You are about to {confirmModal.targetStatus === 'CONFIRMED' ? 'confirm' : 'decline'} the consultation request from <strong>{confirmModal.appt?.patientName}</strong> on <strong>{fmtDt(confirmModal.appt?.appointmentAt)}</strong>.
+                You are about to {confirmModal.targetStatus === 'CONFIRMED' ? 'confirm' : confirmModal.targetStatus === 'CANCELLED' ? 'cancel' : 'decline'} the consultation request from <strong>{confirmModal.appt?.patientName}</strong> on <strong>{fmtDt(confirmModal.appt?.appointmentAt)}</strong>.
               </p>
+
+              {(confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, textAlign: 'left' }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Reason for cancellation</label>
+                  <textarea 
+                    value={cancellationReason}
+                    onChange={e => setCancellationReason(e.target.value)}
+                    placeholder="Specify why you are cancelling/declining this appointment..."
+                    style={{ 
+                      width: '100%', padding: '12px 16px', borderRadius: 14, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, minHeight: 80, resize: 'none', color: '#2B2D42', fontWeight: 500, fontFamily: 'inherit'
+                    }} 
+                  />
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: 12 }}>
-                <button onClick={() => setConfirmModal({ show: false, appt: null, targetStatus: null })} 
+                <button onClick={() => { setConfirmModal({ show: false, appt: null, targetStatus: null }); setCancellationReason(''); }} 
                   className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13, borderRadius: 12 }}>Cancel</button>
                 <button onClick={() => updateStatus()} 
+                  disabled={(confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && !cancellationReason.trim()}
                   style={{ 
                     flex: 1, padding: 12, fontSize: 13, borderRadius: 12, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 800,
                     background: confirmModal.targetStatus === 'CONFIRMED' ? '#16A34A' : '#EF233C',
-                    boxShadow: confirmModal.targetStatus === 'CONFIRMED' ? '0 8px 20px rgba(22,163,74,0.2)' : '0 8px 20px rgba(239,35,60,0.2)'
+                    boxShadow: confirmModal.targetStatus === 'CONFIRMED' ? '0 8px 20px rgba(22,163,74,0.2)' : '0 8px 20px rgba(239,35,60,0.2)',
+                    opacity: ((confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && !cancellationReason.trim()) ? 0.5 : 1
                   }}>
-                  {confirmModal.targetStatus === 'CONFIRMED' ? 'Yes, Confirm' : 'Yes, Decline'}
+                  {confirmModal.targetStatus === 'CONFIRMED' ? 'Yes, Confirm' : confirmModal.targetStatus === 'CANCELLED' ? 'Yes, Cancel' : 'Yes, Decline'}
                 </button>
               </div>
             </motion.div>
@@ -362,15 +389,25 @@ export default function DoctorAppointments() {
                         </div>
                       )}
                       {appt.status === 'CONFIRMED' && (
-                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                          onClick={e => { e.stopPropagation(); setCompleteModal({ show: true, appt }); }} disabled={updating === appt.id}
-                          style={{ 
-                            padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
-                            background: '#34A853', color: '#fff', border: 'none', cursor: 'pointer',
-                            boxShadow: '0 10px 20px rgba(52,168,83,0.2)'
-                          }}>
-                          Complete
-                        </motion.button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setCompleteModal({ show: true, appt }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: '#34A853', color: '#fff', border: 'none', cursor: 'pointer',
+                              boxShadow: '0 10px 20px rgba(52,168,83,0.2)'
+                            }}>
+                            Complete
+                          </motion.button>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'CANCELLED' }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: 'rgba(43,45,66,0.05)', color: '#2B2D42', border: '1px solid rgba(43,45,66,0.1)', cursor: 'pointer'
+                            }}>
+                            Cancel
+                          </motion.button>
+                        </div>
                       )}
                       <div style={{ padding: '8px', color: '#8D99AE', transition: 'all 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                         <ChevronDown size={20} />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldCheck, XCircle, CheckCircle2, ArrowRight, Stethoscope } from 'lucide-react';
@@ -10,6 +10,7 @@ export default function VerifyEmail() {
   const token = new URLSearchParams(location.search).get('token');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
+  const verifiedCalled = useRef(false);
 
   useEffect(() => {
     if (!token) {
@@ -17,6 +18,9 @@ export default function VerifyEmail() {
       setMessage('No verification token provided.');
       return;
     }
+
+    if (verifiedCalled.current) return;
+    verifiedCalled.current = true;
 
     authApi.verifyEmail(token)
       .then(res => {

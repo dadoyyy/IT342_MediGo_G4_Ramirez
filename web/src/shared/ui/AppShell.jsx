@@ -76,7 +76,7 @@ export default function AppShell({ children, user }) {
     '/appointments': hasAppointmentUpdates,
     '/doctor/appointments': hasAppointmentUpdates,
     '/doctor/schedule': hasAppointmentUpdates,
-    '/chat': hasNewChat || hasAppointmentUpdates,
+    '/chat': hasNewChat,
     '/admin/verification': hasAdminPending,
     '/admin/specialization-requests': hasAdminSpecReqNew,
     '/admin/doctors': hasAdminDoctorsNew,

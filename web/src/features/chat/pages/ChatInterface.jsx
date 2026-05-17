@@ -1,20 +1,22 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageSquare, Phone, Video, MoreVertical, CheckCheck, FileText, Clock } from 'lucide-react';
+import { Send, Search, MessageSquare, Phone, Video, MoreVertical, CheckCheck, FileText, Clock, XCircle } from 'lucide-react';
 import { chatApi, authApi, fetchAuthBlob } from '../../../shared/api/api';
 import AppShell from '../../../shared/ui/AppShell';
 import AuthImage from '../../../shared/ui/AuthImage';
 
 const APPT_CONFIRM_TAG = '[APPT_CONFIRMED]';
 const APPT_COMPLETE_TAG = '[APPT_COMPLETED]';
+const APPT_CANCELLED_TAG = '[APPT_CANCELLED]';
 
 function parseAppointmentAlert(content) {
   if (!content) return null;
   const isConfirm = content.startsWith(APPT_CONFIRM_TAG);
   const isComplete = content.startsWith(APPT_COMPLETE_TAG);
-  if (!isConfirm && !isComplete) return null;
+  const isCancelled = content.startsWith(APPT_CANCELLED_TAG);
+  if (!isConfirm && !isComplete && !isCancelled) return null;
 
-  const data = { _type: isConfirm ? 'CONFIRMED' : 'COMPLETED' };
+  const data = { _type: isConfirm ? 'CONFIRMED' : isComplete ? 'COMPLETED' : 'CANCELLED' };
   content.split('|').slice(1).forEach(part => {
     const idx = part.indexOf('=');
     if (idx > 0) {
@@ -145,7 +147,11 @@ export default function ChatInterface() {
           <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
             Communications
           </h1>
-          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Coordinate with your patients and manage clinical discussions</p>
+          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>
+            {me?.role === 'PATIENT' 
+              ? 'Coordinate with your doctors and manage your medical consultations' 
+              : 'Coordinate with your patients and manage clinical discussions'}
+          </p>
         </motion.div>
 
         <div style={{ 
@@ -161,7 +167,7 @@ export default function ChatInterface() {
             <div style={{ position: 'relative' }}>
               <Search size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#8D99AE' }} />
               <input type="text" value={contactQuery} onChange={e => setContactQuery(e.target.value)}
-                placeholder="Search patients..." 
+                placeholder={me?.role === 'PATIENT' ? "Search doctors..." : "Search patients..."} 
                 className="mg-input" 
                 style={{ paddingLeft: 46, background: 'rgba(43,45,66,0.02)', border: '1px solid rgba(43,45,66,0.05)', fontSize: 14, height: 48, borderRadius: 16 }} />
             </div>
@@ -182,7 +188,14 @@ export default function ChatInterface() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {contacts.map(c => {
+                {[...contacts]
+                  .sort((a, b) => {
+                    const timeA = a.lastMsgAt ? new Date(a.lastMsgAt).getTime() : 0;
+                    const timeB = b.lastMsgAt ? new Date(b.lastMsgAt).getTime() : 0;
+                    if (timeB !== timeA) return timeB - timeA;
+                    return b.userId - a.userId;
+                  })
+                  .map(c => {
                   const isSelected = selected?.userId === c.userId;
                   return (
                     <motion.button 
@@ -334,12 +347,20 @@ export default function ChatInterface() {
                             {apptData ? (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 14, borderBottom: '1px solid rgba(43,45,66,0.06)' }}>
-                                  <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(34,197,94,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <CheckCheck size={18} style={{ color: '#16A34A' }} />
+                                  <div style={{ 
+                                    width: 36, height: 36, borderRadius: 12, 
+                                    background: apptData._type === 'CANCELLED' ? 'rgba(239,35,60,0.08)' : 'rgba(34,197,94,0.08)', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                                  }}>
+                                    {apptData._type === 'CANCELLED' ? (
+                                      <XCircle size={18} style={{ color: '#EF233C' }} />
+                                    ) : (
+                                      <CheckCheck size={18} style={{ color: '#16A34A' }} />
+                                    )}
                                   </div>
                                   <div>
                                     <p style={{ fontSize: 14, fontWeight: 900, margin: 0, color: '#2B2D42', letterSpacing: '-0.02em' }}>
-                                      {apptData._type === 'CONFIRMED' ? 'Appointment Confirmed' : 'Consultation Summary'}
+                                      {apptData._type === 'CONFIRMED' ? 'Appointment Confirmed' : apptData._type === 'CANCELLED' ? 'Appointment Cancelled' : 'Consultation Summary'}
                                     </p>
                                     <p style={{ fontSize: 10, color: '#8D99AE', fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Medigo Clinical Records</p>
                                   </div>
@@ -347,7 +368,7 @@ export default function ChatInterface() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                   {Object.entries(apptData).map(([key, val]) => {
                                     if (key === '_type') return null;
-                                    const isFullWidth = key === 'Instructions' || key === 'Location' || key === 'Medical Notes' || key === 'Digital Records';
+                                    const isFullWidth = key === 'Instructions' || key === 'Location' || key === 'Medical Notes' || key === 'Digital Records' || key === 'Reason';
                                     
                                     if (key === 'Digital Records' && val) {
                                       const links = val.split(';').filter(l => l && l.includes(':'));

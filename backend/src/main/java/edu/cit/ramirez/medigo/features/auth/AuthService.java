@@ -127,26 +127,29 @@ public class AuthService {
                 });
     }
 
-    /**
-     * Completes registration for a first-time Google user after they have
-     * chosen their role on the frontend.
-     */
     @Transactional
     public AuthResponse completeGoogleRegistration(String email, String name, String role) {
         if (userRepository.existsByEmail(email.toLowerCase())) {
             // Race condition edge case — user already exists, just log them in
             User existing = userRepository.findByEmail(email.toLowerCase()).orElseThrow();
+            if (!existing.isVerified()) {
+                throw new RuntimeException("Please verify your email before logging in.");
+            }
             String token = jwtUtil.generateToken(existing.getEmail());
             eventPublisher.publishEvent(new AuthEvent(existing.getEmail(), existing.getRole(), AuthEventType.LOGIN));
             return userAuthAdapter.toAuthResponse(existing, token);
         }
 
         User user = userFactory.createGoogleUser(email, name, role);
+        user.setVerified(false);
+        user.setVerificationToken(UUID.randomUUID().toString());
 
         User saved = Objects.requireNonNull(userRepository.save(user));
-        String token = jwtUtil.generateToken(saved.getEmail());
+        
+        emailService.sendVerificationEmail(saved.getEmail(), saved.getFullName(), saved.getVerificationToken(), verificationUrl);
+        
         eventPublisher.publishEvent(new AuthEvent(saved.getEmail(), saved.getRole(), AuthEventType.GOOGLE_REGISTER));
-        return userAuthAdapter.toAuthResponse(saved, token);
+        return userAuthAdapter.toAuthResponse(saved, null);
     }
 
     // ── Current user ─────────────────────────────────────────────────────────

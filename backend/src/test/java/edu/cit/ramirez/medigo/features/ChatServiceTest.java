@@ -9,6 +9,8 @@ import edu.cit.ramirez.medigo.features.chat.dto.ChatContactDto;
 import edu.cit.ramirez.medigo.features.chat.dto.ChatMessageDto;
 import edu.cit.ramirez.medigo.features.chat.dto.ChatSendRequest;
 import edu.cit.ramirez.medigo.features.chat.entity.ChatMessage;
+import edu.cit.ramirez.medigo.features.doctor.DoctorProfileRepository;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.UserRepository;
 import edu.cit.ramirez.medigo.features.user.entity.User;
 import edu.cit.ramirez.medigo.shared.exception.BadRequestException;
@@ -40,6 +42,7 @@ class ChatServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private AppointmentRepository appointmentRepository;
     @Mock private ChatMessageRepository chatMessageRepository;
+    @Mock private DoctorProfileRepository doctorProfileRepository;
 
     @InjectMocks
     private ChatService chatService;
@@ -72,6 +75,9 @@ class ChatServiceTest {
         sampleMessage.setReceiver(doctorUser);
         sampleMessage.setContent("Hello doctor");
         sampleMessage.setSentAt(Instant.now());
+
+        lenient().when(appointmentRepository.existsSuccessfulAppointmentBetween(anyLong(), anyLong()))
+                .thenReturn(true);
     }
 
     // ── getContacts() ─────────────────────────────────────────────────────────
@@ -79,6 +85,12 @@ class ChatServiceTest {
     @Test
     @DisplayName("getContacts() — patient sees only doctors")
     void getContacts_patientSeesOnlyDoctors() {
+        DoctorProfile docProfile = DoctorProfile.builder()
+                .id(10L)
+                .doctor(doctorUser)
+                .profilePictureUrl("http://example.com/avatar.jpg")
+                .build();
+        when(doctorProfileRepository.findByDoctorId(2L)).thenReturn(Optional.of(docProfile));
         when(userRepository.findByEmail("patient@example.com")).thenReturn(Optional.of(patientUser));
         when(userRepository.findAll()).thenReturn(List.of(patientUser, doctorUser, anotherPatient));
 
@@ -87,10 +99,11 @@ class ChatServiceTest {
         assertThat(contacts).hasSize(1);
         assertThat(contacts.get(0).getRole()).isEqualTo("DOCTOR");
         assertThat(contacts.get(0).getFullName()).isEqualTo("Dr. Maria Doctor");
+        assertThat(contacts.get(0).getProfilePictureUrl()).isEqualTo("http://example.com/avatar.jpg");
     }
 
     @Test
-    @DisplayName("getContacts() — doctor sees patients and other doctors")
+    @DisplayName("getContacts() — doctor sees allowed patient contacts")
     void getContacts_doctorSeesAllAllowed() {
         User anotherDoctor = User.builder()
                 .id(4L).email("doctor2@example.com")
@@ -102,8 +115,8 @@ class ChatServiceTest {
 
         List<ChatContactDto> contacts = chatService.getContacts("doctor@example.com", null);
 
-        // Doctor sees patients and other doctors (not themselves)
-        assertThat(contacts).hasSize(3);
+        // Doctor sees patients (not themselves or other doctors)
+        assertThat(contacts).hasSize(2);
     }
 
     @Test

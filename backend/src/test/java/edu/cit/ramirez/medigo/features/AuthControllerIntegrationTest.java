@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cit.ramirez.medigo.features.auth.dto.LoginRequest;
 import edu.cit.ramirez.medigo.features.auth.dto.RegisterRequest;
 import edu.cit.ramirez.medigo.features.user.UserRepository;
+import edu.cit.ramirez.medigo.features.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class AuthControllerIntegrationTest {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Juan")
                 .lastname("Dela Cruz")
-                .email("juan@example.com")
+                .email("juan@gmail.com")
                 .password("Password1!")
                 .role("PATIENT")
                 .build();
@@ -59,9 +60,7 @@ class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.token").isNotEmpty())
-                .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.data.user.email").value("juan@example.com"))
+                .andExpect(jsonPath("$.data.user.email").value("juan@gmail.com"))
                 .andExpect(jsonPath("$.data.user.role").value("PATIENT"));
     }
 
@@ -71,7 +70,7 @@ class AuthControllerIntegrationTest {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Maria")
                 .lastname("Santos")
-                .email("doctor@example.com")
+                .email("doctor@gmail.com")
                 .password("Password1!")
                 .role("DOCTOR")
                 .licenseNumber("PRC-2024-12345")
@@ -89,7 +88,7 @@ class AuthControllerIntegrationTest {
     void register_duplicateEmail_returns409() throws Exception {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("duplicate@example.com")
+                .email("duplicate@gmail.com")
                 .password("Password1!").role("PATIENT").build();
 
         // First registration
@@ -130,7 +129,7 @@ class AuthControllerIntegrationTest {
     void register_weakPassword_returns400() throws Exception {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("juan@example.com")
+                .email("juan@gmail.com")
                 .password("weakpass")  // no uppercase, no special char
                 .role("PATIENT").build();
 
@@ -149,7 +148,7 @@ class AuthControllerIntegrationTest {
         // Register first
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("login@example.com")
+                .email("login@gmail.com")
                 .password("Password1!").role("PATIENT").build();
 
         mockMvc.perform(post(BASE_URL + "/register")
@@ -157,8 +156,13 @@ class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated());
 
+        // Verify the user
+        User user = userRepository.findByEmail("login@gmail.com").orElseThrow();
+        user.setVerified(true);
+        userRepository.save(user);
+
         // Then login
-        LoginRequest loginRequest = new LoginRequest("login@example.com", "Password1!");
+        LoginRequest loginRequest = new LoginRequest("login@gmail.com", "Password1!");
 
         mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -166,7 +170,7 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.token").isNotEmpty())
-                .andExpect(jsonPath("$.data.user.email").value("login@example.com"));
+                .andExpect(jsonPath("$.data.user.email").value("login@gmail.com"));
     }
 
     @Test
@@ -175,7 +179,7 @@ class AuthControllerIntegrationTest {
         // Register first
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("wrongpass@example.com")
+                .email("wrongpass@gmail.com")
                 .password("Password1!").role("PATIENT").build();
 
         mockMvc.perform(post(BASE_URL + "/register")
@@ -183,8 +187,13 @@ class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated());
 
+        // Verify the user
+        User user = userRepository.findByEmail("wrongpass@gmail.com").orElseThrow();
+        user.setVerified(true);
+        userRepository.save(user);
+
         // Login with wrong password
-        LoginRequest loginRequest = new LoginRequest("wrongpass@example.com", "WrongPassword!");
+        LoginRequest loginRequest = new LoginRequest("wrongpass@gmail.com", "WrongPassword!");
 
         mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -196,7 +205,7 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("POST /login — 401 Unauthorized for non-existent email")
     void login_unknownEmail_returns401() throws Exception {
-        LoginRequest loginRequest = new LoginRequest("nobody@example.com", "Password1!");
+        LoginRequest loginRequest = new LoginRequest("nobody@gmail.com", "Password1!");
 
         mockMvc.perform(post(BASE_URL + "/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -213,16 +222,28 @@ class AuthControllerIntegrationTest {
         // Register and get token
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("logout@example.com")
+                .email("logout@gmail.com")
                 .password("Password1!").role("PATIENT").build();
 
-        MvcResult registerResult = mockMvc.perform(post(BASE_URL + "/register")
+        mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isCreated());
+
+        // Verify
+        User user = userRepository.findByEmail("logout@gmail.com").orElseThrow();
+        user.setVerified(true);
+        userRepository.save(user);
+
+        // Login to get token
+        LoginRequest loginRequest = new LoginRequest("logout@gmail.com", "Password1!");
+        MvcResult loginResult = mockMvc.perform(post(BASE_URL + "/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        String responseBody = registerResult.getResponse().getContentAsString();
+        String responseBody = loginResult.getResponse().getContentAsString();
         String token = objectMapper.readTree(responseBody).path("data").path("token").asText();
 
         // Logout
@@ -246,22 +267,34 @@ class AuthControllerIntegrationTest {
         // Register and get token
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .firstname("Juan").lastname("Dela Cruz")
-                .email("me@example.com")
+                .email("me@gmail.com")
                 .password("Password1!").role("PATIENT").build();
 
-        MvcResult registerResult = mockMvc.perform(post(BASE_URL + "/register")
+        mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isCreated());
+
+        // Verify
+        User user = userRepository.findByEmail("me@gmail.com").orElseThrow();
+        user.setVerified(true);
+        userRepository.save(user);
+
+        // Login to get token
+        LoginRequest loginRequest = new LoginRequest("me@gmail.com", "Password1!");
+        MvcResult loginResult = mockMvc.perform(post(BASE_URL + "/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        String token = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
                 .path("data").path("token").asText();
 
         mockMvc.perform(get(BASE_URL + "/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email").value("me@example.com"))
+                .andExpect(jsonPath("$.data.email").value("me@gmail.com"))
                 .andExpect(jsonPath("$.data.role").value("PATIENT"));
     }
 

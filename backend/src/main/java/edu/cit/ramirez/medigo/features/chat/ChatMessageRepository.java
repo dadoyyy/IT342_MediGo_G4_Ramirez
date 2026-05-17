@@ -54,4 +54,22 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             @Param("senderId") Long senderId,
             @Param("readAt") Instant readAt
     );
+
+    @Query("""
+            SELECT m
+            FROM ChatMessage m
+            WHERE (m.sender.id = :userA AND m.receiver.id = :userB)
+               OR (m.sender.id = :userB AND m.receiver.id = :userA)
+            ORDER BY m.sentAt DESC
+            """)
+    List<ChatMessage> findLatestMessagesBetween(@Param("userA") Long userA, @Param("userB") Long userB);
+
+    @Query("""
+            SELECT COUNT(m)
+            FROM ChatMessage m
+            WHERE m.sender.id = :senderId
+              AND m.receiver.id = :receiverId
+              AND m.readAt IS NULL
+            """)
+    long countUnreadFromSender(@Param("senderId") Long senderId, @Param("receiverId") Long receiverId);
 }

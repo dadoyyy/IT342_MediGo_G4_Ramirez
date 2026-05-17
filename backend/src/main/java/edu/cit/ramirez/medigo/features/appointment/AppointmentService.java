@@ -302,8 +302,9 @@ public class AppointmentService {
         AppointmentStatus previous = appointment.getStatus();
         if (target != AppointmentStatus.CONFIRMED
                 && target != AppointmentStatus.REJECTED
+                && target != AppointmentStatus.CANCELLED
                 && target != AppointmentStatus.COMPLETED) {
-            throw new BadRequestException("Doctor can only set status to CONFIRMED, REJECTED, or COMPLETED.");
+            throw new BadRequestException("Doctor can only set status to CONFIRMED, REJECTED, CANCELLED, or COMPLETED.");
         }
 
         if (target == AppointmentStatus.COMPLETED && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
@@ -315,6 +316,9 @@ public class AppointmentService {
 
         if (target == AppointmentStatus.CONFIRMED && previous != AppointmentStatus.CONFIRMED) {
             sendConfirmationMessage(saved);
+        } else if ((target == AppointmentStatus.REJECTED && previous != AppointmentStatus.REJECTED)
+                || (target == AppointmentStatus.CANCELLED && previous != AppointmentStatus.CANCELLED)) {
+            sendCancellationMessage(saved, request.getReason());
         } else if (target == AppointmentStatus.COMPLETED && previous != AppointmentStatus.COMPLETED) {
             if (request.getDocumentUrls() != null) {
                 for (String url : request.getDocumentUrls()) {
@@ -431,6 +435,31 @@ public class AppointmentService {
                 .append("|Type=").append(appointment.getAppointmentType())
                 .append("|Location=").append(location)
                 .append("|Instructions=").append(instructions);
+
+        ChatMessage message = new ChatMessage();
+        message.setSender(appointment.getDoctor());
+        message.setReceiver(appointment.getPatient());
+        message.setAppointment(appointment);
+        message.setContent(content.toString());
+        chatMessageRepository.save(message);
+    }
+
+    private void sendCancellationMessage(Appointment appointment, String reason) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a", Locale.ENGLISH);
+        String when = appointment.getAppointmentAt() == null ? "" : appointment.getAppointmentAt().format(formatter);
+
+        StringBuilder content = new StringBuilder("[APPT_CANCELLED]")
+                .append("|Doctor=").append(appointment.getDoctor().getFullName())
+                .append("|Patient=").append(appointment.getPatient().getFullName())
+                .append("|When=").append(when)
+                .append("|Type=").append(appointment.getAppointmentType())
+                .append("|Status=").append(appointment.getStatus() == AppointmentStatus.REJECTED ? "Declined" : "Cancelled");
+
+        if (reason != null && !reason.isBlank()) {
+            content.append("|Reason=").append(reason.trim());
+        } else {
+            content.append("|Reason=").append("No reason provided by the doctor.");
+        }
 
         ChatMessage message = new ChatMessage();
         message.setSender(appointment.getDoctor());

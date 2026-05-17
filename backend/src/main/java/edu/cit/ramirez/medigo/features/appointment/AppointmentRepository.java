@@ -48,7 +48,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             FROM Appointment a
             WHERE a.status IN (
                 edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.CONFIRMED,
-                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.COMPLETED
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.COMPLETED,
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.PENDING_DOCTOR_APPROVAL,
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.CANCELLED,
+                edu.cit.ramirez.medigo.features.appointment.entity.AppointmentStatus.REJECTED
             )
             AND (
                 (a.patient.id = :patientId AND a.doctor.id = :doctorId)

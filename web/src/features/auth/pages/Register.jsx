@@ -103,9 +103,16 @@ export default function Register() {
       try {
         const res = await authApi.completeOAuth2(pendingToken, r);
         const token = authResponseAdapter.extractToken(res);
-        authSession.setToken(token);
-        authEvents.emit(authEvents.names.login, { source: 'oauth2' });
-        navigate(r === 'DOCTOR' ? '/doctor/register' : '/dashboard', { replace: true });
+        if (token) {
+          authSession.setToken(token);
+          authEvents.emit(authEvents.names.login, { source: 'oauth2' });
+          navigate(r === 'DOCTOR' ? '/doctor/register' : '/dashboard', { replace: true });
+        } else {
+          const email = res?.data?.data?.user?.email ?? '';
+          setRegisteredEmail(email);
+          setIsSuccess(true);
+          addToast('Registration successful! Please check your Gmail for verification.', 'success');
+        }
       } catch (err) {
         addToast('Failed to complete Google sign-in. Please try again.', 'error');
       } finally {

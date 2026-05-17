@@ -17,6 +17,7 @@ public class AppointmentStatusUpdateRequest {
     private String medicalNotes;
     private String followUpAt;
     private java.util.List<String> documentUrls;
+    private String reason;
 
     public AppointmentStatusUpdateRequest(AppointmentStatus status) {
         this.status = status;
