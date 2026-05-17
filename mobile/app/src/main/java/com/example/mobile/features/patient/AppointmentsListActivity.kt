@@ -1,5 +1,7 @@
 package com.example.mobile.features.patient
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,6 +31,10 @@ class AppointmentsListActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var appointmentsAdapter: AppointmentsAdapter
     private var userRole = "PATIENT"
+
+    companion object {
+        private const val LAUNCH_COMPLETE = 882
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,12 +70,31 @@ class AppointmentsListActivity : AppCompatActivity() {
             role = userRole,
             onConfirmClick = { appointment -> updateStatus(appointment.id, "CONFIRMED") },
             onRejectClick = { appointment -> updateStatus(appointment.id, "REJECTED") },
-            onCancelClick = { appointment -> cancelAppointment(appointment.id) }
+            onCancelClick = { appointment -> cancelAppointment(appointment.id) },
+            onCompleteConsultationClick = { appointment ->
+                val intent = Intent(this, CompleteAppointmentActivity::class.java).apply {
+                    putExtra("appointment_extra", appointment)
+                }
+                startActivityForResult(intent, LAUNCH_COMPLETE)
+            },
+            onCompletedClick = { appointment ->
+                val intent = Intent(this, ConsultationSummaryActivity::class.java).apply {
+                    putExtra("appointment_extra", appointment)
+                }
+                startActivity(intent)
+            }
         )
 
         binding.rvAppointments.apply {
             layoutManager = LinearLayoutManager(this@AppointmentsListActivity)
             adapter = appointmentsAdapter
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LAUNCH_COMPLETE && resultCode == Activity.RESULT_OK) {
+            fetchAppointments()
         }
     }
 
@@ -161,7 +186,9 @@ class AppointmentsAdapter(
     private val role: String,
     private val onConfirmClick: (AppointmentDto) -> Unit,
     private val onRejectClick: (AppointmentDto) -> Unit,
-    private val onCancelClick: (AppointmentDto) -> Unit
+    private val onCancelClick: (AppointmentDto) -> Unit,
+    private val onCompleteConsultationClick: (AppointmentDto) -> Unit,
+    private val onCompletedClick: (AppointmentDto) -> Unit
 ) : RecyclerView.Adapter<AppointmentsAdapter.AppointmentViewHolder>() {
 
     private var items = listOf<AppointmentDto>()
@@ -213,6 +240,17 @@ class AppointmentsAdapter(
 
             // Configure action buttons visibility
             configureActionArea(appointment)
+
+            // View consultation summary when completed card is clicked
+            if (appointment.status.uppercase() == "COMPLETED") {
+                binding.root.setOnClickListener { onCompletedClick(appointment) }
+                binding.root.isClickable = true
+                binding.root.isFocusable = true
+            } else {
+                binding.root.setOnClickListener(null)
+                binding.root.isClickable = false
+                binding.root.isFocusable = false
+            }
         }
 
         private fun configureStatusTag(status: String) {
@@ -263,11 +301,18 @@ class AppointmentsAdapter(
             if (role == "DOCTOR") {
                 if (status == "PENDING_DOCTOR_APPROVAL") {
                     binding.layoutActionArea.visibility = View.VISIBLE
+                    binding.btnDoctorConfirm.text = "Confirm Slot"
                     binding.btnDoctorConfirm.visibility = View.VISIBLE
                     binding.btnDoctorReject.visibility = View.VISIBLE
 
                     binding.btnDoctorConfirm.setOnClickListener { onConfirmClick(appointment) }
                     binding.btnDoctorReject.setOnClickListener { onRejectClick(appointment) }
+                } else if (status == "CONFIRMED") {
+                    binding.layoutActionArea.visibility = View.VISIBLE
+                    binding.btnDoctorConfirm.text = "Complete Consultation"
+                    binding.btnDoctorConfirm.visibility = View.VISIBLE
+
+                    binding.btnDoctorConfirm.setOnClickListener { onCompleteConsultationClick(appointment) }
                 }
             } else {
                 if (status == "PENDING_DOCTOR_APPROVAL" || status == "CONFIRMED") {

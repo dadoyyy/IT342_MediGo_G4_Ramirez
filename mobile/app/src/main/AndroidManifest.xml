@@ -37,6 +37,13 @@
             android:name=".features.patient.AppointmentsListActivity"
             android:exported="false" />
         <activity
+            android:name=".features.patient.CompleteAppointmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".features.patient.ConsultationSummaryActivity"
+            android:exported="false" />
+        <activity
             android:name=".features.auth.RegisterActivity"
             android:exported="false" />
         <activity
