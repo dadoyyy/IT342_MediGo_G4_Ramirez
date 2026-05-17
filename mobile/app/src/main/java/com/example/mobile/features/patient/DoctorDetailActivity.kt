@@ -1,5 +1,6 @@
 package com.example.mobile.features.patient
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +23,7 @@ class DoctorDetailActivity : AppCompatActivity() {
         }
 
         bindProfileDetails(profile)
-        setupListeners()
+        setupListeners(profile)
     }
 
     private fun bindProfileDetails(profile: DoctorProfileDto) {
@@ -58,17 +59,16 @@ class DoctorDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupListeners() {
+    private fun setupListeners(profile: DoctorProfileDto) {
         binding.btnBack.setOnClickListener {
             finish()
         }
 
         binding.btnBookAppointment.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Consultation Scheduling: Practice availability slots loading...",
-                Toast.LENGTH_LONG
-            ).show()
+            val intent = Intent(this, BookAppointmentActivity::class.java).apply {
+                putExtra("doctor_profile", profile)
+            }
+            startActivity(intent)
         }
     }
 }

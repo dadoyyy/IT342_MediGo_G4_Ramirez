@@ -30,6 +30,10 @@
             android:name=".features.patient.DoctorDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".features.patient.BookAppointmentActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".features.auth.RegisterActivity"
             android:exported="false" />
         <activity

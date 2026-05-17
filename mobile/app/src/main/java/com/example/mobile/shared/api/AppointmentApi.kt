@@ -1,12 +1,14 @@
 package com.example.mobile.shared.api
 
 import com.example.mobile.model.ApiEnvelope
+import com.example.mobile.model.AppointmentCreateRequest
 import com.example.mobile.model.AppointmentDto
 import com.example.mobile.model.DoctorProfileDto
 import com.example.mobile.model.DoctorProfileUpsertRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
@@ -16,6 +18,9 @@ interface AppointmentApi {
 
     @PUT("api/v1/doctors/me/profile")
     fun upsertDoctorProfile(@Body request: DoctorProfileUpsertRequest): Call<ApiEnvelope<DoctorProfileDto>>
+
+    @POST("api/v1/appointments")
+    fun createAppointment(@Body request: AppointmentCreateRequest): Call<ApiEnvelope<AppointmentDto>>
 
     @GET("api/v1/appointments")
     fun getMyAppointments(): Call<ApiEnvelope<List<AppointmentDto>>>

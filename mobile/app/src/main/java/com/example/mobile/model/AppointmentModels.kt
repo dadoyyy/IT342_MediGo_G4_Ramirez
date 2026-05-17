@@ -45,3 +45,10 @@ data class DoctorProfileUpsertRequest(
     val education: String?,
     val consultationFee: Double?
 )
+
+data class AppointmentCreateRequest(
+    val doctorId: Long,
+    val appointmentAt: String,
+    val appointmentType: String,
+    val notes: String?
+)
