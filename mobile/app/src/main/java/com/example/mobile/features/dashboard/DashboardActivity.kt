@@ -12,6 +12,7 @@ import com.example.mobile.databinding.ActivityDashboardBinding
 import com.example.mobile.features.auth.LoginActivity
 import com.example.mobile.features.doctor.DoctorProfileActivity
 import com.example.mobile.features.patient.AppointmentsListActivity
+import com.example.mobile.features.patient.ChatListActivity
 import com.example.mobile.features.patient.SearchDoctorsActivity
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.DoctorProfileDto
@@ -167,7 +168,7 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, AppointmentsListActivity::class.java))
         }
         binding.cardPatientChats.setOnClickListener {
-            Toast.makeText(this, "Consultation Messenger: Loading secure chat channels...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ChatListActivity::class.java))
         }
 
         // Doctor Actions
@@ -178,7 +179,7 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, AppointmentsListActivity::class.java))
         }
         binding.cardDoctorChats.setOnClickListener {
-            Toast.makeText(this, "Patient Chats: Loading secure chat consulting...", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ChatListActivity::class.java))
         }
 
         binding.btnStatusAction.setOnClickListener {

@@ -44,6 +44,13 @@
             android:name=".features.patient.ConsultationSummaryActivity"
             android:exported="false" />
         <activity
+            android:name=".features.patient.ChatListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.patient.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".features.auth.RegisterActivity"
             android:exported="false" />
         <activity

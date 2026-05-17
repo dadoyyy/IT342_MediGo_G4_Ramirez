@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="end"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="48dp"
+    android:paddingEnd="8dp">
+
+    <!-- Outgoing Bubble -->
+    <TextView
+        android:id="@+id/tvMessageContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_status_box_error"
+        android:backgroundTint="@color/primary_accent"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:maxWidth="280dp"
+        android:text="Hi Doctor, here is my clinical status." />
+
+    <!-- Message Timings -->
+    <TextView
+        android:id="@+id/tvMessageTime"
+        style="@style/TextCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="10sp"
+        android:textColor="@color/text_tertiary"
+        android:text="10:46 AM" />
+
+</LinearLayout>
