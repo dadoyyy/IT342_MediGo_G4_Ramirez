@@ -29,13 +29,13 @@ function parseAppointmentAlert(content) {
 function formatLastMessagePreview(lastMsg) {
   if (!lastMsg) return '';
   if (lastMsg.startsWith(APPT_CONFIRM_TAG)) {
-    return '📅 Consultation Confirmed';
+    return 'Consultation Confirmed';
   }
   if (lastMsg.startsWith(APPT_COMPLETE_TAG)) {
-    return '✅ Consultation Completed';
+    return 'Consultation Completed';
   }
   if (lastMsg.startsWith(APPT_CANCELLED_TAG)) {
-    return '❌ Consultation Cancelled';
+    return 'Consultation Cancelled';
   }
   return lastMsg;
 }
