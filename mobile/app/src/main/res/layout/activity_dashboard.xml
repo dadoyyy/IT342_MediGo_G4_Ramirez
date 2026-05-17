@@ -1,137 +1,385 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_100"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    android:background="@color/gray_50">
 
-    <!-- Header Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/primary"
-        android:gravity="center_vertical"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:elevation="4dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            style="@style/TextHeading2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MediGo"
-            android:textColor="@color/white" />
+        <!-- ── Premium Toolbar Brand Header ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:elevation="1dp">
 
-    </LinearLayout>
+            <!-- Brand Title -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-    <!-- Content -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="24dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MediGo"
+                    android:textSize="20sp"
+                    android:textColor="@color/primary"
+                    android:fontFamily="sans-serif-black"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02" />
+            </LinearLayout>
 
-        <TextView
-            style="@style/TextHeading1"
+            <!-- Sign Out Button -->
+            <ImageView
+                android:id="@+id/btnHeaderLogout"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@android:drawable/ic_lock_power_off"
+                android:contentDescription="Logout" />
+        </LinearLayout>
+
+        <!-- ── Dynamic User Greeting Banner ── -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dashboard" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="28dp"
+            android:paddingBottom="16dp">
 
-        <!-- User Card -->
+            <!-- Greeting Text -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvWelcomeGreeting"
+                    style="@style/TextCaption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome back,"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvUserDisplayName"
+                    style="@style/TextHeading2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ruther Ramirez"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <!-- Dynamic Role Badge Container -->
+            <TextView
+                android:id="@+id/tvRoleBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:background="@drawable/bg_status_box_success"
+                android:textColor="@color/success"
+                android:text="PATIENT"
+                android:textStyle="bold"
+                android:textSize="11sp"
+                android:letterSpacing="0.05" />
+        </LinearLayout>
+
+        <!-- ── Main Dynamic Content Container ── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/surface"
-            android:elevation="2dp"
-            android:padding="16dp"
-            android:layout_marginTop="24dp">
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="24dp">
 
-            <!-- User Name -->
-            <TextView
+            <!-- ── Doctor Profile/Verification Status Card ── -->
+            <LinearLayout
+                android:id="@+id/cardSpecializationStatus"
+                style="@style/Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Profile"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone">
 
-            <TextView
-                android:id="@+id/tvUserName"
-                style="@style/TextHeading3"
+                <TextView
+                    android:id="@+id/tvStatusTitle"
+                    style="@style/TextHeading3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Practice Verification"
+                    android:textSize="15sp"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvStatusDetails"
+                    style="@style/TextBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:text="Checking status..." />
+
+                <Button
+                    android:id="@+id/btnStatusAction"
+                    style="@style/ButtonPrimary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:layout_marginTop="12dp"
+                    android:textSize="13sp"
+                    android:text="Complete Practice Profile"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- ── Patient Dashboard Layout View ── -->
+            <LinearLayout
+                android:id="@+id/layoutPatientDashboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
+                <TextView
+                    style="@style/TextHeading3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Healthcare Access"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_accent"
+                    android:letterSpacing="0.05"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="16dp" />
 
-            <!-- Email -->
-            <TextView
+                <!-- Action: Find & Book Doctor -->
+                <LinearLayout
+                    android:id="@+id/cardBookConsultation"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primary"
+                        android:text="Book Consultation" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Browse and connect with verified medical specialist doctors." />
+                </LinearLayout>
+
+                <!-- Action: My Schedule -->
+                <LinearLayout
+                    android:id="@+id/cardMySchedule"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="My Appointments" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Track upcoming consultations, notes, and medical records." />
+                </LinearLayout>
+
+                <!-- Action: Direct Chats -->
+                <LinearLayout
+                    android:id="@+id/cardPatientChats"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Consultation Messenger" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Open secure, direct text chat consulting channels with your physician." />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ── Doctor Dashboard Layout View ── -->
+            <LinearLayout
+                android:id="@+id/layoutDoctorDashboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Email"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/TextHeading3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Specialist Control Panel"
+                    android:textSize="14sp"
+                    android:textColor="@color/primary_accent"
+                    android:letterSpacing="0.05"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Action: Complete Profile / Specialization -->
+                <LinearLayout
+                    android:id="@+id/cardDoctorProfile"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primary"
+                        android:text="Practice Profile" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Manage your specialization, clinic information, and credentials." />
+                </LinearLayout>
+
+                <!-- Action: Booking Queue -->
+                <LinearLayout
+                    android:id="@+id/cardConsultationQueue"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Booking Requests Queue" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Review, confirm, or cancel scheduling requests from patients." />
+                </LinearLayout>
+
+                <!-- Action: Patient Chats -->
+                <LinearLayout
+                    android:id="@+id/cardDoctorChats"
+                    style="@style/Card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="@style/TextHeading3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Patient Chats" />
+
+                    <TextView
+                        style="@style/TextBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="13sp"
+                        android:text="Text and share documents with patients in active consultations." />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ── Muted Profile Details Footer ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:padding="28dp"
+            android:gravity="center_horizontal">
 
             <TextView
-                android:id="@+id/tvUserEmail"
-                style="@style/TextBody"
-                android:layout_width="match_parent"
+                android:id="@+id/tvUserEmailFooter"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Role -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Account Type"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
+                android:text="logged.in@medigo.com"
+                android:textColor="@color/text_tertiary" />
 
             <TextView
-                android:id="@+id/tvUserRole"
-                style="@style/TextBody"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="6dp"
+                android:text="MediGo Mobile Premium Edition v1.0"
+                style="@style/TextSmall"
+                android:textColor="@color/gray_400"
+                android:textSize="10sp"
+                android:letterSpacing="0.02" />
         </LinearLayout>
 
     </LinearLayout>
-
-    <!-- Bottom Action -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:layout_gravity="bottom">
-
-        <Button
-            android:id="@+id/btnLogout"
-            style="@style/ButtonPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Logout" />
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
