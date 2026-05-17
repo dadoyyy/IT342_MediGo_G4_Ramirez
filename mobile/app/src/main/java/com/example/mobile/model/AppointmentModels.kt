@@ -52,3 +52,11 @@ data class AppointmentCreateRequest(
     val appointmentType: String,
     val notes: String?
 )
+
+data class AppointmentStatusUpdateRequest(
+    val status: String,
+    val medicalNotes: String? = null,
+    val followUpAt: String? = null,
+    val documentUrls: List<String>? = null,
+    val reason: String? = null
+)

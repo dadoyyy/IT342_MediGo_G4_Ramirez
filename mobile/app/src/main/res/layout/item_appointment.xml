@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:orientation="vertical">
+
+    <!-- Header Panel: Name & Status Capsule -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvAppointmentHeader"
+            style="@style/TextHeading3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Dr. Ruther Ramirez"
+            android:textColor="@color/primary_accent" />
+
+        <TextView
+            android:id="@+id/tvStatusBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/bg_status_box_success"
+            android:textColor="@color/success"
+            android:text="CONFIRMED"
+            android:textStyle="bold"
+            android:textSize="9sp"
+            android:letterSpacing="0.02" />
+    </LinearLayout>
+
+    <!-- Details Section -->
+    <TextView
+        android:id="@+id/tvAppointmentTime"
+        style="@style/TextBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:text="Monday, May 18, 2026 at 10:00 AM" />
+
+    <TextView
+        android:id="@+id/tvAppointmentType"
+        style="@style/TextCaption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="12sp"
+        android:text="Medium: In-Clinic Consultation" />
+
+    <TextView
+        android:id="@+id/tvAppointmentNotes"
+        style="@style/TextBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary"
+        android:text="Notes: Regular cardiology checkup." />
+
+    <!-- Action Divider & Bar -->
+    <LinearLayout
+        android:id="@+id/layoutActionArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <!-- Patient Action: Cancel -->
+            <Button
+                android:id="@+id/btnPatientCancel"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="36dp"
+                android:text="Cancel Booking"
+                android:textColor="@color/error"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <!-- Doctor Action: Reject -->
+            <Button
+                android:id="@+id/btnDoctorReject"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="36dp"
+                android:text="Reject"
+                android:textColor="@color/error"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <!-- Doctor Action: Confirm -->
+            <Button
+                android:id="@+id/btnDoctorConfirm"
+                style="@style/ButtonPrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="36dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginStart="8dp"
+                android:text="Confirm Slot"
+                android:textSize="13sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
