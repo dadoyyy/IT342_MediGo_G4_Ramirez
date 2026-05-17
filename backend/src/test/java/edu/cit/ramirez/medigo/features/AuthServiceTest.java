@@ -12,6 +12,7 @@ import edu.cit.ramirez.medigo.shared.exception.EmailAlreadyExistsException;
 import edu.cit.ramirez.medigo.shared.exception.InvalidCredentialsException;
 import edu.cit.ramirez.medigo.shared.patterns.adapter.UserAuthAdapter;
 import edu.cit.ramirez.medigo.shared.patterns.factory.UserFactory;
+import edu.cit.ramirez.medigo.shared.mail.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ class AuthServiceTest {
     @Mock private UserFactory userFactory;
     @Mock private UserAuthAdapter userAuthAdapter;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private EmailService emailService;
 
     @InjectMocks
     private AuthService authService;
@@ -59,6 +61,7 @@ class AuthServiceTest {
                 .passwordHash("$2a$12$hashedpassword")
                 .fullName("Juan Dela Cruz")
                 .role("PATIENT")
+                .verified(true)
                 .createdAt(Instant.now())
                 .build();
 
@@ -80,7 +83,7 @@ class AuthServiceTest {
     // ── register() ────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("register() — success: new user is saved and JWT returned")
+    @DisplayName("register() — success: new user is saved and returns pending verification")
     void register_success() {
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Juan")
@@ -90,22 +93,30 @@ class AuthServiceTest {
                 .role("PATIENT")
                 .build();
 
+        sampleUser.setVerified(false);
+        sampleUser.setVerificationToken("some-token");
+
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$12$hashedpassword");
         when(userFactory.createLocalUser(any(), anyString())).thenReturn(sampleUser);
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
-        when(jwtUtil.generateToken(anyString())).thenReturn("mock.jwt.token");
-        when(userAuthAdapter.toAuthResponse(any(User.class), anyString())).thenReturn(sampleAuthResponse);
+
+        AuthResponse pendingResponse = AuthResponse.builder()
+                .token(null)
+                .tokenType("Bearer")
+                .user(sampleUserDto)
+                .build();
+        when(userAuthAdapter.toAuthResponse(any(User.class), eq(null))).thenReturn(pendingResponse);
 
         AuthResponse result = authService.register(request);
 
         assertThat(result).isNotNull();
-        assertThat(result.getToken()).isEqualTo("mock.jwt.token");
+        assertThat(result.getToken()).isNull();
         assertThat(result.getTokenType()).isEqualTo("Bearer");
         assertThat(result.getUser().getEmail()).isEqualTo("patient@example.com");
 
         verify(userRepository).save(any(User.class));
-        verify(jwtUtil).generateToken("patient@example.com");
+        verify(emailService).sendVerificationEmail(eq("patient@example.com"), anyString(), anyString(), any());
         verify(eventPublisher).publishEvent(any(AuthEvent.class));
     }
 
@@ -204,6 +215,39 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.loginWithGoogle(null, "Name"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Email not provided");
+    }
+
+    // ── completeGoogleRegistration() ─────────────────────────────────────────
+
+    @Test
+    @DisplayName("completeGoogleRegistration() — success: new Google user is registered, unverified, and returns null token")
+    void completeGoogleRegistration_success() {
+        when(userRepository.existsByEmail("newgoogle@gmail.com")).thenReturn(false);
+
+        User googleUser = User.builder()
+                .email("newgoogle@gmail.com")
+                .fullName("Google User")
+                .role("PATIENT")
+                .verified(false)
+                .verificationToken("google-token")
+                .build();
+
+        when(userFactory.createGoogleUser("newgoogle@gmail.com", "Google User", "PATIENT")).thenReturn(googleUser);
+        when(userRepository.save(any(User.class))).thenReturn(googleUser);
+
+        AuthResponse pendingResponse = AuthResponse.builder()
+                .token(null)
+                .user(sampleUserDto)
+                .build();
+        when(userAuthAdapter.toAuthResponse(any(User.class), eq(null))).thenReturn(pendingResponse);
+
+        AuthResponse result = authService.completeGoogleRegistration("newgoogle@gmail.com", "Google User", "PATIENT");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getToken()).isNull();
+        verify(emailService).sendVerificationEmail(eq("newgoogle@gmail.com"), anyString(), anyString(), any());
+        verify(userRepository).save(any(User.class));
+        verify(eventPublisher).publishEvent(any(AuthEvent.class));
     }
 
     // ── getCurrentUser() ──────────────────────────────────────────────────────

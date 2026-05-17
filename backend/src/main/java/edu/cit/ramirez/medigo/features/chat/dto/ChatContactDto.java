@@ -18,4 +18,8 @@ public class ChatContactDto {
     private String lastName;
     private String email;
     private String role;
+    private String profilePictureUrl;
+    private String lastMsg;
+    private java.time.Instant lastMsgAt;
+    private long unread;
 }

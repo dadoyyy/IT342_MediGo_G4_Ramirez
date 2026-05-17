@@ -3,8 +3,16 @@ package edu.cit.ramirez.medigo.features.appointment;
 import edu.cit.ramirez.medigo.features.appointment.dto.*;
 import edu.cit.ramirez.medigo.features.appointment.entity.*;
 import edu.cit.ramirez.medigo.features.doctor.DoctorProfileRepository;
+import edu.cit.ramirez.medigo.features.doctor.DoctorSpecializationChangeRequestRepository;
+import edu.cit.ramirez.medigo.features.appointment.AppointmentDocumentRepository;
+import edu.cit.ramirez.medigo.features.chat.ChatMessageRepository;
+import edu.cit.ramirez.medigo.features.chat.entity.ChatMessage;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileUpsertRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestCreateRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorSpecializationChangeRequest;
+import edu.cit.ramirez.medigo.features.doctor.entity.DoctorSpecializationChangeStatus;
 import edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile;
 import edu.cit.ramirez.medigo.features.user.UserRepository;
 import edu.cit.ramirez.medigo.features.user.entity.User;
@@ -24,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -35,10 +44,16 @@ public class AppointmentService {
 
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
+    private final DoctorSpecializationChangeRequestRepository doctorChangeRequestRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentDocumentRepository appointmentDocumentRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Value("${app.upload.dir:uploads/doctor-docs}")
     private String uploadDir;
+
+    @Value("${app.consultation.upload.dir:uploads/consultation-docs}")
+    private String consultationUploadDir;
 
     @PostConstruct
     public void logUploadDir() {
@@ -61,13 +76,73 @@ public class AppointmentService {
         DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
                 .orElseGet(() -> DoctorProfile.builder().doctor(doctor).build());
 
-        profile.setSpecialization(request.getSpecialization().trim());
+        String requestedSpec = request.getSpecialization().trim();
+        if (profile.isVerified()) {
+            String currentSpec = profile.getSpecialization() == null ? "" : profile.getSpecialization().trim();
+            if (!currentSpec.equalsIgnoreCase(requestedSpec)) {
+                throw new BadRequestException("Specialization changes require admin approval.");
+            }
+        } else {
+            profile.setSpecialization(requestedSpec);
+        }
         profile.setClinicName(request.getClinicName().trim());
         profile.setClinicAddress(request.getClinicAddress().trim());
+        profile.setBio(request.getBio() == null ? null : request.getBio().trim());
+        profile.setYearsOfExperience(request.getYearsOfExperience());
+        profile.setEducation(request.getEducation() == null ? null : request.getEducation().trim());
+        profile.setConsultationFee(request.getConsultationFee());
         // Do NOT set verified here — admin must approve via /admin/doctors/{id}/approve
 
         DoctorProfile saved = doctorProfileRepository.save(profile);
         return toDoctorProfileDto(saved);
+    }
+
+    @Transactional
+    public DoctorSpecializationChangeRequestDto requestSpecializationChange(
+            String email,
+            DoctorSpecializationChangeRequestCreateRequest request
+    ) {
+        User doctor = findUserByEmail(email);
+        ensureRole(doctor, "DOCTOR");
+
+        DoctorProfile profile = doctorProfileRepository.findByDoctorId(doctor.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor profile not found."));
+
+        if (!profile.isVerified()) {
+            throw new BadRequestException("You can update specialization directly before verification.");
+        }
+
+        String requestedSpec = request.getRequestedSpecialization().trim();
+        String currentSpec = profile.getSpecialization() == null ? "" : profile.getSpecialization().trim();
+        if (currentSpec.equalsIgnoreCase(requestedSpec)) {
+            throw new BadRequestException("Requested specialization matches your current specialization.");
+        }
+
+        doctorChangeRequestRepository.findTopByDoctorIdAndStatusOrderByCreatedAtDesc(
+                doctor.getId(), DoctorSpecializationChangeStatus.PENDING
+        ).ifPresent(existing -> {
+            throw new BadRequestException("You already have a pending specialization change request.");
+        });
+
+        DoctorSpecializationChangeRequest changeRequest = DoctorSpecializationChangeRequest.builder()
+                .doctor(doctor)
+                .currentSpecialization(currentSpec)
+                .requestedSpecialization(requestedSpec)
+                .reason(request.getReason() == null ? null : request.getReason().trim())
+                .status(DoctorSpecializationChangeStatus.PENDING)
+                .build();
+
+        DoctorSpecializationChangeRequest saved = doctorChangeRequestRepository.save(changeRequest);
+        return toChangeRequestDto(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DoctorSpecializationChangeRequestDto> getMySpecializationChangeRequests(String email) {
+        User doctor = findUserByEmail(email);
+        ensureRole(doctor, "DOCTOR");
+        return doctorChangeRequestRepository.findByDoctorIdOrderByCreatedAtDesc(doctor.getId()).stream()
+                .map(this::toChangeRequestDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -224,10 +299,12 @@ public class AppointmentService {
         }
 
         AppointmentStatus target = request.getStatus();
+        AppointmentStatus previous = appointment.getStatus();
         if (target != AppointmentStatus.CONFIRMED
                 && target != AppointmentStatus.REJECTED
+                && target != AppointmentStatus.CANCELLED
                 && target != AppointmentStatus.COMPLETED) {
-            throw new BadRequestException("Doctor can only set status to CONFIRMED, REJECTED, or COMPLETED.");
+            throw new BadRequestException("Doctor can only set status to CONFIRMED, REJECTED, CANCELLED, or COMPLETED.");
         }
 
         if (target == AppointmentStatus.COMPLETED && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
@@ -235,7 +312,161 @@ public class AppointmentService {
         }
 
         appointment.setStatus(target);
-        return toAppointmentDto(appointmentRepository.save(appointment));
+        Appointment saved = appointmentRepository.save(appointment);
+
+        if (target == AppointmentStatus.CONFIRMED && previous != AppointmentStatus.CONFIRMED) {
+            sendConfirmationMessage(saved);
+        } else if ((target == AppointmentStatus.REJECTED && previous != AppointmentStatus.REJECTED)
+                || (target == AppointmentStatus.CANCELLED && previous != AppointmentStatus.CANCELLED)) {
+            sendCancellationMessage(saved, request.getReason());
+        } else if (target == AppointmentStatus.COMPLETED && previous != AppointmentStatus.COMPLETED) {
+            if (request.getDocumentUrls() != null) {
+                for (String url : request.getDocumentUrls()) {
+                    String fileName = url.substring(url.lastIndexOf("/") + 1);
+                    AppointmentDocument doc = AppointmentDocument.builder()
+                            .appointment(saved)
+                            .fileName(fileName)
+                            .fileUrl(url)
+                            .documentType("CONSULTATION_RESULT")
+                            .build();
+                    appointmentDocumentRepository.save(doc);
+                }
+            }
+            sendCompletionMessage(saved, request.getMedicalNotes(), request.getFollowUpAt());
+        }
+
+        return toAppointmentDto(saved);
+    }
+
+    public String uploadConsultationDocument(MultipartFile file) throws IOException {
+        Path root = Paths.get(consultationUploadDir);
+        if (!Files.exists(root)) Files.createDirectories(root);
+
+        String originalName = file.getOriginalFilename();
+        String extension = "";
+        if (originalName != null && originalName.contains(".")) {
+            extension = originalName.substring(originalName.lastIndexOf("."));
+        }
+        String fileName = UUID.randomUUID().toString() + extension;
+        Files.copy(file.getInputStream(), root.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+        return "/api/v1/appointments/docs/view/" + fileName;
+    }
+
+    private void sendCompletionMessage(Appointment appointment, String notes, String followUp) {
+        StringBuilder content = new StringBuilder("[APPT_COMPLETED]")
+                .append("|Doctor=").append(appointment.getDoctor().getFullName())
+                .append("|Patient=").append(appointment.getPatient().getFullName())
+                .append("|Consultation=").append(appointment.getAppointmentType());
+
+        if (notes != null && !notes.isBlank()) {
+            content.append("|Medical Notes=").append(notes.trim());
+        }
+        if (followUp != null && !followUp.isBlank()) {
+            content.append("|Follow-up=").append(followUp.trim());
+        }
+
+        // Add Document Links
+        List<AppointmentDocument> docs = appointmentDocumentRepository.findByAppointmentId(appointment.getId());
+        if (!docs.isEmpty()) {
+            StringBuilder docLinks = new StringBuilder();
+            for (int i = 0; i < docs.size(); i++) {
+                if (i > 0) docLinks.append(";");
+                docLinks.append("Result ").append(i + 1).append(":").append(docs.get(i).getFileUrl());
+            }
+            content.append("|Digital Records=").append(docLinks.toString());
+        }
+
+        // Standard post-consultation instructions
+        content.append("|Instructions=").append("Your prescription and digital medical records are processed and available for download in this summary.");
+
+        ChatMessage message = new ChatMessage();
+        message.setSender(appointment.getDoctor());
+        message.setReceiver(appointment.getPatient());
+        message.setAppointment(appointment);
+        message.setContent(content.toString());
+        chatMessageRepository.save(message);
+    }
+
+    private void sendConfirmationMessage(Appointment appointment) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a", Locale.ENGLISH);
+        String when = appointment.getAppointmentAt() == null ? "" : appointment.getAppointmentAt().format(formatter);
+
+        User patient = appointment.getPatient();
+        String patientDetails = patient.getFullName();
+        if (patient.getBirthDate() != null) {
+            int age = java.time.Period.between(patient.getBirthDate(), java.time.LocalDate.now()).getYears();
+            patientDetails += " (" + age + "y";
+            if (patient.getGender() != null) {
+                patientDetails += ", " + patient.getGender();
+            }
+            patientDetails += ")";
+        } else if (patient.getGender() != null) {
+            patientDetails += " (" + patient.getGender() + ")";
+        }
+
+        DoctorProfile profile = doctorProfileRepository.findByDoctorId(appointment.getDoctor().getId()).orElse(null);
+        String location = "TBA";
+        String instructions = "Please arrive 15 minutes before your scheduled appointment.";
+
+        if (profile != null) {
+            boolean isOnline = "Online".equalsIgnoreCase(appointment.getAppointmentType());
+            if (isOnline) {
+                location = "Online Meeting (Link will be sent via chat)";
+                instructions = "Ensure you have a stable internet connection. The telehealth meeting link will be shared here 5 minutes before your session.";
+            } else {
+                String clinicName = profile.getClinicName() == null ? "" : profile.getClinicName().trim();
+                String clinicAddress = profile.getClinicAddress() == null ? "" : profile.getClinicAddress().trim();
+                if (!clinicName.isBlank() && !clinicAddress.isBlank()) {
+                    location = clinicName + " - " + clinicAddress;
+                } else if (!clinicName.isBlank()) {
+                    location = clinicName;
+                } else if (!clinicAddress.isBlank()) {
+                    location = clinicAddress;
+                }
+                instructions = "Please bring a valid ID and arrive 15 minutes early at the clinic for documentation.";
+            }
+        }
+
+        StringBuilder content = new StringBuilder("[APPT_CONFIRMED]")
+                .append("|Doctor=").append(appointment.getDoctor().getFullName())
+                .append("|Patient=").append(patientDetails)
+                .append("|When=").append(when)
+                .append("|Type=").append(appointment.getAppointmentType())
+                .append("|Location=").append(location)
+                .append("|Instructions=").append(instructions);
+
+        ChatMessage message = new ChatMessage();
+        message.setSender(appointment.getDoctor());
+        message.setReceiver(appointment.getPatient());
+        message.setAppointment(appointment);
+        message.setContent(content.toString());
+        chatMessageRepository.save(message);
+    }
+
+    private void sendCancellationMessage(Appointment appointment, String reason) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a", Locale.ENGLISH);
+        String when = appointment.getAppointmentAt() == null ? "" : appointment.getAppointmentAt().format(formatter);
+
+        StringBuilder content = new StringBuilder("[APPT_CANCELLED]")
+                .append("|Doctor=").append(appointment.getDoctor().getFullName())
+                .append("|Patient=").append(appointment.getPatient().getFullName())
+                .append("|When=").append(when)
+                .append("|Type=").append(appointment.getAppointmentType())
+                .append("|Status=").append(appointment.getStatus() == AppointmentStatus.REJECTED ? "Declined" : "Cancelled");
+
+        if (reason != null && !reason.isBlank()) {
+            content.append("|Reason=").append(reason.trim());
+        } else {
+            content.append("|Reason=").append("No reason provided by the doctor.");
+        }
+
+        ChatMessage message = new ChatMessage();
+        message.setSender(appointment.getDoctor());
+        message.setReceiver(appointment.getPatient());
+        message.setAppointment(appointment);
+        message.setContent(content.toString());
+        chatMessageRepository.save(message);
     }
 
     @Transactional
@@ -323,6 +554,8 @@ public class AppointmentService {
 
     private DoctorProfileDto toDoctorProfileDto(DoctorProfile profile) {
         User doctor = profile.getDoctor();
+        long completedCount = appointmentRepository.countByDoctorIdAndStatus(doctor.getId(), AppointmentStatus.COMPLETED);
+
         return DoctorProfileDto.builder()
                 .doctorId(doctor.getId())
                 .doctorName(doctor.getFullName())
@@ -337,14 +570,44 @@ public class AppointmentService {
                 .prcIdUrl(profile.getPrcIdUrl())
                 .boardCertificateUrl(profile.getBoardCertificateUrl())
                 .governmentIdUrl(profile.getGovernmentIdUrl())
+                .bio(profile.getBio())
+                .yearsOfExperience(profile.getYearsOfExperience())
+                .education(profile.getEducation())
+                .patientCount(completedCount)
+                .consultationFee(profile.getConsultationFee())
+                .build();
+    }
+
+    private DoctorSpecializationChangeRequestDto toChangeRequestDto(DoctorSpecializationChangeRequest request) {
+        User doctor = request.getDoctor();
+        return DoctorSpecializationChangeRequestDto.builder()
+                .id(request.getId())
+                .doctorId(doctor.getId())
+                .doctorName(doctor.getFullName())
+                .email(doctor.getEmail())
+                .currentSpecialization(request.getCurrentSpecialization())
+                .requestedSpecialization(request.getRequestedSpecialization())
+                .reason(request.getReason())
+                .status(request.getStatus())
+                .adminNote(request.getAdminNote())
+                .createdAt(request.getCreatedAt())
+                .decidedAt(request.getDecidedAt())
                 .build();
     }
 
     private AppointmentDto toAppointmentDto(Appointment appointment) {
+        User patient = appointment.getPatient();
+        Integer age = null;
+        if (patient.getBirthDate() != null) {
+            age = java.time.Period.between(patient.getBirthDate(), java.time.LocalDate.now()).getYears();
+        }
+
         return AppointmentDto.builder()
                 .id(appointment.getId())
-                .patientId(appointment.getPatient().getId())
-                .patientName(appointment.getPatient().getFullName())
+                .patientId(patient.getId())
+                .patientName(patient.getFullName())
+                .patientAge(age)
+                .patientGender(patient.getGender())
                 .doctorId(appointment.getDoctor().getId())
                 .doctorName(appointment.getDoctor().getFullName())
                 .appointmentAt(appointment.getAppointmentAt())

@@ -1,6 +1,7 @@
 package edu.cit.ramirez.medigo.features.admin;
 
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
 import edu.cit.ramirez.medigo.shared.exception.ResourceNotFoundException;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,55 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @GetMapping("/analytics")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<edu.cit.ramirez.medigo.features.admin.dto.AdminAnalyticsDto> getAnalytics() {
+        return ApiResponse.ok(adminService.getAnalytics());
+    }
+
+    @GetMapping("/doctors")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<DoctorProfileDto>> getAllDoctors() {
+        return ApiResponse.ok(adminService.getAllDoctors());
+    }
+
+    @GetMapping("/patients")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<edu.cit.ramirez.medigo.features.user.dto.UserDto>> getAllPatients() {
+        return ApiResponse.ok(adminService.getAllPatients());
+    }
+
     /** Returns all doctor profiles that are not yet verified (pending approval). */
     @GetMapping("/doctors/pending")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<List<DoctorProfileDto>> getPendingDoctors() {
         return ApiResponse.ok(adminService.getPendingDoctors());
+    }
+
+    /** List specialization change requests. Optional query param: status=PENDING|APPROVED|REJECTED */
+    @GetMapping("/specialization-change-requests")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<DoctorSpecializationChangeRequestDto>> specializationChangeRequests(
+            @RequestParam(value = "status", required = false) String status) {
+        return ApiResponse.ok(adminService.getSpecializationChangeRequests(status));
+    }
+
+    @PutMapping("/specialization-change-requests/{requestId}/approve")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> approveSpecializationChange(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String note = body != null ? body.get("note") : null;
+        return ApiResponse.ok(adminService.approveSpecializationChange(requestId, note));
+    }
+
+    @PutMapping("/specialization-change-requests/{requestId}/reject")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> rejectSpecializationChange(
+            @PathVariable Long requestId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String note = body != null ? body.get("note") : null;
+        return ApiResponse.ok(adminService.rejectSpecializationChange(requestId, note));
     }
 
     /** Approves a doctor — sets verified = true. */
@@ -71,5 +116,33 @@ public class AdminController {
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    /**
+     * Permanently deletes a doctor's account and all associated data.
+     * Body: { "reason": "..." }
+     */
+    @DeleteMapping("/doctors/{doctorId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> deleteDoctorAccount(
+            @PathVariable Long doctorId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Administrative cleanup.";
+        adminService.deleteDoctorAccount(doctorId, reason);
+        return ApiResponse.ok(null);
+    }
+
+    /**
+     * Permanently deletes a patient's account and all associated data.
+     * Body: { "reason": "..." }
+     */
+    @DeleteMapping("/patients/{patientId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> deletePatientAccount(
+            @PathVariable Long patientId,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Administrative cleanup.";
+        adminService.deletePatientAccount(patientId, reason);
+        return ApiResponse.ok(null);
     }
 }

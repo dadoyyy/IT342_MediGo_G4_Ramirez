@@ -3,6 +3,8 @@ package edu.cit.ramirez.medigo.features.appointment;
 import edu.cit.ramirez.medigo.features.appointment.dto.*;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileDto;
 import edu.cit.ramirez.medigo.features.doctor.dto.DoctorProfileUpsertRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestCreateRequest;
+import edu.cit.ramirez.medigo.features.doctor.dto.DoctorSpecializationChangeRequestDto;
 import edu.cit.ramirez.medigo.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,21 @@ public class AppointmentController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<DoctorProfileDto> myDoctorProfile(Principal principal) {
         return ApiResponse.ok(appointmentService.getMyDoctorProfile(principal.getName()));
+    }
+
+    @PostMapping("/doctors/me/specialization-change-requests")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<DoctorSpecializationChangeRequestDto> requestSpecializationChange(
+            Principal principal,
+            @Valid @RequestBody DoctorSpecializationChangeRequestCreateRequest body) {
+        return ApiResponse.ok(appointmentService.requestSpecializationChange(principal.getName(), body));
+    }
+
+    @GetMapping("/doctors/me/specialization-change-requests")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<List<DoctorSpecializationChangeRequestDto>> mySpecializationChangeRequests(
+            Principal principal) {
+        return ApiResponse.ok(appointmentService.getMySpecializationChangeRequests(principal.getName()));
     }
 
     /** Upload a single document for the authenticated doctor.
@@ -129,5 +146,31 @@ public class AppointmentController {
             @PathVariable Long id,
             @Valid @RequestBody AppointmentStatusUpdateRequest body) {
         return ApiResponse.ok(appointmentService.updateStatus(principal.getName(), id, body));
+    }
+
+    @Value("${app.consultation.upload.dir:uploads/consultation-docs}")
+    private String consultationUploadDir;
+
+    @PostMapping(value = "/appointments/docs/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<String> uploadConsultationDoc(@RequestParam("file") MultipartFile file) throws java.io.IOException {
+        return ApiResponse.ok(appointmentService.uploadConsultationDocument(file));
+    }
+
+    @GetMapping("/appointments/docs/view/{filename:.+}")
+    public ResponseEntity<Resource> serveConsultationDoc(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get(consultationUploadDir).resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

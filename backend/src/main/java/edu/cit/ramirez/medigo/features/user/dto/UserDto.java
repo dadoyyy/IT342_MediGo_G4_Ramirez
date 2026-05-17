@@ -18,5 +18,9 @@ public class UserDto {
     private String email;
     private String fullName;
     private String role;
+    private java.time.LocalDate birthDate;
+    private String gender;
+    private String contactNumber;
+    private String address;
     private Instant createdAt;
 }

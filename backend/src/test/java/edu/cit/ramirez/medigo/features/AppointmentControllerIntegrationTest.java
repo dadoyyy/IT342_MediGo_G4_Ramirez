@@ -82,6 +82,12 @@ class AppointmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(profileRequest)))
                 .andExpect(status().isOk());
+
+        // Mark the doctor profile as verified in database
+        edu.cit.ramirez.medigo.features.doctor.entity.DoctorProfile profile = 
+                doctorProfileRepository.findByDoctorId(doctorUserId).orElseThrow();
+        profile.setVerified(true);
+        doctorProfileRepository.save(profile);
     }
 
     // ── POST /appointments ────────────────────────────────────────────────────
@@ -317,17 +323,33 @@ class AppointmentControllerIntegrationTest {
     // ── Helper ────────────────────────────────────────────────────────────────
 
     private String registerAndGetToken(String email, String role) throws Exception {
+        String gmailEmail = email.split("@")[0] + "@gmail.com";
+
         RegisterRequest request = RegisterRequest.builder()
                 .firstname("Test").lastname("User")
-                .email(email).password("Password1!").role(role).build();
+                .email(gmailEmail).password("Password1!").role(role).build();
 
-        MvcResult result = mockMvc.perform(post(AUTH_URL + "/register")
+        mockMvc.perform(post(AUTH_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isCreated());
+
+        // Verify the user manually in database
+        edu.cit.ramirez.medigo.features.user.entity.User user = userRepository.findByEmail(gmailEmail).orElseThrow();
+        user.setVerified(true);
+        userRepository.save(user);
+
+        // Login to get token
+        edu.cit.ramirez.medigo.features.auth.dto.LoginRequest loginRequest = 
+                new edu.cit.ramirez.medigo.features.auth.dto.LoginRequest(gmailEmail, "Password1!");
+
+        MvcResult loginResult = mockMvc.perform(post(AUTH_URL + "/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        return objectMapper.readTree(result.getResponse().getContentAsString())
+        return objectMapper.readTree(loginResult.getResponse().getContentAsString())
                 .path("data").path("token").asText();
     }
 }

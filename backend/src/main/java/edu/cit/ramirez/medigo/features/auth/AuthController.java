@@ -10,7 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 /**
  * Public authentication endpoints.
@@ -88,9 +91,13 @@ public class AuthController {
      * Requires a valid Bearer JWT.
      */
     @GetMapping("/me")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<UserDto> me(java.security.Principal principal) {
-        UserDto userDto = authService.getCurrentUser(principal.getName());
-        return ApiResponse.ok(userDto);
+    public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(Principal principal) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.getCurrentUser(principal.getName())));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponse<String>> verifyEmail(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok(ApiResponse.ok("Email verified successfully. You can now log in."));
     }
 }

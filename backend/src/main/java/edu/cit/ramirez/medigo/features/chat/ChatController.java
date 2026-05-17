@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,18 @@ public class ChatController {
             Principal principal,
             @PathVariable Long otherUserId) {
         return ApiResponse.ok(chatService.getConversation(principal.getName(), otherUserId));
+    }
+
+    @GetMapping("/unread/latest")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Instant> latestIncoming(Principal principal) {
+        return ApiResponse.ok(chatService.getLatestUnreadTimestamp(principal.getName()));
+    }
+
+    @GetMapping("/unread/count")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Long> unreadCount(Principal principal) {
+        return ApiResponse.ok(chatService.getUnreadCount(principal.getName()));
     }
 
     @PostMapping("/messages")

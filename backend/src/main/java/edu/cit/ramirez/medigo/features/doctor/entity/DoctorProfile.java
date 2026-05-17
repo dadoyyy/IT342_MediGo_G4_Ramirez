@@ -25,7 +25,7 @@ public class DoctorProfile {
     @JoinColumn(name = "doctor_id", nullable = false, unique = true)
     private User doctor;
 
-    @Column(name = "specialization", nullable = false, length = 120)
+    @Column(name = "specialization", nullable = false, length = 500)
     private String specialization;
 
     @Column(name = "clinic_name", nullable = false, length = 150)
@@ -40,6 +40,18 @@ public class DoctorProfile {
 
     @Column(name = "rejection_reason", length = 1000)
     private String rejectionReason;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "years_of_experience")
+    private Integer yearsOfExperience;
+
+    @Column(name = "education", length = 500)
+    private String education;
+
+    @Column(name = "consultation_fee")
+    private Double consultationFee;
 
     // ── Document uploads ──────────────────────────────────────────────────────
     @Column(name = "profile_picture_url", length = 512)

@@ -24,6 +24,10 @@ public class DefaultUserFactory implements UserFactory {
                 .passwordHash(encodedPassword)
                 .fullName(fullName)
                 .role(normalizedRole)
+                .birthDate(request.getBirthDate() != null ? java.time.LocalDate.parse(request.getBirthDate()) : null)
+                .gender(request.getGender())
+                .contactNumber(request.getContactNumber())
+                .address(request.getAddress())
                 .build();
     }
 

@@ -1,0 +1,485 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, CheckCircle, XCircle, Activity, Calendar, ChevronDown, ChevronUp, FileText, User } from 'lucide-react';
+import { authApi, appointmentApi } from '../../../shared/api/api';
+import AppShell from '../../../shared/ui/AppShell';
+import { authSession } from '../../auth/authSession';
+
+const STATUS_META = {
+  PENDING_DOCTOR_APPROVAL: { label: 'Pending Approval', color: '#FFB800', bg: 'rgba(255,184,0,0.1)' },
+  CONFIRMED:               { label: 'Confirmed',        color: '#EF233C', bg: 'rgba(239,35,60,0.1)' },
+  COMPLETED:               { label: 'Completed',        color: '#34A853', bg: 'rgba(52,168,83,0.1)' },
+  CANCELLED:               { label: 'Cancelled',        color: '#8D99AE', bg: 'rgba(141,153,174,0.1)' },
+  REJECTED:                { label: 'Rejected',         color: '#D90429', bg: 'rgba(217,4,41,0.1)' },
+};
+
+function fmtDt(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+function fmtDate(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+const TABS = [
+  { key: 'pending',   label: 'Pending',   filter: 'PENDING_DOCTOR_APPROVAL' },
+  { key: 'confirmed', label: 'Confirmed', filter: 'CONFIRMED' },
+  { key: 'history',   label: 'History',   filter: null },
+];
+
+export default function DoctorAppointments() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(null);
+  const [activeTab, setActiveTab] = useState('pending');
+  const [expandedId, setExpandedId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ show: false, appt: null, targetStatus: null });
+  const [completeModal, setCompleteModal] = useState({ show: false, appt: null });
+  const [completionData, setCompletionData] = useState({ medicalNotes: '', followUpAt: '', documentUrls: [] });
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [meRes, apptRes] = await Promise.all([authApi.me(), appointmentApi.listMine()]);
+        const u = meRes.data?.data ?? meRes.data; setUser(u); authSession.setUser(u);
+        const list = apptRes.data?.data ?? apptRes.data; setAppointments(Array.isArray(list) ? list : []);
+      } catch {} finally { setLoading(false); }
+    }
+    load();
+  }, []);
+
+  async function updateStatus(targetAppt = null, status = null, extra = {}) {
+    const appt = targetAppt || confirmModal.appt;
+    const targetStatus = status || confirmModal.targetStatus;
+    if (!appt || !targetStatus) return;
+
+    setUpdating(appt.id);
+    const reasonPayload = (targetStatus === 'REJECTED' || targetStatus === 'CANCELLED') ? { reason: cancellationReason } : {};
+    setConfirmModal({ show: false, appt: null, targetStatus: null });
+    setCompleteModal({ show: false, appt: null });
+    setCancellationReason('');
+    
+    try { 
+      await appointmentApi.updateStatus(appt.id, { 
+        status: targetStatus,
+        ...reasonPayload,
+        ...extra
+      }); 
+      setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: targetStatus } : a)); 
+      setCompletionData({ medicalNotes: '', followUpAt: '', documentUrls: [] });
+    }
+    catch { alert('Failed to update appointment status.'); }
+    finally { setUpdating(null); }
+  }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setUploadingDoc(true);
+    try {
+      const res = await appointmentApi.uploadConsultationDoc(file);
+      const url = res.data?.data ?? res.data;
+      setCompletionData(prev => ({
+        ...prev,
+        documentUrls: [...prev.documentUrls, url]
+      }));
+    } catch {
+      alert('Failed to upload document.');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const displayed = (() => {
+    if (activeTab === 'pending') return appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL');
+    if (activeTab === 'confirmed') return appointments.filter(a => a.status === 'CONFIRMED');
+    return appointments.filter(a => ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(a.status));
+  })();
+  const sorted = [...displayed].sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.appointmentAt || 0).getTime();
+    const timeB = new Date(b.createdAt || b.appointmentAt || 0).getTime();
+    if (timeB !== timeA) return timeB - timeA;
+    return b.id - a.id;
+  });
+  const pendingCount = appointments.filter(a => a.status === 'PENDING_DOCTOR_APPROVAL').length;
+  const confirmedCount = appointments.filter(a => a.status === 'CONFIRMED').length;
+  const historyCount = appointments.filter(a => ['COMPLETED', 'CANCELLED', 'REJECTED'].includes(a.status)).length;
+
+  return (
+    <AppShell user={user}>
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.show && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              style={{ background: '#FFFFFF', borderRadius: 32, width: '100%', maxWidth: 420, padding: 32, textAlign: 'center', boxShadow: '0 32px 80px rgba(43,45,66,0.2)' }}>
+              <div style={{ 
+                width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+                background: confirmModal.targetStatus === 'CONFIRMED' ? 'rgba(34,197,94,0.06)' : 'rgba(239,35,60,0.06)',
+                border: confirmModal.targetStatus === 'CONFIRMED' ? '1px solid rgba(34,197,94,0.15)' : '1px solid rgba(239,35,60,0.15)'
+              }}>
+                {confirmModal.targetStatus === 'CONFIRMED' ? <CheckCircle size={28} style={{ color: '#16A34A' }} /> : <XCircle size={28} style={{ color: '#EF233C' }} />}
+              </div>
+              <h3 style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+                {confirmModal.targetStatus === 'CONFIRMED' ? 'Confirm Appointment?' : confirmModal.targetStatus === 'CANCELLED' ? 'Cancel Appointment?' : 'Decline Appointment?'}
+              </h3>
+              <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 24px', lineHeight: 1.6 }}>
+                You are about to {confirmModal.targetStatus === 'CONFIRMED' ? 'confirm' : confirmModal.targetStatus === 'CANCELLED' ? 'cancel' : 'decline'} the consultation request from <strong>{confirmModal.appt?.patientName}</strong> on <strong>{fmtDt(confirmModal.appt?.appointmentAt)}</strong>.
+              </p>
+
+              {(confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, textAlign: 'left' }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Reason for cancellation</label>
+                  <textarea 
+                    value={cancellationReason}
+                    onChange={e => setCancellationReason(e.target.value)}
+                    placeholder="Specify why you are cancelling/declining this appointment..."
+                    style={{ 
+                      width: '100%', padding: '12px 16px', borderRadius: 14, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, minHeight: 80, resize: 'none', color: '#2B2D42', fontWeight: 500, fontFamily: 'inherit'
+                    }} 
+                  />
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => { setConfirmModal({ show: false, appt: null, targetStatus: null }); setCancellationReason(''); }} 
+                  className="mg-btn-ghost" style={{ flex: 1, padding: 12, fontSize: 13, borderRadius: 12 }}>Cancel</button>
+                <button onClick={() => updateStatus()} 
+                  disabled={(confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && !cancellationReason.trim()}
+                  style={{ 
+                    flex: 1, padding: 12, fontSize: 13, borderRadius: 12, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 800,
+                    background: confirmModal.targetStatus === 'CONFIRMED' ? '#16A34A' : '#EF233C',
+                    boxShadow: confirmModal.targetStatus === 'CONFIRMED' ? '0 8px 20px rgba(22,163,74,0.2)' : '0 8px 20px rgba(239,35,60,0.2)',
+                    opacity: ((confirmModal.targetStatus === 'REJECTED' || confirmModal.targetStatus === 'CANCELLED') && !cancellationReason.trim()) ? 0.5 : 1
+                  }}>
+                  {confirmModal.targetStatus === 'CONFIRMED' ? 'Yes, Confirm' : confirmModal.targetStatus === 'CANCELLED' ? 'Yes, Cancel' : 'Yes, Decline'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Completion Results Modal */}
+      <AnimatePresence>
+        {completeModal.show && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(43,45,66,0.6)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              style={{ background: '#FFFFFF', borderRadius: 32, width: '100%', maxWidth: 500, padding: 32, boxShadow: '0 32px 80px rgba(43,45,66,0.2)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ 
+                  width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+                  background: 'rgba(52,168,83,0.06)', border: '1px solid rgba(52,168,83,0.15)'
+                }}>
+                  <Activity size={28} style={{ color: '#34A853' }} />
+                </div>
+                <h3 style={{ fontSize: 20, fontWeight: 900, color: '#2B2D42', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Complete Consultation</h3>
+                <p style={{ fontSize: 14, color: '#6B7280', margin: 0, lineHeight: 1.6 }}>Please provide the post-consultation results for <strong>{completeModal.appt?.patientName}</strong>.</p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Medical Notes & Summary</label>
+                  <textarea 
+                    value={completionData.medicalNotes}
+                    onChange={e => setCompletionData(p => ({ ...p, medicalNotes: e.target.value }))}
+                    placeholder="Provide a summary of the consultation, diagnosis, and recommendations..."
+                    style={{ 
+                      width: '100%', padding: '16px', borderRadius: 16, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, minHeight: 120, resize: 'none', color: '#2B2D42', fontWeight: 500
+                    }} 
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Follow-up Schedule (Optional)</label>
+                  <input 
+                    type="date"
+                    value={completionData.followUpAt}
+                    onChange={e => setCompletionData(p => ({ ...p, followUpAt: e.target.value }))}
+                    style={{ 
+                      width: '100%', padding: '14px 16px', borderRadius: 16, background: '#F8F9FA', border: '1px solid rgba(43,45,66,0.08)',
+                      fontSize: 14, color: '#2B2D42', fontWeight: 600
+                    }} 
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label style={{ fontSize: 11, fontWeight: 900, color: '#2B2D42', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Upload Documents (PDF)</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <label style={{ 
+                      width: '100%', padding: '16px', borderRadius: 16, background: '#F8F9FA', border: '1px dashed rgba(43,45,66,0.15)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: uploadingDoc ? 'wait' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={uploadingDoc} style={{ display: 'none' }} />
+                      <FileText size={18} style={{ color: '#EF233C' }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#2B2D42' }}>
+                        {uploadingDoc ? 'Uploading...' : 'Click to upload Prescription or Results'}
+                      </span>
+                    </label>
+                    
+                    {completionData.documentUrls.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {completionData.documentUrls.map((url, idx) => (
+                          <div key={idx} style={{ 
+                            padding: '12px 16px', borderRadius: 12, background: 'rgba(52,168,83,0.05)', border: '1px solid rgba(52,168,83,0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <FileText size={14} style={{ color: '#34A853' }} />
+                              <span style={{ fontSize: 12, fontWeight: 700, color: '#2B2D42' }}>Digital_Record_{idx + 1}.pdf</span>
+                            </div>
+                            <button onClick={() => setCompletionData(p => ({ ...p, documentUrls: p.documentUrls.filter((_, i) => i !== idx) }))}
+                              style={{ border: 'none', background: 'none', color: '#EF233C', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
+                              <XCircle size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                <button onClick={() => setCompleteModal({ show: false, appt: null })} 
+                  className="mg-btn-ghost" style={{ flex: 1, padding: 14, fontSize: 13, borderRadius: 12 }}>Cancel</button>
+                <button onClick={() => updateStatus(completeModal.appt, 'COMPLETED', completionData)} 
+                  disabled={!completionData.medicalNotes.trim() || updating}
+                  style={{ 
+                    flex: 1, padding: 14, fontSize: 13, borderRadius: 12, border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 800,
+                    background: '#34A853', boxShadow: '0 8px 20px rgba(52,168,83,0.2)',
+                    opacity: !completionData.medicalNotes.trim() || updating ? 0.5 : 1
+                  }}>
+                  {updating ? 'Finalizing...' : 'Finalize & Complete'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div style={{ padding: '28px 28px 40px' }}>
+
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#2B2D42', margin: '0 0 6px', letterSpacing: '-0.04em' }}>
+            Consultation Pipeline
+          </h1>
+          <p style={{ fontSize: 14, color: '#8D99AE', margin: 0, fontWeight: 600 }}>Manage and track your patient clinical journey</p>
+        </motion.div>
+
+        {/* Tabs - Glassmorphic Switch */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.06 }}
+          style={{ 
+            display: 'flex', gap: 6, marginBottom: 32, background: '#2B2D42', 
+            borderRadius: 20, padding: '6px', boxShadow: '0 15px 35px rgba(43,45,66,0.15)',
+            width: 'fit-content'
+          }}>
+          {TABS.map(tab => {
+            const count = tab.key === 'pending' ? pendingCount : tab.key === 'confirmed' ? confirmedCount : historyCount;
+            const active = activeTab === tab.key;
+            return (
+              <button key={tab.key} onClick={() => { setActiveTab(tab.key); setExpandedId(null); }}
+                style={{
+                  padding: '10px 24px', borderRadius: 16, fontSize: 13, fontWeight: 800,
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  background: active ? '#EF233C' : 'transparent',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.4)',
+                  cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                  border: 'none', fontFamily: 'inherit',
+                  boxShadow: active ? '0 8px 20px rgba(239,35,60,0.3)' : 'none'
+                }}>
+                {tab.label}
+                <span style={{
+                  fontSize: 10, fontWeight: 900, padding: '2px 8px', borderRadius: 8,
+                  background: active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.3)',
+                }}>{count}</span>
+              </button>
+            );
+          })}
+        </motion.div>
+
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+            <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }} />
+          </div>
+        ) : sorted.length === 0 ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', background: 'rgba(239,35,60,0.06)', border: '1px solid rgba(239,35,60,0.12)' }}>
+              <Activity size={22} style={{ color: 'rgba(239,35,60,0.4)' }} />
+            </div>
+            <p style={{ fontWeight: 600, color: '#2B2D42', marginBottom: 4 }}>No {activeTab === 'history' ? 'past' : activeTab} appointments</p>
+            <p style={{ fontSize: 14, color: '#6B7280' }}>
+              {activeTab === 'pending' ? 'No appointment requests waiting for your review' : activeTab === 'confirmed' ? 'No confirmed appointments at the moment' : 'No appointment history yet'}
+            </p>
+          </motion.div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sorted.map((appt, i) => {
+              const meta = STATUS_META[appt.status] || { label: appt.status, color: '#8D99AE', bg: 'rgba(141,153,174,0.1)' };
+              const isExpanded = expandedId === appt.id;
+              return (
+                <motion.div key={appt.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                  className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: 24, border: '1px solid rgba(43,45,66,0.05)' }}>
+                  <div onClick={() => setExpandedId(isExpanded ? null : appt.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '24px 28px', cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(43,45,66,0.01)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ 
+                      width: 52, height: 52, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      flexShrink: 0, background: 'rgba(239,35,60,0.05)', border: '1px solid rgba(239,35,60,0.1)',
+                      boxShadow: '0 8px 16px rgba(239,35,60,0.04)'
+                    }}>
+                      <User size={22} style={{ color: '#EF233C' }} />
+                    </div>
+                    
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+                        <p style={{ fontSize: 18, fontWeight: 900, color: '#2B2D42', margin: 0, letterSpacing: '-0.02em' }}>{appt.patientName}</p>
+                        <span style={{ 
+                          fontSize: 10, fontWeight: 900, padding: '4px 10px', borderRadius: 8,
+                          background: meta.bg, color: meta.color, textTransform: 'uppercase', letterSpacing: '0.05em'
+                        }}>{meta.label}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.appointmentType === 'Video' ? '#EF233C' : '#4CC9F0' }} />
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#8D99AE' }}>{appt.appointmentType}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Clock size={13} style={{ color: '#8D99AE' }} />
+                          <span style={{ fontSize: 13, color: '#2B2D42', fontWeight: 600 }}>{fmtDt(appt.appointmentAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                      {appt.status === 'PENDING_DOCTOR_APPROVAL' && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'CONFIRMED' }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: '#EF233C', color: '#fff', border: 'none', cursor: 'pointer',
+                              boxShadow: '0 10px 20px rgba(239,35,60,0.2)'
+                            }}>
+                            Confirm
+                          </motion.button>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'REJECTED' }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: 'rgba(43,45,66,0.05)', color: '#2B2D42', border: '1px solid rgba(43,45,66,0.1)', cursor: 'pointer'
+                            }}>
+                            Decline
+                          </motion.button>
+                        </div>
+                      )}
+                      {appt.status === 'CONFIRMED' && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setCompleteModal({ show: true, appt }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: '#34A853', color: '#fff', border: 'none', cursor: 'pointer',
+                              boxShadow: '0 10px 20px rgba(52,168,83,0.2)'
+                            }}>
+                            Complete
+                          </motion.button>
+                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                            onClick={e => { e.stopPropagation(); setConfirmModal({ show: true, appt, targetStatus: 'CANCELLED' }); }} disabled={updating === appt.id}
+                            style={{ 
+                              padding: '10px 20px', borderRadius: 14, fontSize: 13, fontWeight: 800, 
+                              background: 'rgba(43,45,66,0.05)', color: '#2B2D42', border: '1px solid rgba(43,45,66,0.1)', cursor: 'pointer'
+                            }}>
+                            Cancel
+                          </motion.button>
+                        </div>
+                      )}
+                      <div style={{ padding: '8px', color: '#8D99AE', transition: 'all 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                        <ChevronDown size={20} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }} style={{ overflow: 'hidden' }}>
+                        <div style={{ padding: '32px', borderTop: '1px solid rgba(43,45,66,0.05)', background: 'rgba(43,45,66,0.01)' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 32 }}>
+                            <div>
+                              <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', letterSpacing: '0.1em', marginBottom: 12, textTransform: 'uppercase' }}>Patient Details</p>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                  <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User size={16} style={{ color: '#2B2D42' }} /></div>
+                                  <span style={{ fontSize: 15, color: '#2B2D42', fontWeight: 800 }}>{appt.patientName || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', gap: 24, paddingLeft: 48 }}>
+                                  <div>
+                                    <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', textTransform: 'uppercase', margin: '0 0 2px' }}>Age</p>
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{appt.patientAge || '—'} yrs</p>
+                                  </div>
+                                  <div>
+                                    <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', textTransform: 'uppercase', margin: '0 0 2px' }}>Gender</p>
+                                    <p style={{ fontSize: 14, fontWeight: 700, color: '#2B2D42', margin: 0 }}>{appt.patientGender || '—'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', letterSpacing: '0.1em', marginBottom: 12, textTransform: 'uppercase' }}>Consultation</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={16} style={{ color: '#8D99AE' }} /></div>
+                                <span style={{ fontSize: 15, color: '#2B2D42', fontWeight: 800 }}>{appt.appointmentType || '—'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', letterSpacing: '0.1em', marginBottom: 12, textTransform: 'uppercase' }}>Schedule</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(43,45,66,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Calendar size={16} style={{ color: '#EF233C' }} /></div>
+                                <span style={{ fontSize: 15, color: '#2B2D42', fontWeight: 800 }}>{fmtDate(appt.appointmentAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {appt.notes && (
+                            <div style={{ marginTop: 32 }}>
+                              <p style={{ fontSize: 10, fontWeight: 800, color: '#8D99AE', letterSpacing: '0.1em', marginBottom: 12, textTransform: 'uppercase' }}>Clinical Notes</p>
+                              <div style={{ 
+                                padding: '20px 24px', borderRadius: 16, background: '#fff', border: '1px solid rgba(43,45,66,0.08)',
+                                color: '#6B7280', fontSize: 14, lineHeight: 1.6, fontStyle: 'italic',
+                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)'
+                              }}>
+                                "{appt.notes}"
+                              </div>
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 32, paddingTop: 20, borderTop: '1px dashed rgba(43,45,66,0.1)' }}>
+                            <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600 }}>ID: #{String(appt.id).slice(-8).toUpperCase()}</p>
+                            <p style={{ fontSize: 12, color: '#8D99AE', fontWeight: 600 }}>Requested: {fmtDt(appt.createdAt)}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </AppShell>
+  );
+}

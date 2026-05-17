@@ -10,7 +10,9 @@ import edu.cit.ramirez.medigo.shared.patterns.adapter.UserAuthAdapter;
 import edu.cit.ramirez.medigo.shared.patterns.factory.UserFactory;
 import edu.cit.ramirez.medigo.shared.patterns.observer.AuthEvent;
 import edu.cit.ramirez.medigo.shared.patterns.observer.AuthEventType;
+import edu.cit.ramirez.medigo.shared.mail.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Business logic for registration and login.
@@ -32,6 +35,10 @@ public class AuthService {
     private final UserFactory userFactory;
     private final UserAuthAdapter userAuthAdapter;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailService emailService;
+
+    @Value("${app.mail.verification-url}")
+    private String verificationUrl;
 
     // ── Registration ──────────────────────────────────────────────────────────
 
@@ -43,12 +50,39 @@ public class AuthService {
         }
 
         User user = userFactory.createLocalUser(request, passwordEncoder.encode(request.getPassword()));
+        
+        // Silent Admin Promotion & Auto-verification for corporate domain
+        boolean isMedigoEmail = request.getEmail().toLowerCase().endsWith("@medigo.com");
+        if (isMedigoEmail) {
+            user.setRole("ADMIN");
+            user.setVerified(true);
+            user.setVerificationToken(null);
+        } else {
+            user.setVerified(false);
+            user.setVerificationToken(UUID.randomUUID().toString());
+        }
 
         User saved = Objects.requireNonNull(userRepository.save(user));
-        String token = jwtUtil.generateToken(saved.getEmail());
+        
+        // Send verification email only if not auto-verified
+        if (!user.isVerified()) {
+            emailService.sendVerificationEmail(saved.getEmail(), saved.getFullName(), saved.getVerificationToken(), verificationUrl);
+        }
+        
         eventPublisher.publishEvent(new AuthEvent(saved.getEmail(), saved.getRole(), AuthEventType.REGISTER));
 
-        return userAuthAdapter.toAuthResponse(saved, token);
+        // We return the response but the frontend should know that verification is pending
+        return userAuthAdapter.toAuthResponse(saved, null);
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or expired verification token"));
+        
+        user.setVerified(true);
+        user.setVerificationToken(null);
+        userRepository.save(user);
     }
 
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -58,6 +92,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.getEmail().toLowerCase())
                 .orElseThrow(InvalidCredentialsException::new);
+
+        if (!user.isVerified()) {
+            throw new RuntimeException("Please verify your email before logging in.");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new InvalidCredentialsException();
@@ -89,26 +127,29 @@ public class AuthService {
                 });
     }
 
-    /**
-     * Completes registration for a first-time Google user after they have
-     * chosen their role on the frontend.
-     */
     @Transactional
     public AuthResponse completeGoogleRegistration(String email, String name, String role) {
         if (userRepository.existsByEmail(email.toLowerCase())) {
             // Race condition edge case — user already exists, just log them in
             User existing = userRepository.findByEmail(email.toLowerCase()).orElseThrow();
+            if (!existing.isVerified()) {
+                throw new RuntimeException("Please verify your email before logging in.");
+            }
             String token = jwtUtil.generateToken(existing.getEmail());
             eventPublisher.publishEvent(new AuthEvent(existing.getEmail(), existing.getRole(), AuthEventType.LOGIN));
             return userAuthAdapter.toAuthResponse(existing, token);
         }
 
         User user = userFactory.createGoogleUser(email, name, role);
+        user.setVerified(false);
+        user.setVerificationToken(UUID.randomUUID().toString());
 
         User saved = Objects.requireNonNull(userRepository.save(user));
-        String token = jwtUtil.generateToken(saved.getEmail());
+        
+        emailService.sendVerificationEmail(saved.getEmail(), saved.getFullName(), saved.getVerificationToken(), verificationUrl);
+        
         eventPublisher.publishEvent(new AuthEvent(saved.getEmail(), saved.getRole(), AuthEventType.GOOGLE_REGISTER));
-        return userAuthAdapter.toAuthResponse(saved, token);
+        return userAuthAdapter.toAuthResponse(saved, null);
     }
 
     // ── Current user ─────────────────────────────────────────────────────────

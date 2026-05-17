@@ -2,6 +2,8 @@ package edu.cit.ramirez.medigo.features;
 
 import edu.cit.ramirez.medigo.features.appointment.AppointmentRepository;
 import edu.cit.ramirez.medigo.features.appointment.AppointmentService;
+import edu.cit.ramirez.medigo.features.appointment.AppointmentDocumentRepository;
+import edu.cit.ramirez.medigo.features.chat.ChatMessageRepository;
 import edu.cit.ramirez.medigo.features.appointment.dto.AppointmentCreateRequest;
 import edu.cit.ramirez.medigo.features.appointment.dto.AppointmentDto;
 import edu.cit.ramirez.medigo.features.appointment.dto.AppointmentStatusUpdateRequest;
@@ -41,6 +43,8 @@ class AppointmentServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private DoctorProfileRepository doctorProfileRepository;
     @Mock private AppointmentRepository appointmentRepository;
+    @Mock private AppointmentDocumentRepository appointmentDocumentRepository;
+    @Mock private ChatMessageRepository chatMessageRepository;
 
     @InjectMocks
     private AppointmentService appointmentService;

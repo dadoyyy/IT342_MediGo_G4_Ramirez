@@ -23,6 +23,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be a valid address")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|medigo\\.com)$", message = "Only Gmail or Medigo accounts are allowed")
     @Size(max = 255)
     private String email;
 
@@ -35,8 +36,16 @@ public class RegisterRequest {
     private String password;
 
     @NotBlank(message = "Role is required")
-    @Pattern(regexp = "PATIENT|DOCTOR", message = "Role must be PATIENT or DOCTOR")
+    @Pattern(regexp = "PATIENT|DOCTOR|ADMIN", message = "Role must be PATIENT, DOCTOR, or ADMIN")
     private String role;
+
+    private String birthDate;
+
+    private String gender;
+
+    private String contactNumber;
+
+    private String address;
 
     /** Required for DOCTOR registrations. */
     private String licenseNumber;

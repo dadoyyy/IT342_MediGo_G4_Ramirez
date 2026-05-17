@@ -38,6 +38,24 @@ public class User {
     @Column(name = "role", nullable = false, length = 10)
     private String role;
 
+    @Column(name = "birth_date")
+    private java.time.LocalDate birthDate;
+
+    @Column(name = "gender", length = 20)
+    private String gender;
+
+    @Column(name = "contact_number", length = 20)
+    private String contactNumber;
+
+    @Column(name = "address", length = 500)
+    private String address;
+
+    @Column(name = "verified", nullable = false)
+    private boolean verified = false;
+
+    @Column(name = "verification_token", length = 100)
+    private String verificationToken;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

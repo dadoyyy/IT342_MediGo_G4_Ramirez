@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { doctorApi } from '../../../shared/api/api';
+import { authSession } from '../../auth/authSession';
+import AppShell from '../../../shared/ui/AppShell';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -13,25 +15,32 @@ export function DoctorProfileProvider({ children }) {
   const [isVerified, setIsVerified] = useState(false);
   const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileVersion, setProfileVersion] = useState(0);
+
+  async function fetchProfile() {
+    const user = authSession.getUser();
+    if (user?.role !== 'DOCTOR') {
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const res = await doctorApi.getMyProfile();
+      const profile = res.data?.data ?? res.data;
+      const specialization = profile?.specialization;
+      const complete = typeof specialization === 'string' && specialization.trim().length > 0;
+      setIsProfileComplete(complete);
+      setIsVerified(!!profile?.verified);
+      setProfilePictureUrl(profile?.profilePictureUrl || null);
+    } catch {
+      setIsProfileComplete(false);
+      setIsVerified(false);
+      setProfilePictureUrl(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const res = await doctorApi.getMyProfile();
-        const profile = res.data?.data ?? res.data;
-        const specialization = profile?.specialization;
-        const complete = typeof specialization === 'string' && specialization.trim().length > 0;
-        setIsProfileComplete(complete);
-        setIsVerified(!!profile?.verified);
-        setProfilePictureUrl(profile?.profilePictureUrl || null);
-      } catch {
-        setIsProfileComplete(false);
-        setIsVerified(false);
-        setProfilePictureUrl(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     fetchProfile();
   }, []);
 
@@ -42,10 +51,15 @@ export function DoctorProfileProvider({ children }) {
 
   function updateProfilePicture(url) {
     setProfilePictureUrl(url);
+    setProfileVersion(v => v + 1);
+  }
+
+  function refreshProfile() {
+    return fetchProfile();
   }
 
   return (
-    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, profilePictureUrl, isLoading, markProfileComplete, updateProfilePicture }}>
+    <DoctorProfileContext.Provider value={{ isProfileComplete, isVerified, profilePictureUrl, profileVersion, isLoading, markProfileComplete, updateProfilePicture, refreshProfile }}>
       {children}
     </DoctorProfileContext.Provider>
   );
@@ -55,21 +69,25 @@ export function DoctorProfileProvider({ children }) {
 
 export function ProfileCompletionGuard({ children }) {
   const { isProfileComplete, isVerified, isLoading } = useContext(DoctorProfileContext);
+  const user = authSession.getUser();
 
   if (isLoading) {
+    // Render the AppShell with a loader inside so the sidebar/navbar don't flicker away
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B1020' }}>
-        <div
-          className="w-8 h-8 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'rgba(46,196,182,0.2)', borderTopColor: '#2EC4B6' }}
-        />
-      </div>
+      <AppShell user={user}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#EDF2F4' }}>
+          <div
+            className="w-8 h-8 rounded-full border-2 animate-spin"
+            style={{ borderColor: 'rgba(239,35,60,0.2)', borderTopColor: '#EF233C' }}
+          />
+        </div>
+      </AppShell>
     );
   }
 
   // Not filled in yet → go to profile setup
   if (!isProfileComplete) {
-    return <Navigate to="/doctor/profile" replace />;
+    return <Navigate to="/doctor/register" replace />;
   }
 
   // Filled in but awaiting admin approval → go to pending page
