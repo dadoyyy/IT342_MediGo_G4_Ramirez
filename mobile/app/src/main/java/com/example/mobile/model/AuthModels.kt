@@ -26,3 +26,8 @@ data class AuthResponse(
     val token: String?,
     val user: UserDto
 )
+
+data class CompleteOAuth2Request(
+    val pendingToken: String,
+    val role: String
+)

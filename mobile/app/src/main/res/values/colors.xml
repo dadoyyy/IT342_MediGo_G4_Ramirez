@@ -6,16 +6,31 @@
     <color name="primary_light">#FFF0F2</color>    <!-- Soft brand red background -->
     <color name="primary_accent">#2B2D42</color>   <!-- Slate Navy / Gray -->
 
-    <!-- ── Grayscale ── -->
-    <color name="gray_50">#F8F9FA</color>           <!-- Premium Off-white background -->
+    <!-- ── Premium UI Aliases ── -->
+    <color name="primary_gradient_start">#0066CC</color>
+    <color name="primary_gradient_end">#0052A3</color>
+    <color name="accent_blue">#0066CC</color>
+    <color name="accent_teal">#00897B</color>
+    <color name="accent_green">#4CAF50</color>
+    <color name="bg_primary">#FFFFFF</color>
+    <color name="bg_secondary">#F5F7FA</color>
+    <color name="bg_tertiary">#EEF2F7</color>
+    <color name="text_light">#FFFFFF</color>
+    <color name="border_light">#E0E6ED</color>
+    <color name="info">#0066CC</color>
+    <color name="shadow_dark">#000000</color>
+    <color name="shadow_light">#F3F4F6</color>
+
+    <!-- ── Grayscale (Aligned with Web System) ── -->
+    <color name="gray_50">#EDF2F4</color>           <!-- Premium Mist White background -->
     <color name="gray_100">#F1F3F5</color>          <!-- Clean light background -->
     <color name="gray_200">#E9ECEF</color>          <!-- Soft borders -->
     <color name="gray_300">#DEE2E6</color>          <!-- Dividers -->
-    <color name="gray_400">#ADB5BD</color>          <!-- Hint text -->
-    <color name="gray_500">#6C757D</color>          <!-- Muted text -->
-    <color name="gray_600">#495057</color>          <!-- Labels -->
-    <color name="gray_700">#343A40</color>          <!-- Body text -->
-    <color name="gray_900">#212529</color>          <!-- Headers / Primary text -->
+    <color name="gray_400">#8D99AE</color>          <!-- Slate gray secondary accent -->
+    <color name="gray_500">#6B7280</color>          <!-- Muted text -->
+    <color name="gray_600">#4B5563</color>          <!-- Labels -->
+    <color name="gray_700">#374151</color>          <!-- Body text -->
+    <color name="gray_900">#2B2D42</color>          <!-- Headers / Primary Navy text -->
 
     <!-- ── Status Colors ── -->
     <color name="success">#10B981</color>           <!-- Green success -->
@@ -29,14 +44,14 @@
     <color name="warning">#F59E0B</color>           <!-- Amber warning -->
     <color name="warning_bg">#FEF3C7</color>        <!-- Light amber bg -->
 
-    <!-- ── Semantic Colors ── -->
-    <color name="background">#F8F9FA</color>        <!-- App background -->
-    <color name="surface">#FFFFFF</color>           <!-- Card background -->
-    <color name="text_primary">#212529</color>      <!-- Headings / Primary text -->
-    <color name="text_secondary">#495057</color>    <!-- Muted body text -->
-    <color name="text_tertiary">#ADB5BD</color>     <!-- Hints -->
+    <!-- ── Semantic Colors (Aligned with Web System) ── -->
+    <color name="background">#EDF2F4</color>        <!-- App background (Mist) -->
+    <color name="surface">#FFFFFF</color>           <!-- Card background (White) -->
+    <color name="text_primary">#2B2D42</color>      <!-- Headings / Primary text (Navy) -->
+    <color name="text_secondary">#6B7280</color>    <!-- Muted body text (Gray) -->
+    <color name="text_tertiary">#8D99AE</color>     <!-- Hints / Subtext (Slate) -->
     <color name="border">#E9ECEF</color>            <!-- Standard borders -->
-    <color name="shadow">#000000</color>            <!-- Shadows -->
+    <color name="shadow">#0D2B2D42</color>          <!-- Navy soft shadow -->
 
     <!-- ── Core Primitives ── -->
     <color name="black">#FF000000</color>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp">
+
+    <!-- Specialized Post-Consultation Report Card -->
+    <LinearLayout
+        style="@style/Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_status_box_success"
+        android:backgroundTint="@color/success_bg"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/TextHeading3"
+                android:text="Consultation Completed"
+                android:textColor="@color/success" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:background="@drawable/bg_status_box_success"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/success"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:text="SIGNED REPORT" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvSystemMessageHeader"
+            style="@style/TextBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:text="Doctor: Dr. Ruther Ramirez" />
+
+        <TextView
+            android:id="@+id/tvSystemMessageDetails"
+            style="@style/TextBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:text="Prescription report and laboratory requests are signed and available." />
+
+        <Button
+            android:id="@+id/btnViewSystemSummary"
+            style="@style/ButtonPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:minHeight="36dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/success"
+            android:text="View Signed Summary &amp; PDF"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Timing Label -->
+    <TextView
+        android:id="@+id/tvMessageTime"
+        style="@style/TextCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="10sp"
+        android:textColor="@color/text_tertiary"
+        android:text="10:48 AM" />
+
+</LinearLayout>

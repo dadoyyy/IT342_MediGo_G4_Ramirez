@@ -24,6 +24,7 @@ import com.example.mobile.shared.session.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
@@ -82,7 +83,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        val currentUserId = sessionManager.userId() ?: 0L
+        val currentUserId = sessionManager.userId()
         chatAdapter = ChatMessagesAdapter(
             currentUserId = currentUserId,
             partnerId = partnerId,
@@ -233,32 +234,32 @@ class ChatMessagesAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    inner class SentViewHolder(private val binding: ItemChatMessageSentBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class SentViewHolder(private val sentBinding: ItemChatMessageSentBinding) : RecyclerView.ViewHolder(sentBinding.root) {
         fun bind(message: ChatMessageDto) {
-            binding.tvMessageContent.text = message.content
-            binding.tvMessageTime.text = formatTime(message.sentAt)
+            sentBinding.tvMessageContent.text = message.content
+            sentBinding.tvMessageTime.text = formatTime(message.sentAt)
         }
     }
 
-    inner class ReceivedViewHolder(private val binding: ItemChatMessageReceivedBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ReceivedViewHolder(private val receivedBinding: ItemChatMessageReceivedBinding) : RecyclerView.ViewHolder(receivedBinding.root) {
         fun bind(message: ChatMessageDto) {
-            binding.tvMessageContent.text = message.content
-            binding.tvMessageTime.text = formatTime(message.sentAt)
+            receivedBinding.tvMessageContent.text = message.content
+            receivedBinding.tvMessageTime.text = formatTime(message.sentAt)
         }
     }
 
-    inner class SystemViewHolder(private val binding: ItemChatMessageSystemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class SystemViewHolder(private val systemBinding: ItemChatMessageSystemBinding) : RecyclerView.ViewHolder(systemBinding.root) {
         fun bind(message: ChatMessageDto) {
             val parsed = parseSummaryContent(message.content)
             
             val doctor = parsed["Doctor"] ?: "Practitioner Specialist"
-            binding.tvSystemMessageHeader.text = "Doctor: $doctor"
+            systemBinding.tvSystemMessageHeader.text = "Doctor: $doctor"
             
             val notes = parsed["Medical Notes"] ?: "Prescription finalized."
-            binding.tvSystemMessageDetails.text = notes
-            binding.tvMessageTime.text = formatTime(message.sentAt)
+            systemBinding.tvSystemMessageDetails.text = notes
+            systemBinding.tvMessageTime.text = formatTime(message.sentAt)
 
-            binding.btnViewSystemSummary.setOnClickListener {
+            systemBinding.btnViewSystemSummary.setOnClickListener {
                 val role = sessionManager.role().orEmpty().uppercase()
                 val isDoc = role == "DOCTOR"
 
@@ -274,7 +275,7 @@ class ChatMessagesAdapter(
                     appointmentType = "In-Clinic Consultation",
                     notes = "",
                     status = "COMPLETED",
-                    createdAt = null
+                    createdAt = message.sentAt
                 )
                 onSystemSummaryClick(apptDto)
             }

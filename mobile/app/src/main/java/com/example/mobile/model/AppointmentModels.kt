@@ -34,7 +34,7 @@ data class AppointmentDto(
     val notes: String?,
     val status: String,
     val createdAt: String
-)
+) : java.io.Serializable
 
 data class DoctorProfileUpsertRequest(
     val specialization: String,

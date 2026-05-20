@@ -30,6 +30,9 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, com.example.mobile.R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         binding.btnRegister.setOnClickListener {
             submitRegistration()
         }
@@ -42,6 +45,17 @@ class RegisterActivity : AppCompatActivity() {
             selectRole("DOCTOR")
         }
 
+        binding.btnBackToRole.setOnClickListener {
+            binding.llRoleContainer.visibility = View.VISIBLE
+            binding.llFormContainer.visibility = View.GONE
+            selectedRole = ""
+        }
+
+        binding.btnGoogleSignUp.setOnClickListener {
+            val intent = Intent(this, OAuthActivity::class.java)
+            startActivityForResult(intent, 1002)
+        }
+
         binding.tvGoToLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
@@ -50,13 +64,14 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun selectRole(role: String) {
         selectedRole = role
-        binding.llPatientCard.isSelected = (role == "PATIENT")
-        binding.llDoctorCard.isSelected = (role == "DOCTOR")
+        binding.tvFormHeaderTitle.text = if (role == "DOCTOR") "Doctor Portal Setup" else "Patient Portal Setup"
         binding.licenseContainer.visibility = if (role == "DOCTOR") View.VISIBLE else View.GONE
         if (role != "DOCTOR") {
             binding.etLicenseNumber.text?.clear()
             binding.etLicenseNumber.error = null
         }
+        binding.llRoleContainer.visibility = View.GONE
+        binding.llFormContainer.visibility = View.VISIBLE
     }
 
     private fun submitRegistration() {
@@ -104,12 +119,13 @@ class RegisterActivity : AppCompatActivity() {
                         // Auto-verified user (e.g. corporate medigo email)
                         val sessionManager = SessionManager(this@RegisterActivity)
                         sessionManager.saveSession(
-                            token = auth.token,
+                            userId = auth.user.id,
+                            token = auth.token.orEmpty(),
                             email = auth.user.email,
                             fullName = auth.user.fullName,
                             role = auth.user.role
                         )
-                        TokenHolder.setToken(auth.token)
+                        TokenHolder.setToken(auth.token.orEmpty())
 
                         Toast.makeText(this@RegisterActivity, "Registration successful", Toast.LENGTH_LONG).show()
                         startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
@@ -132,6 +148,117 @@ class RegisterActivity : AppCompatActivity() {
                 binding.tvErrorCard.visibility = View.VISIBLE
             }
         })
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1002) {
+            if (resultCode == RESULT_OK && data != null) {
+                val token = data.getStringExtra("token")
+                val pending = data.getStringExtra("pending")
+
+                if (!token.isNullOrEmpty()) {
+                    setLoading(true)
+                    TokenHolder.setToken(token)
+                    ApiClient.authApi.getProfile().enqueue(object : Callback<ApiEnvelope<com.example.mobile.model.UserDto>> {
+                        override fun onResponse(
+                            call: Call<ApiEnvelope<com.example.mobile.model.UserDto>>,
+                            response: Response<ApiEnvelope<com.example.mobile.model.UserDto>>
+                        ) {
+                            setLoading(false)
+                            val body = response.body()
+                            if (response.isSuccessful && body?.success == true && body.data != null) {
+                                val user = body.data
+                                val sessionManager = com.example.mobile.shared.session.SessionManager(this@RegisterActivity)
+                                sessionManager.saveSession(
+                                    userId = user.id,
+                                    token = token,
+                                    email = user.email,
+                                    fullName = user.fullName,
+                                    role = user.role
+                                )
+                                Toast.makeText(this@RegisterActivity, "Login successful", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
+                                finish()
+                            } else {
+                                TokenHolder.clearToken()
+                                showError("Unable to fetch user profile details.")
+                            }
+                        }
+
+                        override fun onFailure(call: Call<ApiEnvelope<com.example.mobile.model.UserDto>>, t: Throwable) {
+                            setLoading(false)
+                            TokenHolder.clearToken()
+                            showError("Cannot connect to server to fetch profile.")
+                        }
+                    })
+                } else if (!pending.isNullOrEmpty()) {
+                    if (selectedRole.isNotEmpty()) {
+                        submitCompleteOAuth2(pending, selectedRole)
+                    } else {
+                        showRoleSelectionDialog(pending)
+                    }
+                }
+            } else if (resultCode == RESULT_CANCELED && data != null) {
+                val error = data.getStringExtra("error")
+                showError(error ?: "Google Sign-Up cancelled.")
+            }
+        }
+    }
+
+    private fun showRoleSelectionDialog(pendingToken: String) {
+        val options = arrayOf("Patient Portal", "Doctor Portal")
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Select Account Type")
+            .setItems(options) { _, which ->
+                val role = if (which == 0) "PATIENT" else "DOCTOR"
+                submitCompleteOAuth2(pendingToken, role)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun submitCompleteOAuth2(pendingToken: String, role: String) {
+        setLoading(true)
+        ApiClient.authApi.completeOAuth2(com.example.mobile.model.CompleteOAuth2Request(pendingToken, role))
+            .enqueue(object : Callback<ApiEnvelope<AuthResponse>> {
+                override fun onResponse(
+                    call: Call<ApiEnvelope<AuthResponse>>,
+                    response: Response<ApiEnvelope<AuthResponse>>
+                ) {
+                    setLoading(false)
+                    val body = response.body()
+                    if (response.isSuccessful && body?.success == true && body.data != null) {
+                        val auth = body.data
+                        val sessionManager = com.example.mobile.shared.session.SessionManager(this@RegisterActivity)
+                        sessionManager.saveSession(
+                            userId = auth.user.id,
+                            token = auth.token.orEmpty(),
+                            email = auth.user.email,
+                            fullName = auth.user.fullName,
+                            role = auth.user.role
+                        )
+                        TokenHolder.setToken(auth.token.orEmpty())
+                        Toast.makeText(this@RegisterActivity, "Registration completed successfully!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
+                        finish()
+                    } else {
+                        val message = ApiErrorParser.parseMessage(response.errorBody(), "Registration completion failed.")
+                        showError(message)
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiEnvelope<AuthResponse>>, t: Throwable) {
+                    setLoading(false)
+                    showError("Cannot connect to server to complete Google registration.")
+                }
+            })
+    }
+
+    private fun showError(message: String) {
+        binding.tvErrorCard.text = message
+        binding.tvErrorCard.visibility = View.VISIBLE
     }
 
     private fun isValidForm(
@@ -163,6 +290,10 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun setLoading(isLoading: Boolean) {
         binding.btnRegister.isEnabled = !isLoading
+        binding.btnGoogleSignUp.isEnabled = !isLoading
         binding.btnRegister.text = if (isLoading) "Registering..." else "Create Account"
+        if (isLoading) {
+            binding.tvErrorCard.visibility = View.GONE
+        }
     }
 }

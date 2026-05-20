@@ -57,6 +57,8 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textCursorDrawable">@null</item>
     </style>
+    
+    <style name="InputField" parent="EditTextInput" />
 
     <!-- ── Buttons ── -->
     <style name="ButtonPrimary" parent="Widget.AppCompat.Button">
@@ -67,6 +69,17 @@
         <item name="android:textStyle">bold</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:stateListAnimator">@null</item> <!-- Clean flat appearance -->
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="ButtonSecondary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:minHeight">54dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
     </style>
 

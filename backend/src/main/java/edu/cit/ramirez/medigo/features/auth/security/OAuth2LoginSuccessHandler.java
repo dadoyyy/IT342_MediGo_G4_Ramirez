@@ -29,6 +29,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${app.oauth.mobile-callback-uri:medigo-app://auth/callback}")
+    private String mobileCallbackUri;
+
     public OAuth2LoginSuccessHandler(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
@@ -39,7 +42,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                         Authentication authentication) throws IOException, ServletException {
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof OAuth2User oAuth2User)) {
-            response.sendRedirect(frontendUrl + "/auth/callback?error=oauth2_principal_invalid");
+            String errorRedirect = buildCallbackUrl(request, "error", "oauth2_principal_invalid");
+            response.sendRedirect(errorRedirect);
             return;
         }
 
@@ -52,17 +56,41 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             if (existing.isPresent()) {
                 // Existing user — issue real JWT and go straight to dashboard
                 String encodedToken = URLEncoder.encode(existing.get().getToken(), StandardCharsets.UTF_8);
-                response.sendRedirect(frontendUrl + "/auth/callback?token=" + encodedToken);
+                String callbackUrl = buildCallbackUrl(request, "token", encodedToken);
+                response.sendRedirect(callbackUrl);
             } else {
                 // New user — issue pending token so frontend can ask for role
                 String pendingToken = jwtUtil.generatePendingToken(
                         email, name != null ? name : email);
                 String encodedPending = URLEncoder.encode(pendingToken, StandardCharsets.UTF_8);
-                response.sendRedirect(frontendUrl + "/auth/callback?pending=" + encodedPending);
+                String callbackUrl = buildCallbackUrl(request, "pending", encodedPending);
+                response.sendRedirect(callbackUrl);
             }
         } catch (IllegalArgumentException ex) {
             String encodedMessage = URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-            response.sendRedirect(frontendUrl + "/auth/callback?error=" + encodedMessage);
+            String errorRedirect = buildCallbackUrl(request, "error", encodedMessage);
+            response.sendRedirect(errorRedirect);
         }
+    }
+
+    private String buildCallbackUrl(HttpServletRequest request, String paramName, String paramValue) {
+        String callbackBase = resolveCallbackBase(request);
+        String separator = callbackBase.contains("?") ? "&" : "?";
+        return callbackBase + separator + paramName + "=" + paramValue;
+    }
+
+    private String resolveCallbackBase(HttpServletRequest request) {
+        String requestedRedirectUri = request.getParameter("redirect_uri");
+        String webCallbackUri = frontendUrl + "/auth/callback";
+
+        if (requestedRedirectUri == null || requestedRedirectUri.isBlank()) {
+            return webCallbackUri;
+        }
+
+        if (requestedRedirectUri.equals(webCallbackUri) || requestedRedirectUri.equals(mobileCallbackUri)) {
+            return requestedRedirectUri;
+        }
+
+        return webCallbackUri;
     }
 }

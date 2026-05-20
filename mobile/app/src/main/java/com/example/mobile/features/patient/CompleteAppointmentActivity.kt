@@ -14,6 +14,7 @@ import com.example.mobile.model.AppointmentStatusUpdateRequest
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.api.ApiErrorParser
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -136,7 +137,7 @@ class CompleteAppointmentActivity : AppCompatActivity() {
                 }
             }
             val requestFile = RequestBody.create(
-                MediaType.parse("application/pdf"),
+                "application/pdf".toMediaTypeOrNull(),
                 tempFile
             )
             MultipartBody.Part.createFormData("file", tempFile.name, requestFile)

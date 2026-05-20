@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#EDF2F4">
+
+    <!-- Premium Gradient Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_gradient_navy_to_midnight"
+        android:padding="32dp">
+
+        <!-- Animated Gradient Background -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:background="@drawable/bg_premium_header_gradient"
+            android:alpha="0.3"
+            android:layout_marginBottom="-140dp" />
+
+        <!-- Logo + Branding -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_logo_gradient"
+                android:foreground="@drawable/ic_stethoscope_white"
+                android:foregroundGravity="center" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="MediGo"
+                android:textSize="22sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-black"
+                android:textStyle="bold"
+                android:letterSpacing="-0.02" />
+        </LinearLayout>
+
+        <!-- Header Text -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Healthcare, evolved"
+            android:textSize="28sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif-black"
+            android:textStyle="bold"
+            android:letterSpacing="-0.02"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Access premium healthcare seamlessly"
+            android:textSize="14sp"
+            android:textColor="#8D99AE"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="16dp" />
+    </LinearLayout>
+
+    <!-- Main Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Premium Card Container -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="28dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome back"
+                        android:textSize="24sp"
+                        android:textColor="#2B2D42"
+                        android:fontFamily="sans-serif-black"
+                        android:textStyle="bold"
+                        android:letterSpacing="-0.02"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enter your credentials to continue"
+                        android:textSize="13sp"
+                        android:textColor="#6B7280"
+                        android:fontFamily="sans-serif"
+                        android:layout_marginBottom="24dp" />
+
+                    <!-- Google Sign In Button -->
+                    <LinearLayout
+                        android:id="@+id/btnGoogleSignIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:background="@drawable/bg_button_secondary"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_marginBottom="20dp">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_google"
+                            android:scaleType="centerInside" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Continue with Google"
+                            android:textSize="14sp"
+                            android:textColor="#2B2D42"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="#E5E7EB" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:text="OR"
+                            android:textSize="11sp"
+                            android:textColor="#8D99AE"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.05" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="#E5E7EB" />
+                    </LinearLayout>
+
+                    <!-- Email Field -->
+                    <EditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:hint="Email address"
+                        android:textSize="14sp"
+                        android:textColor="#2B2D42"
+                        android:textColorHint="#8D99AE"
+                        android:fontFamily="sans-serif"
+                        android:inputType="textEmailAddress"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:background="@drawable/bg_input_field"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Password Field -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginBottom="16dp">
+
+                        <EditText
+                            android:id="@+id/etPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:hint="Password"
+                            android:textSize="14sp"
+                            android:textColor="#2B2D42"
+                            android:textColorHint="#8D99AE"
+                            android:fontFamily="sans-serif"
+                            android:inputType="textPassword"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="48dp"
+                            android:paddingTop="0dp"
+                            android:paddingBottom="0dp"
+                            android:background="@drawable/bg_input_field" />
+
+                        <ImageView
+                            android:id="@+id/ivTogglePassword"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginEnd="16dp"
+                            android:src="@drawable/ic_eye_off"
+                            android:scaleType="centerInside"
+                            android:clickable="true"
+                            android:focusable="true" />
+                    </FrameLayout>
+
+                    <!-- Error Message -->
+                    <TextView
+                        android:id="@+id/tvErrorCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:textSize="12sp"
+                        android:textColor="#D90429"
+                        android:fontFamily="sans-serif-medium"
+                        android:visibility="gone"
+                        android:background="@drawable/bg_status_box_error"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Login Button -->
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="Sign In"
+                        android:textSize="16sp"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:background="@drawable/bg_button_primary"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Loading Progress -->
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:layout_marginBottom="16dp"
+                        style="@android:style/Widget.ProgressBar.Horizontal" />
+
+                    <!-- Sign Up Link -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Don't have an account? "
+                            android:textSize="13sp"
+                            android:textColor="#6B7280"
+                            android:fontFamily="sans-serif" />
+
+                        <TextView
+                            android:id="@+id/tvGoToRegister"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sign Up"
+                            android:textSize="13sp"
+                            android:textColor="#EF233C"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold"
+                            android:clickable="true"
+                            android:focusable="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

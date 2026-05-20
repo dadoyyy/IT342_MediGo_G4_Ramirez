@@ -11,6 +11,7 @@ import com.example.mobile.R
 import com.example.mobile.databinding.ActivityDashboardBinding
 import com.example.mobile.features.auth.LoginActivity
 import com.example.mobile.features.doctor.DoctorProfileActivity
+import com.example.mobile.features.doctor.DoctorScheduleActivity
 import com.example.mobile.features.patient.AppointmentsListActivity
 import com.example.mobile.features.patient.ChatListActivity
 import com.example.mobile.features.patient.SearchDoctorsActivity
@@ -174,6 +175,9 @@ class DashboardActivity : AppCompatActivity() {
         // Doctor Actions
         binding.cardDoctorProfile.setOnClickListener {
             startActivity(Intent(this, DoctorProfileActivity::class.java))
+        }
+        binding.cardDoctorSchedule.setOnClickListener {
+            startActivity(Intent(this, DoctorScheduleActivity::class.java))
         }
         binding.cardConsultationQueue.setOnClickListener {
             startActivity(Intent(this, AppointmentsListActivity::class.java))
