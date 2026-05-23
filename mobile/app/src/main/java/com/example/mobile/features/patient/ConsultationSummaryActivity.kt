@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.BuildConfig
+import com.example.mobile.R
 import com.example.mobile.databinding.ActivityConsultationSummaryBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.AppointmentDto
@@ -27,6 +28,9 @@ class ConsultationSummaryActivity : AppCompatActivity() {
         binding = ActivityConsultationSummaryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         appointment = intent.getSerializableExtra("appointment_extra") as? AppointmentDto
         if (appointment == null) {
             Toast.makeText(this, "Failed to load appointment details", Toast.LENGTH_SHORT).show()
@@ -41,18 +45,10 @@ class ConsultationSummaryActivity : AppCompatActivity() {
 
     private fun setupMetadata() {
         val app = appointment ?: return
-        val session = SessionManager(this)
-        val role = session.role().orEmpty().uppercase()
-
-        if (role == "DOCTOR") {
-            binding.tvHeaderName.text = app.patientName
-            binding.tvConsultationDetails.text = "Medium: ${app.appointmentType} • Patient Report"
-            otherUserId = app.patientId
-        } else {
-            binding.tvHeaderName.text = "Dr. ${app.doctorName}"
-            binding.tvConsultationDetails.text = "Medium: ${app.appointmentType} • Medical Report Summary"
-            otherUserId = app.doctorId
-        }
+        // Patient view: always show doctor name
+        binding.tvHeaderName.text = "Dr. ${app.doctorName}"
+        binding.tvConsultationDetails.text = "Medium: ${app.appointmentType} • Medical Report Summary"
+        otherUserId = app.doctorId
     }
 
     private fun setupListeners() {
@@ -63,7 +59,7 @@ class ConsultationSummaryActivity : AppCompatActivity() {
 
     private fun fetchConsultationSummary() {
         binding.progressBar.visibility = View.VISIBLE
-        binding.tvDiagnosisNotes.text = "Retrieving completed report summary from server..."
+        binding.tvDiagnosisNotes.text = "Retrieving report summary..."
 
         ApiClient.chatApi.getConversation(otherUserId).enqueue(object : Callback<ApiEnvelope<List<ChatMessageDto>>> {
             override fun onResponse(
@@ -90,7 +86,6 @@ class ConsultationSummaryActivity : AppCompatActivity() {
             override fun onFailure(call: Call<ApiEnvelope<List<ChatMessageDto>>>, t: Throwable) {
                 binding.progressBar.visibility = View.GONE
                 showPlaceholderState()
-                Toast.makeText(this@ConsultationSummaryActivity, "Offline: Loaded local offline credentials.", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -123,7 +118,7 @@ class ConsultationSummaryActivity : AppCompatActivity() {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fullUrl))
                         startActivity(intent)
                     } catch (e: Exception) {
-                        Toast.makeText(this@ConsultationSummaryActivity, "Unable to view PDF. Verify a PDF reader is installed.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Unable to view PDF.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -131,7 +126,7 @@ class ConsultationSummaryActivity : AppCompatActivity() {
     }
 
     private fun showPlaceholderState() {
-        binding.tvDiagnosisNotes.text = "Your prescription and diagnosis details are successfully registered! The document files are currently being finalized on the server. Check back shortly."
+        binding.tvDiagnosisNotes.text = "Your prescription and diagnosis details are being finalized. Check back shortly."
         binding.tvFollowUp.text = "None configured."
         binding.layoutAttachmentCard.visibility = View.GONE
     }

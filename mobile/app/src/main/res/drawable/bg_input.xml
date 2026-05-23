@@ -1,24 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Focused State -->
-    <item android:state_focused="true">
-        <shape android:shape="rectangle">
-            <solid android:color="#0D2B2D42" /> <!-- Very light navy tint -->
-            <stroke
-                android:width="2dp"
-                android:color="#EF233C" /> <!-- Crimson focused border -->
-            <corners android:radius="16dp" />
-        </shape>
-    </item>
-
-    <!-- Normal/Default State -->
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#052B2D42" /> <!-- Ultra soft background fill -->
-            <stroke
-                android:width="1dp"
-                android:color="#D1D5DB" /> <!-- Light grey border -->
-            <corners android:radius="16dp" />
-        </shape>
-    </item>
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFF" />
+    <stroke
+        android:width="1.5dp"
+        android:color="#1A2B2D42" />
+    <corners android:radius="14dp" />
+</shape>

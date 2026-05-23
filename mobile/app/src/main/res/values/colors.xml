@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ── Brand Colors (Matching Web) ── -->
-    <color name="primary">#EF233C</color>          <!-- Crimson Red -->
-    <color name="primary_dark">#D90429</color>     <!-- Darker Crimson Red -->
-    <color name="primary_light">#FFF0F2</color>    <!-- Soft brand red background -->
-    <color name="primary_accent">#2B2D42</color>   <!-- Slate Navy / Gray -->
+    <!-- ── MediGo Brand Colors (Web-Matched Palette) ── -->
+    <color name="navy">#2B2D42</color>
+    <color name="navy_dark">#1A1B28</color>
+    <color name="crimson">#EF233C</color>
+    <color name="ruby">#D90429</color>
+    <color name="slate">#8D99AE</color>
+    <color name="mist">#EDF2F4</color>
 
-    <!-- ── Premium UI Aliases ── -->
-    <color name="primary_gradient_start">#0066CC</color>
-    <color name="primary_gradient_end">#0052A3</color>
-    <color name="accent_blue">#0066CC</color>
-    <color name="accent_teal">#00897B</color>
-    <color name="accent_green">#4CAF50</color>
-    <color name="bg_primary">#FFFFFF</color>
-    <color name="bg_secondary">#F5F7FA</color>
-    <color name="bg_tertiary">#EEF2F7</color>
+    <!-- ── Primary Aliases ── -->
+    <color name="primary">#EF233C</color>
+    <color name="primary_dark">#D90429</color>
+    <color name="primary_light">#FFF0F2</color>
+    <color name="primary_accent">#2B2D42</color>
+
+    <!-- ── Semantic Backgrounds ── -->
+    <color name="background">#EDF2F4</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="panel">#2B2D42</color>
+
+    <!-- ── Text Colors ── -->
+    <color name="text_primary">#2B2D42</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_tertiary">#8D99AE</color>
+    <color name="text_on_dark">#EDF2F4</color>
     <color name="text_light">#FFFFFF</color>
-    <color name="border_light">#E0E6ED</color>
-    <color name="info">#0066CC</color>
-    <color name="shadow_dark">#000000</color>
-    <color name="shadow_light">#F3F4F6</color>
 
-    <!-- ── Grayscale (Aligned with Web System) ── -->
-    <color name="gray_50">#EDF2F4</color>           <!-- Premium Mist White background -->
-    <color name="gray_100">#F1F3F5</color>          <!-- Clean light background -->
-    <color name="gray_200">#E9ECEF</color>          <!-- Soft borders -->
-    <color name="gray_300">#DEE2E6</color>          <!-- Dividers -->
-    <color name="gray_400">#8D99AE</color>          <!-- Slate gray secondary accent -->
-    <color name="gray_500">#6B7280</color>          <!-- Muted text -->
-    <color name="gray_600">#4B5563</color>          <!-- Labels -->
-    <color name="gray_700">#374151</color>          <!-- Body text -->
-    <color name="gray_900">#2B2D42</color>          <!-- Headers / Primary Navy text -->
+    <!-- ── Glass Colors ── -->
+    <color name="glass_white">#B3FFFFFF</color>
+    <color name="glass_border">#33FFFFFF</color>
+    <color name="glass_dark">#D92B2D42</color>
+
+    <!-- ── Grayscale ── -->
+    <color name="gray_50">#EDF2F4</color>
+    <color name="gray_100">#F1F3F5</color>
+    <color name="gray_200">#E9ECEF</color>
+    <color name="gray_300">#DEE2E6</color>
+    <color name="gray_400">#8D99AE</color>
+    <color name="gray_500">#6B7280</color>
+    <color name="gray_600">#4B5563</color>
+    <color name="gray_700">#374151</color>
+    <color name="gray_900">#2B2D42</color>
 
     <!-- ── Status Colors ── -->
-    <color name="success">#10B981</color>           <!-- Green success -->
-    <color name="success_bg">#D1FAE5</color>        <!-- Light green bg -->
-    <color name="success_light">#ECFDF5</color>     <!-- Very light green -->
-    
-    <color name="error">#EF4444</color>             <!-- Red error -->
-    <color name="error_bg">#FEE2E2</color>          <!-- Light red bg -->
-    <color name="error_light">#FEF2F2</color>       <!-- Very light red -->
-    
-    <color name="warning">#F59E0B</color>           <!-- Amber warning -->
-    <color name="warning_bg">#FEF3C7</color>        <!-- Light amber bg -->
+    <color name="success">#10B981</color>
+    <color name="success_bg">#D1FAE5</color>
+    <color name="success_light">#ECFDF5</color>
+    <color name="error">#EF4444</color>
+    <color name="error_bg">#FEE2E2</color>
+    <color name="error_light">#FEF2F2</color>
+    <color name="warning">#F59E0B</color>
+    <color name="warning_bg">#FEF3C7</color>
+    <color name="info">#3B82F6</color>
+    <color name="info_bg">#DBEAFE</color>
 
-    <!-- ── Semantic Colors (Aligned with Web System) ── -->
-    <color name="background">#EDF2F4</color>        <!-- App background (Mist) -->
-    <color name="surface">#FFFFFF</color>           <!-- Card background (White) -->
-    <color name="text_primary">#2B2D42</color>      <!-- Headings / Primary text (Navy) -->
-    <color name="text_secondary">#6B7280</color>    <!-- Muted body text (Gray) -->
-    <color name="text_tertiary">#8D99AE</color>     <!-- Hints / Subtext (Slate) -->
-    <color name="border">#E9ECEF</color>            <!-- Standard borders -->
-    <color name="shadow">#0D2B2D42</color>          <!-- Navy soft shadow -->
+    <!-- ── Gradient Crimson ── -->
+    <color name="crimson_glow_15">#26EF233C</color>
+    <color name="crimson_glow_25">#40EF233C</color>
+    <color name="navy_10">#1A2B2D42</color>
+    <color name="navy_05">#0D2B2D42</color>
 
-    <!-- ── Core Primitives ── -->
+    <!-- ── Borders & Shadows ── -->
+    <color name="border">#E9ECEF</color>
+    <color name="border_light">#E0E6ED</color>
+    <color name="shadow">#0D2B2D42</color>
+    <color name="shadow_dark">#000000</color>
+
+    <!-- ── Primitives ── -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
 </resources>

@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mobile.R
 import com.example.mobile.databinding.ActivityChatBinding
 import com.example.mobile.databinding.ItemChatMessageReceivedBinding
 import com.example.mobile.databinding.ItemChatMessageSentBinding
@@ -38,7 +39,7 @@ class ChatActivity : AppCompatActivity() {
     private val pollRunnable = object : Runnable {
         override fun run() {
             fetchMessages(silent = true)
-            handler.postDelayed(this, 3000) // Poll every 3 seconds
+            handler.postDelayed(this, 3000)
         }
     }
 
@@ -47,13 +48,16 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         sessionManager = SessionManager(this)
         partnerId = intent.getLongExtra("partner_id", 0)
         partnerName = intent.getStringExtra("partner_name").orEmpty()
         partnerRole = intent.getStringExtra("partner_role").orEmpty()
 
         if (partnerId == 0L) {
-            Toast.makeText(this, "Unable to load conversation thread.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Unable to load conversation.", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -88,7 +92,6 @@ class ChatActivity : AppCompatActivity() {
             currentUserId = currentUserId,
             partnerId = partnerId,
             partnerName = partnerName,
-            partnerRole = partnerRole,
             sessionManager = sessionManager,
             onSystemSummaryClick = { apptDto ->
                 val intent = Intent(this, ConsultationSummaryActivity::class.java).apply {
@@ -100,7 +103,7 @@ class ChatActivity : AppCompatActivity() {
 
         binding.rvChatMessages.apply {
             layoutManager = LinearLayoutManager(this@ChatActivity).apply {
-                stackFromEnd = true // Start showing items from the bottom
+                stackFromEnd = true
             }
             adapter = chatAdapter
         }
@@ -160,13 +163,13 @@ class ChatActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body()?.success == true) {
                     fetchMessages(silent = true)
                 } else {
-                    Toast.makeText(this@ChatActivity, "Message transmission failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ChatActivity, "Message failed to send.", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<ApiEnvelope<ChatMessageDto>>, t: Throwable) {
                 binding.btnSendMessage.isEnabled = true
-                Toast.makeText(this@ChatActivity, "Network offline: Message transmission suspended.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChatActivity, "Network offline.", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -176,7 +179,6 @@ class ChatMessagesAdapter(
     private val currentUserId: Long,
     private val partnerId: Long,
     private val partnerName: String,
-    private val partnerRole: String,
     private val sessionManager: SessionManager,
     private val onSystemSummaryClick: (AppointmentDto) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -251,28 +253,25 @@ class ChatMessagesAdapter(
     inner class SystemViewHolder(private val systemBinding: ItemChatMessageSystemBinding) : RecyclerView.ViewHolder(systemBinding.root) {
         fun bind(message: ChatMessageDto) {
             val parsed = parseSummaryContent(message.content)
-            
-            val doctor = parsed["Doctor"] ?: "Practitioner Specialist"
+
+            val doctor = parsed["Doctor"] ?: "Practitioner"
             systemBinding.tvSystemMessageHeader.text = "Doctor: $doctor"
-            
-            val notes = parsed["Medical Notes"] ?: "Prescription finalized."
+
+            val notes = parsed["Medical Notes"] ?: "Consultation completed."
             systemBinding.tvSystemMessageDetails.text = notes
             systemBinding.tvMessageTime.text = formatTime(message.sentAt)
 
             systemBinding.btnViewSystemSummary.setOnClickListener {
-                val role = sessionManager.role().orEmpty().uppercase()
-                val isDoc = role == "DOCTOR"
-
                 val apptDto = AppointmentDto(
                     id = message.appointmentId ?: 0L,
-                    patientId = if (isDoc) partnerId else currentUserId,
-                    patientName = if (isDoc) partnerName else sessionManager.fullName().orEmpty(),
-                    patientAge = 24,
-                    patientGender = "MALE",
-                    doctorId = if (isDoc) currentUserId else partnerId,
-                    doctorName = if (isDoc) sessionManager.fullName().orEmpty() else partnerName,
+                    patientId = currentUserId,
+                    patientName = sessionManager.fullName().orEmpty(),
+                    patientAge = null,
+                    patientGender = null,
+                    doctorId = partnerId,
+                    doctorName = partnerName,
                     appointmentAt = message.sentAt,
-                    appointmentType = "In-Clinic Consultation",
+                    appointmentType = "Consultation",
                     notes = "",
                     status = "COMPLETED",
                     createdAt = message.sentAt

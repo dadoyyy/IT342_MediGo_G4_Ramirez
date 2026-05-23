@@ -1,9 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.Mobile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/crimson</item>
+        <item name="colorPrimaryDark">@color/ruby</item>
+        <item name="colorAccent">@color/crimson</item>
+        <item name="android:statusBarColor">@color/navy</item>
+        <item name="android:navigationBarColor">@color/navy</item>
+        <item name="android:windowBackground">@color/mist</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="Theme.Mobile" parent="Base.Theme.Mobile" />
+
+    <!-- Splash / Landing theme with navy status bar -->
+    <style name="Theme.Mobile.Splash" parent="Base.Theme.Mobile">
+        <item name="android:statusBarColor">@color/navy_dark</item>
+        <item name="android:windowBackground">@color/mist</item>
+    </style>
 </resources>

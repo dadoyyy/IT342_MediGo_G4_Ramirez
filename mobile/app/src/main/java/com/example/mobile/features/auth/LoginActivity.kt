@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mobile.R
 import com.example.mobile.features.dashboard.DashboardActivity
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.api.ApiErrorParser
@@ -13,6 +14,7 @@ import com.example.mobile.databinding.ActivityLoginBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.AuthResponse
 import com.example.mobile.model.LoginRequest
+import com.example.mobile.model.UserDto
 import com.example.mobile.shared.session.SessionManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, com.example.mobile.R.anim.fade_in_up)
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
 
         sessionManager = SessionManager(this)
@@ -59,15 +61,22 @@ class LoginActivity : AppCompatActivity() {
                 if (!token.isNullOrEmpty()) {
                     setLoading(true)
                     TokenHolder.setToken(token)
-                    ApiClient.authApi.getProfile().enqueue(object : Callback<ApiEnvelope<com.example.mobile.model.UserDto>> {
+                    ApiClient.authApi.getProfile().enqueue(object : Callback<ApiEnvelope<UserDto>> {
                         override fun onResponse(
-                            call: Call<ApiEnvelope<com.example.mobile.model.UserDto>>,
-                            response: Response<ApiEnvelope<com.example.mobile.model.UserDto>>
+                            call: Call<ApiEnvelope<UserDto>>,
+                            response: Response<ApiEnvelope<UserDto>>
                         ) {
                             setLoading(false)
                             val body = response.body()
                             if (response.isSuccessful && body?.success == true && body.data != null) {
                                 val user = body.data
+                                // Only allow PATIENT role on mobile app
+                                if (user.role.uppercase() != "PATIENT") {
+                                    TokenHolder.clearToken()
+                                    binding.tvErrorCard.text = "This app is for patients only. Doctors and admins should use the web portal."
+                                    binding.tvErrorCard.visibility = android.view.View.VISIBLE
+                                    return
+                                }
                                 sessionManager.saveSession(
                                     userId = user.id,
                                     token = token,
@@ -75,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
                                     fullName = user.fullName,
                                     role = user.role
                                 )
-                                Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@LoginActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
                                 startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
                                 finish()
                             } else {
@@ -85,15 +94,14 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
 
-                        override fun onFailure(call: Call<ApiEnvelope<com.example.mobile.model.UserDto>>, t: Throwable) {
+                        override fun onFailure(call: Call<ApiEnvelope<UserDto>>, t: Throwable) {
                             setLoading(false)
                             TokenHolder.clearToken()
-                            binding.tvErrorCard.text = "Cannot connect to server to fetch Google profile."
+                            binding.tvErrorCard.text = "Cannot connect to server."
                             binding.tvErrorCard.visibility = android.view.View.VISIBLE
                         }
                     })
                 } else if (!pending.isNullOrEmpty()) {
-                    // Google email is not registered yet
                     binding.tvErrorCard.text = "This Google account is not registered. Please sign up first."
                     binding.tvErrorCard.visibility = android.view.View.VISIBLE
                 }
@@ -125,6 +133,14 @@ class LoginActivity : AppCompatActivity() {
                     val body = response.body()
                     if (response.isSuccessful && body?.success == true && body.data != null) {
                         val auth = body.data
+
+                        // Only allow PATIENT role on mobile app
+                        if (auth.user.role.uppercase() != "PATIENT") {
+                            binding.tvErrorCard.text = "This app is for patients only. Doctors and admins should use the web portal."
+                            binding.tvErrorCard.visibility = android.view.View.VISIBLE
+                            return
+                        }
+
                         sessionManager.saveSession(
                             userId = auth.user.id,
                             token = auth.token.orEmpty(),
@@ -134,7 +150,7 @@ class LoginActivity : AppCompatActivity() {
                         )
                         TokenHolder.setToken(auth.token.orEmpty())
 
-                        Toast.makeText(this@LoginActivity, "Login successful", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
                         finish()
                     } else {
@@ -150,7 +166,7 @@ class LoginActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<ApiEnvelope<AuthResponse>>, t: Throwable) {
                     setLoading(false)
-                    binding.tvErrorCard.text = "Cannot connect to backend. Check your network or server."
+                    binding.tvErrorCard.text = "Cannot connect to server. Check your network."
                     binding.tvErrorCard.visibility = android.view.View.VISIBLE
                 }
             })
@@ -178,7 +194,7 @@ class LoginActivity : AppCompatActivity() {
     private fun setLoading(isLoading: Boolean) {
         binding.btnLogin.isEnabled = !isLoading
         binding.btnGoogleSignIn.isEnabled = !isLoading
-        binding.btnLogin.text = if (isLoading) "Logging in..." else "Login"
+        binding.btnLogin.text = if (isLoading) "Signing in..." else "Access Portal"
         if (isLoading) {
             binding.tvErrorCard.visibility = android.view.View.GONE
         }

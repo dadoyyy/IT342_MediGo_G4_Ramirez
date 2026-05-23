@@ -16,15 +16,10 @@
         android:theme="@style/Theme.Mobile"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <!-- Patient-Only Activities -->
         <activity
             android:name=".features.dashboard.DashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".features.doctor.DoctorProfileActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".features.doctor.DoctorScheduleActivity"
             android:exported="false" />
         <activity
             android:name=".features.patient.SearchDoctorsActivity"
@@ -41,10 +36,6 @@
             android:name=".features.patient.AppointmentsListActivity"
             android:exported="false" />
         <activity
-            android:name=".features.patient.CompleteAppointmentActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".features.patient.ConsultationSummaryActivity"
             android:exported="false" />
         <activity
@@ -54,6 +45,8 @@
             android:name=".features.patient.ChatActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Auth Activities -->
         <activity
             android:name=".features.auth.RegisterActivity"
             android:exported="false" />
@@ -66,12 +59,13 @@
         <activity
             android:name=".features.auth.EmailVerificationActivity"
             android:exported="false" />
+
+        <!-- Launcher -->
         <activity
             android:name=".features.dashboard.MainActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
+               <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

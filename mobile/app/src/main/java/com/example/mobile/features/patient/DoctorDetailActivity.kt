@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mobile.R
 import com.example.mobile.databinding.ActivityDoctorDetailBinding
 import com.example.mobile.model.DoctorProfileDto
 
@@ -15,9 +16,12 @@ class DoctorDetailActivity : AppCompatActivity() {
         binding = ActivityDoctorDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         val profile = intent.getSerializableExtra("doctor_profile") as? DoctorProfileDto
         if (profile == null) {
-            Toast.makeText(this, "Failed to load doctor profile details", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to load doctor profile", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -30,7 +34,7 @@ class DoctorDetailActivity : AppCompatActivity() {
         binding.tvDoctorName.text = profile.doctorName
         binding.tvSpecialization.text = profile.specialization?.uppercase() ?: "GENERAL MEDICINE"
         binding.tvExperience.text = "Practice Experience: ${profile.yearsOfExperience ?: 0} Years"
-        
+
         binding.tvClinicName.text = if (!profile.clinicName.isNullOrBlank()) {
             profile.clinicName
         } else {

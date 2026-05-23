@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#EDF2F4">
+    android:background="@color/mist">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,9 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="24dp"
-            app:cardElevation="4dp"
-            app:cardMaxElevation="6dp"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/surface"
             android:layout_margin="4dp">
 
             <LinearLayout
@@ -28,477 +27,319 @@
                 android:orientation="vertical"
                 android:padding="32dp">
 
-                <!-- ==================== STEP 1: ROLE SELECTION CONTAINER ==================== -->
+                <!-- Logo + Branding -->
                 <LinearLayout
-                    android:id="@+id/llRoleContainer"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="visible">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="28dp">
 
-                    <!-- Consistent Branding Placement (Logo + Text) -->
-                    <LinearLayout
+                    <View
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_logo"
+                        android:foreground="@drawable/ic_stethoscope_white"
+                        android:foregroundGravity="center" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="28dp">
-
-                        <View
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_logo"
-                            android:foreground="@drawable/ic_stethoscope"
-                            android:foregroundGravity="center" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:text="MediGo"
-                            android:textSize="24sp"
-                            android:textColor="#2B2D42"
-                            android:fontFamily="sans-serif-black"
-                            android:textStyle="bold"
-                            android:letterSpacing="-0.02" />
-                    </LinearLayout>
-
-                    <!-- Headline Header -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Join MediGo"
-                        android:textSize="28sp"
-                        android:textColor="#2B2D42"
+                        android:layout_marginStart="12dp"
+                        android:text="MediGo"
+                        android:textSize="26sp"
+                        android:textColor="@color/navy"
                         android:fontFamily="sans-serif-black"
                         android:textStyle="bold"
-                        android:letterSpacing="-0.02"
-                        android:layout_marginBottom="6dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Select your portal to proceed with registration"
-                        android:textSize="14sp"
-                        android:textColor="#6B7280"
-                        android:fontFamily="sans-serif"
-                        android:layout_marginBottom="28dp" />
-
-                    <!-- Patient Select Card -->
-                    <LinearLayout
-                        android:id="@+id/llPatientCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_selectable_card"
-                        android:orientation="horizontal"
-                        android:padding="20dp"
-                        android:gravity="center_vertical"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="16dp">
-
-                        <LinearLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:background="#14EF233C"
-                            android:gravity="center"
-                            android:orientation="vertical">
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_patient" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="16dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Patient Portal"
-                                android:textSize="16sp"
-                                android:textColor="#2B2D42"
-                                android:fontFamily="sans-serif-medium"
-                                android:textStyle="bold"
-                                android:layout_marginBottom="2dp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Book appointments, track medical history &amp; consult"
-                                android:textSize="12sp"
-                                android:textColor="#8D99AE"
-                                android:fontFamily="sans-serif" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- Doctor Select Card -->
-                    <LinearLayout
-                        android:id="@+id/llDoctorCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_selectable_card"
-                        android:orientation="horizontal"
-                        android:padding="20dp"
-                        android:gravity="center_vertical"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="28dp">
-
-                        <LinearLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:background="#142B2D42"
-                            android:gravity="center"
-                            android:orientation="vertical">
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:src="@drawable/ic_stethoscope"
-                                app:tint="#2B2D42" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="16dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Doctor Portal"
-                                android:textSize="16sp"
-                                android:textColor="#2B2D42"
-                                android:fontFamily="sans-serif-medium"
-                                android:textStyle="bold"
-                                android:layout_marginBottom="2dp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Manage practice, schedules &amp; medical records securely"
-                                android:textSize="12sp"
-                                android:textColor="#8D99AE"
-                                android:fontFamily="sans-serif" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- Google SSO Button -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="20dp">
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#142B2D42" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:text="OR"
-                            android:textSize="11sp"
-                            android:textColor="#8D99AE"
-                            android:fontFamily="sans-serif-medium" />
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#142B2D42" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/btnGoogleSignUp"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:background="@drawable/bg_button_secondary"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:layout_marginBottom="20dp">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_google" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:text="Sign up with Google"
-                            android:textSize="15sp"
-                            android:textColor="#2B2D42"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <!-- Go to Login -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Already registered? "
-                            android:textSize="14sp"
-                            android:textColor="#6B7280"
-                            android:fontFamily="sans-serif" />
-                        <TextView
-                            android:id="@+id/tvGoToLogin"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Access Portal"
-                            android:textSize="14sp"
-                            android:textColor="#EF233C"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:letterSpacing="-0.02" />
                 </LinearLayout>
 
-                <!-- ==================== STEP 2: INPUT FORM CONTAINER ==================== -->
-                <LinearLayout
-                    android:id="@+id/llFormContainer"
+                <!-- Header -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
+                    android:text="Create your account"
+                    android:textSize="28sp"
+                    android:textColor="@color/navy"
+                    android:fontFamily="sans-serif-black"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02"
+                    android:layout_marginBottom="6dp" />
 
-                    <!-- Custom Glass Back Navigation Header -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="28dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Join MediGo as a patient to book consultations"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginBottom="28dp" />
 
-                        <ImageView
-                            android:id="@+id/btnBackToRole"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_button_secondary"
-                            android:src="@drawable/ic_arrow_back"
-                            android:scaleType="centerInside"
-                            android:clickable="true"
-                            android:focusable="true" />
+                <!-- Google SSO -->
+                <LinearLayout
+                    android:id="@+id/btnGoogleSignUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:background="@drawable/bg_button_secondary"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginBottom="24dp">
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginStart="16dp">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_google" />
 
-                            <TextView
-                                android:id="@+id/tvFormHeaderTitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Account Setup"
-                                android:textSize="20sp"
-                                android:textColor="#2B2D42"
-                                android:fontFamily="sans-serif-black"
-                                android:textStyle="bold"
-                                android:letterSpacing="-0.01" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Provide your profile details"
-                                android:textSize="12sp"
-                                android:textColor="#6B7280"
-                                android:fontFamily="sans-serif" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- Collapsible Premium Error Message Card -->
                     <TextView
-                        android:id="@+id/tvErrorCard"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_status_box_error"
-                        android:padding="14dp"
-                        android:textSize="13sp"
-                        android:textColor="#D90429"
+                        android:layout_marginStart="12dp"
+                        android:text="Sign up with Google"
+                        android:textSize="15sp"
+                        android:textColor="@color/navy"
                         android:fontFamily="sans-serif-medium"
-                        android:visibility="gone"
-                        android:layout_marginBottom="20dp"
-                        android:text="Error details go here." />
+                        android:textStyle="bold" />
+                </LinearLayout>
 
-                    <!-- First Name Field -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                <!-- Divider -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="24dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/navy_05" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:text="OR REGISTER WITH EMAIL"
+                        android:textSize="11sp"
+                        android:textColor="@color/slate"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.05" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/navy_05" />
+                </LinearLayout>
+
+                <!-- Error Card -->
+                <TextView
+                    android:id="@+id/tvErrorCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_status_box_error"
+                    android:padding="14dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/ruby"
+                    android:fontFamily="sans-serif-medium"
+                    android:visibility="gone"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- First Name -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginEnd="8dp">
+
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="First Name"
                             android:textSize="12sp"
-                            android:textColor="#2B2D42"
+                            android:textColor="@color/navy"
                             android:fontFamily="sans-serif-medium"
                             android:textStyle="bold"
+                            android:letterSpacing="0.02"
                             android:layout_marginBottom="6dp" />
+
                         <EditText
                             android:id="@+id/etFirstName"
                             android:layout_width="match_parent"
-                            android:layout_height="52dp"
+                            android:layout_height="54dp"
                             android:background="@drawable/bg_input"
                             android:hint="John"
-                            android:textColorHint="#8D99AE"
-                            android:textColor="#2B2D42"
+                            android:textColorHint="@color/slate"
+                            android:textColor="@color/navy"
                             android:textSize="15sp"
+                            android:fontFamily="sans-serif"
                             android:inputType="textPersonName"
                             android:paddingStart="16dp"
                             android:paddingEnd="16dp" />
                     </LinearLayout>
 
-                    <!-- Last Name Field -->
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginStart="8dp">
+
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Last Name"
                             android:textSize="12sp"
-                            android:textColor="#2B2D42"
+                            android:textColor="@color/navy"
                             android:fontFamily="sans-serif-medium"
                             android:textStyle="bold"
+                            android:letterSpacing="0.02"
                             android:layout_marginBottom="6dp" />
+
                         <EditText
                             android:id="@+id/etLastName"
                             android:layout_width="match_parent"
-                            android:layout_height="52dp"
+                            android:layout_height="54dp"
                             android:background="@drawable/bg_input"
                             android:hint="Doe"
-                            android:textColorHint="#8D99AE"
-                            android:textColor="#2B2D42"
+                            android:textColorHint="@color/slate"
+                            android:textColor="@color/navy"
                             android:textSize="15sp"
+                            android:fontFamily="sans-serif"
                             android:inputType="textPersonName"
                             android:paddingStart="16dp"
                             android:paddingEnd="16dp" />
                     </LinearLayout>
+                </LinearLayout>
 
-                    <!-- Email Field -->
-                    <LinearLayout
+                <!-- Email -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="16dp">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Email Address"
-                            android:textSize="12sp"
-                            android:textColor="#2B2D42"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="6dp" />
-                        <EditText
-                            android:id="@+id/etEmail"
-                            android:layout_width="match_parent"
-                            android:layout_height="52dp"
-                            android:background="@drawable/bg_input"
-                            android:hint="john.doe@example.com"
-                            android:textColorHint="#8D99AE"
-                            android:textColor="#2B2D42"
-                            android:textSize="15sp"
-                            android:inputType="textEmailAddress"
-                            android:paddingStart="48dp"
-                            android:paddingEnd="16dp"
-                            android:drawableStart="@drawable/ic_mail"
-                            android:drawablePadding="-32dp" />
-                    </LinearLayout>
-
-                    <!-- Password Field -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="20dp">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Password"
-                            android:textSize="12sp"
-                            android:textColor="#2B2D42"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="6dp" />
-                        <EditText
-                            android:id="@+id/etPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="52dp"
-                            android:background="@drawable/bg_input"
-                            android:hint="••••••••"
-                            android:textColorHint="#8D99AE"
-                            android:textColor="#2B2D42"
-                            android:textSize="15sp"
-                            android:inputType="textPassword"
-                            android:paddingStart="48dp"
-                            android:paddingEnd="16dp"
-                            android:drawableStart="@drawable/ic_lock"
-                            android:drawablePadding="-32dp" />
-                    </LinearLayout>
-
-                    <!-- Doctor's License Field Container -->
-                    <LinearLayout
-                        android:id="@+id/licenseContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone"
-                        android:layout_marginBottom="24dp">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="PRC License Number"
-                            android:textSize="12sp"
-                            android:textColor="#2B2D42"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="6dp" />
-                        <EditText
-                            android:id="@+id/etLicenseNumber"
-                            android:layout_width="match_parent"
-                            android:layout_height="52dp"
-                            android:background="@drawable/bg_input"
-                            android:hint="1234567"
-                            android:textColorHint="#8D99AE"
-                            android:textColor="#2B2D42"
-                            android:textSize="15sp"
-                            android:inputType="number"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp" />
-                    </LinearLayout>
-
-                    <!-- Register Button -->
-                    <Button
-                        android:id="@+id/btnRegister"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:background="@drawable/bg_button_primary"
-                        app:backgroundTint="@null"
-                        android:text="Initialize Account"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
+                        android:text="Email Address"
+                        android:textSize="12sp"
+                        android:textColor="@color/navy"
                         android:fontFamily="sans-serif-medium"
                         android:textStyle="bold"
-                        android:textAllCaps="false" />
+                        android:letterSpacing="0.02"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="john.doe@example.com"
+                        android:textColorHint="@color/slate"
+                        android:textColor="@color/navy"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif"
+                        android:inputType="textEmailAddress"
+                        android:paddingStart="48dp"
+                        android:paddingEnd="16dp"
+                        android:drawableStart="@drawable/ic_mail"
+                        android:drawablePadding="-32dp" />
+                </LinearLayout>
+
+                <!-- Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Password"
+                        android:textSize="12sp"
+                        android:textColor="@color/navy"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.02"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:background="@drawable/bg_input"
+                        android:hint="Min 8 chars, upper/lower/number/special"
+                        android:textColorHint="@color/slate"
+                        android:textColor="@color/navy"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif"
+                        android:inputType="textPassword"
+                        android:paddingStart="48dp"
+                        android:paddingEnd="16dp"
+                        android:drawableStart="@drawable/ic_lock"
+                        android:drawablePadding="-32dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Must contain uppercase, lowercase, number, and special character"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_tertiary"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginBottom="28dp" />
+
+                <!-- Register Button -->
+                <Button
+                    android:id="@+id/btnRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_button_primary"
+                    app:backgroundTint="@null"
+                    android:text="Create Patient Account"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold"
+                    android:textAllCaps="false" />
+
+                <!-- Login Link -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="28dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Already have an account? "
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif" />
+
+                    <TextView
+                        android:id="@+id/tvGoToLogin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sign in"
+                        android:textSize="14sp"
+                        android:textColor="@color/crimson"
+                        android:fontFamily="sans-serif-medium"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
             </LinearLayout>

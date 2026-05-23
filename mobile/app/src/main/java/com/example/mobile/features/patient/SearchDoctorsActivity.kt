@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mobile.R
 import com.example.mobile.databinding.ActivitySearchDoctorsBinding
 import com.example.mobile.databinding.ItemDoctorProfileBinding
 import com.example.mobile.model.ApiEnvelope
@@ -30,10 +31,11 @@ class SearchDoctorsActivity : AppCompatActivity() {
         binding = ActivitySearchDoctorsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         setupRecyclerView()
         setupListeners()
-
-        // Fetch all verified doctors on entry
         fetchDoctors("")
     }
 
@@ -72,11 +74,8 @@ class SearchDoctorsActivity : AppCompatActivity() {
 
     private fun triggerSearch() {
         val query = binding.etSearchQuery.text.toString().trim()
-        
-        // Hide keyboard
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.hideSoftInputFromWindow(binding.etSearchQuery.windowToken, 0)
-
         fetchDoctors(query)
     }
 
@@ -102,14 +101,14 @@ class SearchDoctorsActivity : AppCompatActivity() {
                     }
                 } else {
                     binding.layoutEmptyState.visibility = View.VISIBLE
-                    Toast.makeText(this@SearchDoctorsActivity, "Failed to query doctors list", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SearchDoctorsActivity, "Failed to load doctors", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<ApiEnvelope<List<DoctorProfileDto>>>, t: Throwable) {
                 binding.progressBar.visibility = View.GONE
                 binding.layoutEmptyState.visibility = View.VISIBLE
-                Toast.makeText(this@SearchDoctorsActivity, "Network offline. Check backend connection.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SearchDoctorsActivity, "Network offline.", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -148,7 +147,7 @@ class DoctorsAdapter(
         fun bind(doctor: DoctorProfileDto) {
             binding.tvDoctorName.text = doctor.doctorName
             binding.tvSpecializationBadge.text = doctor.specialization?.uppercase() ?: "GENERAL MEDICINE"
-            
+
             val clinicText = if (!doctor.clinicName.isNullOrBlank()) {
                 "${doctor.clinicName}, ${doctor.clinicAddress.orEmpty()}"
             } else {
@@ -156,7 +155,7 @@ class DoctorsAdapter(
             }
             binding.tvClinicDetails.text = clinicText
             binding.tvExperience.text = "Experience: ${doctor.yearsOfExperience ?: 0} years"
-            
+
             val fee = doctor.consultationFee ?: 0.0
             binding.tvConsultationFee.text = String.format("₱%,.2f", fee)
 

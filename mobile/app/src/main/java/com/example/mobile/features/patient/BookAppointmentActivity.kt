@@ -28,7 +28,6 @@ class BookAppointmentActivity : AppCompatActivity() {
     private var doctorProfile: DoctorProfileDto? = null
 
     private var selectedCalendar = Calendar.getInstance().apply {
-        // Default to tomorrow to satisfy the future validation constraint
         add(Calendar.DAY_OF_YEAR, 1)
     }
 
@@ -45,9 +44,12 @@ class BookAppointmentActivity : AppCompatActivity() {
         binding = ActivityBookAppointmentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
+
         doctorProfile = intent.getSerializableExtra("doctor_profile") as? DoctorProfileDto
         if (doctorProfile == null) {
-            Toast.makeText(this, "Failed to load doctor profile for scheduling", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to load doctor profile", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -61,7 +63,7 @@ class BookAppointmentActivity : AppCompatActivity() {
     private fun setupDoctorSummary() {
         val doctor = doctorProfile ?: return
         binding.tvSummaryDoctorName.text = doctor.doctorName
-        
+
         val fee = doctor.consultationFee ?: 0.0
         val specialization = doctor.specialization ?: "General Practice"
         binding.tvSummaryDetails.text = String.format("%s • Fee: ₱%,.2f", specialization, fee)
@@ -74,7 +76,6 @@ class BookAppointmentActivity : AppCompatActivity() {
             binding.slot16, binding.slot17
         )
 
-        // Select default consultation type
         selectConsultationType("In-Clinic Consultation")
     }
 
@@ -87,7 +88,6 @@ class BookAppointmentActivity : AppCompatActivity() {
             showDatePicker()
         }
 
-        // Setup Time Slot Click Listeners
         binding.slot09.setOnClickListener { selectTimeSlot(binding.slot09, "09:00:00") }
         binding.slot10.setOnClickListener { selectTimeSlot(binding.slot10, "10:00:00") }
         binding.slot11.setOnClickListener { selectTimeSlot(binding.slot11, "11:00:00") }
@@ -97,7 +97,6 @@ class BookAppointmentActivity : AppCompatActivity() {
         binding.slot16.setOnClickListener { selectTimeSlot(binding.slot16, "16:00:00") }
         binding.slot17.setOnClickListener { selectTimeSlot(binding.slot17, "17:00:00") }
 
-        // Setup Consultation Type Click Listeners
         binding.btnTypeInClinic.setOnClickListener {
             selectConsultationType("In-Clinic Consultation")
         }
@@ -111,8 +110,6 @@ class BookAppointmentActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val calendar = Calendar.getInstance()
-        // Must be in the future, so minimum is tomorrow
         val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
 
         val datePickerDialog = DatePickerDialog(
@@ -138,15 +135,13 @@ class BookAppointmentActivity : AppCompatActivity() {
 
     private fun selectTimeSlot(selectedView: TextView, timeString: String) {
         selectedTimeSlot = timeString
-        
-        // Reset all backgrounds
+
         for (view in slotViews) {
             view.background = ContextCompat.getDrawable(this, R.drawable.bg_selectable_card)
             view.backgroundTintList = null
             view.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
         }
 
-        // Highlight selected
         selectedView.background = ContextCompat.getDrawable(this, R.drawable.bg_button_primary)
         selectedView.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary))
         selectedView.setTextColor(ContextCompat.getColor(this, R.color.white))
@@ -154,7 +149,7 @@ class BookAppointmentActivity : AppCompatActivity() {
 
     private fun selectConsultationType(type: String) {
         selectedType = type
-        
+
         val activeBg = ContextCompat.getDrawable(this, R.drawable.bg_button_primary)
         val activeTint = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary_accent))
         val inactiveBg = ContextCompat.getDrawable(this, R.drawable.bg_selectable_card)
@@ -183,19 +178,18 @@ class BookAppointmentActivity : AppCompatActivity() {
         val doctor = doctorProfile ?: return
 
         if (selectedTimeSlot == null) {
-            showError("Please select a convenient time slot")
+            showError("Please select a time slot")
             return
         }
 
         val type = selectedType
         if (type == null) {
-            showError("Please select your preferred consultation medium")
+            showError("Please select consultation type")
             return
         }
 
         val notes = binding.etNotes.text.toString().trim()
 
-        // Construct appointment ISO timestamp (yyyy-MM-ddTHH:mm:ss)
         val dateString = isoDateFormatter.format(selectedCalendar.time)
         val appointmentAtIso = "${dateString}T${selectedTimeSlot}"
 
@@ -218,19 +212,19 @@ class BookAppointmentActivity : AppCompatActivity() {
                 if (response.isSuccessful && body?.success == true) {
                     Toast.makeText(
                         this@BookAppointmentActivity,
-                        "Consultation requested successfully! Pending specialist review.",
+                        "Appointment booked successfully!",
                         Toast.LENGTH_LONG
                     ).show()
                     finish()
                 } else {
-                    val message = ApiErrorParser.parseMessage(response.errorBody(), "Selected schedule is already reserved. Please choose another time.")
+                    val message = ApiErrorParser.parseMessage(response.errorBody(), "Time slot already taken. Please choose another.")
                     showError(message)
                 }
             }
 
             override fun onFailure(call: Call<ApiEnvelope<AppointmentDto>>, t: Throwable) {
                 setLoading(false)
-                showError("Network connection offline. Unable to request consultation.")
+                showError("Network offline. Please try again.")
             }
         })
     }
@@ -238,12 +232,10 @@ class BookAppointmentActivity : AppCompatActivity() {
     private fun showError(message: String) {
         binding.tvErrorCard.text = message
         binding.tvErrorCard.visibility = View.VISIBLE
-        // Scroll to top
-        binding.tvErrorCard.focusSearch(View.FOCUS_UP)?.requestFocus()
     }
 
     private fun setLoading(isLoading: Boolean) {
         binding.btnConfirmBooking.isEnabled = !isLoading
-        binding.btnConfirmBooking.text = if (isLoading) "Requesting Consultation..." else "Confirm Scheduling Request"
+        binding.btnConfirmBooking.text = if (isLoading) "Booking..." else "Confirm Booking"
     }
 }

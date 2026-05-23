@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mobile.R
 import com.example.mobile.databinding.ActivityChatListBinding
 import com.example.mobile.databinding.ItemChatContactBinding
 import com.example.mobile.model.ApiEnvelope
@@ -28,6 +29,9 @@ class ChatListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityChatListBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
+        binding.root.startAnimation(fadeInUp)
 
         setupToolbar()
         setupRecyclerView()
@@ -100,7 +104,7 @@ class ChatListActivity : AppCompatActivity() {
             override fun onFailure(call: Call<ApiEnvelope<List<ChatContactDto>>>, t: Throwable) {
                 binding.progressBar.visibility = View.GONE
                 binding.layoutEmptyState.visibility = View.VISIBLE
-                Toast.makeText(this@ChatListActivity, "Failed to load chats: Connection offline", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChatListActivity, "Connection offline", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -154,11 +158,10 @@ class ChatContactsAdapter(
                     contact.lastMsg
                 }
             } else {
-                "No messages yet. Send a message to start."
+                "No messages yet."
             }
             binding.tvLastMessage.text = lastMsgText
 
-            // Timestamp parsing
             binding.tvTimeLabel.text = if (!contact.lastMsgAt.isNullOrBlank()) {
                 contact.lastMsgAt.split("T").firstOrNull() ?: ""
             } else {
