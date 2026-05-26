@@ -5,7 +5,7 @@ import { authEvents } from '../../features/auth/authEventBus';
 // ─── Axios instance ────────────────────────────────────────────────────────
 
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15_000,
 });
