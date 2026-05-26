@@ -1,44 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ── Primary Colors ── -->
-    <color name="primary">#2563EB</color>          <!-- Primary blue -->
-    <color name="primary_dark">#1e40af</color>     <!-- Dark blue for gradients -->
-    <color name="primary_light">#3b82f6</color>    <!-- Light blue -->
-    <color name="primary_accent">#7C3AED</color>   <!-- Purple accent -->
+    <!-- ── MediGo Brand Colors (Web-Matched Palette) ── -->
+    <color name="navy">#2B2D42</color>
+    <color name="navy_dark">#1A1B28</color>
+    <color name="crimson">#EF233C</color>
+    <color name="ruby">#D90429</color>
+    <color name="slate">#8D99AE</color>
+    <color name="mist">#EDF2F4</color>
+
+    <!-- ── Primary Aliases ── -->
+    <color name="primary">#EF233C</color>
+    <color name="primary_dark">#D90429</color>
+    <color name="primary_light">#FFF0F2</color>
+    <color name="primary_accent">#2B2D42</color>
+
+    <!-- ── Semantic Backgrounds ── -->
+    <color name="background">#EDF2F4</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="panel">#2B2D42</color>
+
+    <!-- ── Text Colors ── -->
+    <color name="text_primary">#2B2D42</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_tertiary">#8D99AE</color>
+    <color name="text_on_dark">#EDF2F4</color>
+    <color name="text_light">#FFFFFF</color>
+
+    <!-- ── Glass Colors ── -->
+    <color name="glass_white">#B3FFFFFF</color>
+    <color name="glass_border">#33FFFFFF</color>
+    <color name="glass_dark">#D92B2D42</color>
 
     <!-- ── Grayscale ── -->
-    <color name="gray_50">#F9FAFB</color>           <!-- Nearly white -->
-    <color name="gray_100">#F3F4F6</color>          <!-- Light gray bg -->
-    <color name="gray_200">#E5E7EB</color>          <!-- Borders -->
-    <color name="gray_300">#D1D5DB</color>          <!-- Dividers -->
-    <color name="gray_400">#9CA3AF</color>          <!-- Secondary text (hints) -->
-    <color name="gray_500">#6B7280</color>          <!-- Body text -->
-    <color name="gray_600">#4B5563</color>          <!-- Labels -->
-    <color name="gray_700">#374151</color>          <!-- Darker text -->
-    <color name="gray_900">#111827</color>          <!-- Headings/primary text -->
+    <color name="gray_50">#EDF2F4</color>
+    <color name="gray_100">#F1F3F5</color>
+    <color name="gray_200">#E9ECEF</color>
+    <color name="gray_300">#DEE2E6</color>
+    <color name="gray_400">#8D99AE</color>
+    <color name="gray_500">#6B7280</color>
+    <color name="gray_600">#4B5563</color>
+    <color name="gray_700">#374151</color>
+    <color name="gray_900">#2B2D42</color>
 
     <!-- ── Status Colors ── -->
-    <color name="success">#10B981</color>           <!-- Green success -->
-    <color name="success_bg">#D1FAE5</color>        <!-- Light green bg -->
-    <color name="success_light">#ECFDF5</color>     <!-- Very light green -->
-    
-    <color name="error">#EF4444</color>             <!-- Red error -->
-    <color name="error_bg">#FEE2E2</color>          <!-- Light red bg -->
-    <color name="error_light">#FEF2F2</color>       <!-- Very light red -->
-    
-    <color name="warning">#F59E0B</color>           <!-- Amber warning -->
-    <color name="warning_bg">#FEF3C7</color>        <!-- Light amber bg -->
+    <color name="success">#10B981</color>
+    <color name="success_bg">#D1FAE5</color>
+    <color name="success_light">#ECFDF5</color>
+    <color name="error">#EF4444</color>
+    <color name="error_bg">#FEE2E2</color>
+    <color name="error_light">#FEF2F2</color>
+    <color name="warning">#F59E0B</color>
+    <color name="warning_bg">#FEF3C7</color>
+    <color name="info">#3B82F6</color>
+    <color name="info_bg">#DBEAFE</color>
 
-    <!-- ── Semantic Colors ── -->
-    <color name="background">#F9FAFB</color>        <!-- App background -->
-    <color name="surface">#FFFFFF</color>           <!-- Card/surface background -->
-    <color name="text_primary">#111827</color>      <!-- Primary text -->
-    <color name="text_secondary">#6B7280</color>    <!-- Secondary text -->
-    <color name="text_tertiary">#9CA3AF</color>     <!-- Tertiary/hint text -->
-    <color name="border">#E5E7EB</color>            <!-- Borders and dividers -->
-    <color name="shadow">#000000</color>            <!-- For shadows (20% opacity) -->
+    <!-- ── Gradient Crimson ── -->
+    <color name="crimson_glow_15">#26EF233C</color>
+    <color name="crimson_glow_25">#40EF233C</color>
+    <color name="navy_10">#1A2B2D42</color>
+    <color name="navy_05">#0D2B2D42</color>
 
-    <!-- ── Legacy ── -->
+    <!-- ── Borders & Shadows ── -->
+    <color name="border">#E9ECEF</color>
+    <color name="border_light">#E0E6ED</color>
+    <color name="shadow">#0D2B2D42</color>
+    <color name="shadow_dark">#000000</color>
+
+    <!-- ── Primitives ── -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
 </resources>

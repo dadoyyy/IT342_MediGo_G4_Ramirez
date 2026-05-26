@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Redesigned Bottom Navigation Bar (Dark Navy Background)
+     ════════════════════════════════════════════════════════════════════════ -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="@color/navy"
+    app:cardUseCompatPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <!-- Home Tab -->
+        <FrameLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/navHomeIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_home_outline"
+                android:contentDescription="Home"
+                app:tint="@color/text_secondary" />
+        </FrameLayout>
+
+        <!-- Appointments Tab -->
+        <FrameLayout
+            android:id="@+id/navAppointments"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/navAppointmentsIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_calendar_outline"
+                android:contentDescription="Appointments"
+                app:tint="@color/text_secondary" />
+        </FrameLayout>
+
+        <!-- Messages Tab -->
+        <FrameLayout
+            android:id="@+id/navMessages"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/navMessagesIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_message_outline"
+                android:contentDescription="Messages"
+                app:tint="@color/text_secondary" />
+        </FrameLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

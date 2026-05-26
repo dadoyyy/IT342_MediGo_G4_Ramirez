@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Received Message Bubble (incoming)
+     ════════════════════════════════════════════════════════════════════════ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="start"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="56dp">
+
+    <TextView
+        android:id="@+id/tvMessageContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_chat_bubble_received"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:maxWidth="280dp"
+        android:lineSpacingExtra="2dp"
+        android:text="Sure Ruther. Take 1 tablet daily." />
+
+    <TextView
+        android:id="@+id/tvMessageTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:textSize="10sp"
+        android:textColor="@color/text_tertiary"
+        android:fontFamily="sans-serif"
+        android:text="10:47 AM" />
+</LinearLayout>

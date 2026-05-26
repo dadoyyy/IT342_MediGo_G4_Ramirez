@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Patient Profile
+     Unified hero header + surface cards, no bottom nav
+     ════════════════════════════════════════════════════════════════════════ -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mist"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:clipToPadding="false"
+    android:paddingBottom="96dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ── Hero Header ─────────────────────────────────────────── -->
+        <FrameLayout
+            style="@style/PageHero"
+            android:layout_width="match_parent"
+            android:layout_height="260dp">
+
+            <View
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="-100dp"
+                android:layout_marginTop="-70dp"
+                android:background="@drawable/bg_auth_orb_crimson" />
+
+            <View
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="-115dp"
+                android:layout_marginEnd="-120dp"
+                android:background="@drawable/bg_auth_orb_slate" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Top bar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btnBack"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_back_button_circle"
+                        android:clickable="true"
+                        android:contentDescription="Back"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_arrow_back" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/btnRefreshNotifications"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_back_button_circle"
+                        android:clickable="true"
+                        android:contentDescription="Refresh notifications"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_bell_outline" />
+                </LinearLayout>
+
+                <!-- Title area -->
+                <TextView
+                    style="@style/SectionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:text="PATIENT PROFILE"
+                    android:textColor="@color/slate" />
+
+                <TextView
+                    android:id="@+id/tvFullName"
+                    style="@style/PageHeroTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Patient Name" />
+
+                <TextView
+                    android:id="@+id/tvEmail"
+                    style="@style/PageHeroSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="patient@email.com" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- ── Content Cards ───────────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-22dp"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="24dp">
+
+            <!-- Profile Identity Card -->
+            <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tvAvatar"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:background="@drawable/bg_avatar_circle"
+                        android:gravity="center"
+                        android:text="RO"
+                        android:textColor="@color/crimson"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvRole"
+                            style="@style/ChipActive"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PATIENT"
+                            android:textSize="10sp" />
+
+                        <TextView
+                            android:id="@+id/tvProfileHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="Tap the notification cards below to jump straight to your latest updates."
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp"
+                            android:lineSpacingExtra="2dp"
+                            android:fontFamily="sans-serif" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Notifications Card -->
+            <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NOTIFICATIONS" />
+
+                    <TextView
+                        android:id="@+id/tvNotificationSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Loading your latest updates..."
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/btnNotificationAppointments"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_surface_card_unified"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                style="@style/SectionLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="APPOINTMENTS" />
+
+                            <TextView
+                                android:id="@+id/tvAppointmentCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="0"
+                                android:textColor="@color/primary_accent"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="0dp" />
+
+                        <LinearLayout
+                            android:id="@+id/btnNotificationMessages"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_surface_card_unified"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                style="@style/SectionLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="MESSAGES" />
+
+                            <TextView
+                                android:id="@+id/tvUnreadMessageCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="0"
+                                android:textColor="@color/primary_accent"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Quick Actions Card -->
+            <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="QUICK ACTIONS" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:id="@+id/btnOpenAppointments"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_chip_default"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Appointments"
+                                android:textColor="@color/navy"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/btnOpenMessages"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:background="@drawable/bg_chip_selected"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Messages"
+                                android:textColor="@color/white"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnSignOut"
+                        style="@style/ButtonSecondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="16dp"
+                        android:text="Sign Out"
+                        android:textColor="@color/ruby" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

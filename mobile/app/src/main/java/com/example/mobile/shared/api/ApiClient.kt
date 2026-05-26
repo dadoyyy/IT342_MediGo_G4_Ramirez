@@ -49,6 +49,8 @@ object ApiClient {
         .build()
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
+    val appointmentApi: AppointmentApi = retrofit.create(AppointmentApi::class.java)
+    val chatApi: ChatApi = retrofit.create(ChatApi::class.java)
 }
 
 // Token holder to access JWT from anywhere

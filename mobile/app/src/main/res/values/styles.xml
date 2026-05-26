@@ -1,64 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ══════════════════════════════════════════════════════════════════════
+         MediGo Design System — Unified Mobile Styles
+         Palette: Navy #2B2D42 · Crimson #EF233C · Ruby #D90429
+                  Slate #8D99AE · Mist #EDF2F4
+         ══════════════════════════════════════════════════════════════════════ -->
+
     <!-- ── Typography ── -->
     <style name="TextHeading1">
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">28sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/primary_accent</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:letterSpacing">-0.02</item>
     </style>
 
     <style name="TextHeading2">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/primary_accent</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:letterSpacing">-0.01</item>
     </style>
 
     <style name="TextHeading3">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">@color/primary_accent</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <style name="TextBody">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:lineSpacingExtra">4dp</item>
     </style>
 
     <style name="TextCaption">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <style name="TextSmall">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- ── Input Fields ── -->
     <style name="EditTextInput" parent="Widget.AppCompat.EditText">
-        <item name="android:minHeight">48dp</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:background">@drawable/bg_input_unified</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_tertiary</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">@font/poppins</item>
         <item name="android:textCursorDrawable">@null</item>
     </style>
+    
+    <style name="InputField" parent="EditTextInput" />
 
     <!-- ── Buttons ── -->
-    <style name="ButtonPrimary" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:minHeight">48dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:layout_marginTop">24dp</item>
-        <item name="android:backgroundTint">@color/primary</item>
+    <style name="ButtonPrimary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:minHeight">52dp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="ButtonSecondary" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
     </style>
 
     <!-- ── Text Links ── -->
@@ -66,32 +94,175 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/primary</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- ── Containers ── -->
     <style name="Card">
-        <item name="android:background">@color/surface</item>
-        <item name="android:elevation">2dp</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:background">@drawable/bg_surface_card_unified</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:padding">24dp</item>
     </style>
 
     <!-- ── Status Messages ── -->
     <style name="SuccessMessage">
-        <item name="android:background">@color/success_light</item>
+        <item name="android:background">@drawable/bg_status_box_success</item>
         <item name="android:textColor">@color/success</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:layout_marginTop">16dp</item>
-        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <style name="ErrorMessage">
-        <item name="android:background">@color/error_light</item>
+        <item name="android:background">@drawable/bg_status_box_error</item>
         <item name="android:textColor">@color/error</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:layout_marginTop">16dp</item>
-        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         UNIFIED PAGE STRUCTURE STYLES
+         These ensure every patient page has an identical skeleton
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Unified page hero header — dark navy gradient with orb decorations -->
+    <style name="PageHero">
+        <item name="android:background">@drawable/bg_page_header_unified</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingBottom">20dp</item>
+    </style>
+
+    <!-- Premium hero (landing / dashboard uses taller variant) -->
+    <style name="PageHeroPremium" parent="PageHero">
+        <item name="android:paddingTop">28dp</item>
+    </style>
+
+    <!-- Hero titles: big white text on dark header -->
+    <style name="PageHeroTitle">
+        <item name="android:textColor">@color/text_on_dark</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="PageHeroTitleCompact">
+        <item name="android:textColor">@color/text_on_dark</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <!-- Hero subtitle -->
+    <style name="PageHeroSubtitle">
+        <item name="android:textColor">@color/slate</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <!-- Section label — small uppercase used inside cards -->
+    <style name="SectionLabel">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Pill badge on hero headers -->
+    <style name="PageHeroPill">
+        <item name="android:background">@drawable/bg_patient_header_pill</item>
+        <item name="android:textColor">@color/text_on_dark</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         UNIFIED CARD STYLES — used by CardView
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <style name="SurfaceCard">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">8dp</item>
+    </style>
+
+    <style name="SurfaceCardFlat">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <style name="DarkStatCard">
+        <item name="cardBackgroundColor">#1C2133</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         CHIPS — Filter pills
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <style name="ChipActive">
+        <item name="android:background">@drawable/bg_chip_selected</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="ChipDefault">
+        <item name="android:background">@drawable/bg_chip_default</item>
+        <item name="android:textColor">@color/navy</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         LEGACY COMPAT — keeping old names alive so Java won't break
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <style name="PatientHeroFrame" parent="PageHero" />
+    <style name="PatientHeroFramePremium" parent="PageHeroPremium" />
+    <style name="PatientHeroTitle" parent="PageHeroTitle" />
+    <style name="PatientHeroTitleCompact" parent="PageHeroTitleCompact" />
+    <style name="PatientHeroBody" parent="PageHeroSubtitle" />
+    <style name="PatientSectionLabel" parent="SectionLabel" />
+    <style name="PatientInlinePill" parent="PageHeroPill" />
+
+    <style name="PatientSurfaceCard" parent="SurfaceCard" />
+    <style name="PatientSurfaceCardCompact">
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">6dp</item>
+    </style>
+
+    <style name="PatientDarkStatCard" parent="DarkStatCard" />
+
+    <style name="PatientChipActive" parent="ChipActive" />
+    <style name="PatientChipInactive" parent="ChipDefault" />
 
 </resources>

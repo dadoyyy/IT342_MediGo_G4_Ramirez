@@ -23,7 +23,7 @@ public interface DoctorProfileRepository extends JpaRepository<DoctorProfile, Lo
             SELECT dp
             FROM DoctorProfile dp
             JOIN FETCH dp.doctor d
-            WHERE dp.verified = true
+            WHERE (dp.verified = true OR dp.verified = false)
               AND (
                 :query IS NULL OR :query = '' OR
                 LOWER(dp.specialization) LIKE LOWER(CONCAT('%', :query, '%')) OR

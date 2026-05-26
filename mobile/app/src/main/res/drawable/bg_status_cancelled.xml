@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status badge — Cancelled (grey) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#1A8D99AE" />
+    <corners android:radius="99dp" />
+    <stroke
+        android:width="1dp"
+        android:color="#338D99AE" />
+</shape>

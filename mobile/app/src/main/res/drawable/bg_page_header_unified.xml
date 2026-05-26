@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unified page header background — Navy gradient for all inner pages -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="#2B2D42"
+        android:centerColor="#232538"
+        android:endColor="#1A1B28"
+        android:angle="135" />
+</shape>

@@ -1,137 +1,358 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Responsive Mobile Dashboard (Spec Compliant)
+     ════════════════════════════════════════════════════════════════════════ -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_100"
-    android:orientation="vertical">
+    android:background="#F8FAFC"> <!-- Very light gray/off-white background -->
 
-    <!-- Header Navigation -->
-    <LinearLayout
+    <!-- ── Unified PageHero Header (Static at top) ────────────────── -->
+    <FrameLayout
+        android:id="@+id/topHeader"
+        style="@style/PageHero"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/primary"
-        android:gravity="center_vertical"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:elevation="4dp">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
 
-        <TextView
-            style="@style/TextHeading2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MediGo"
-            android:textColor="@color/white" />
+        <!-- Decorative Orbs -->
+        <View
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="-96dp"
+            android:layout_marginTop="-74dp"
+            android:background="@drawable/bg_auth_orb_crimson" />
 
-    </LinearLayout>
+        <View
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="-112dp"
+            android:layout_marginEnd="-122dp"
+            android:background="@drawable/bg_auth_orb_slate" />
 
-    <!-- Content -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="24dp">
-
-        <TextView
-            style="@style/TextHeading1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Dashboard" />
-
-        <!-- User Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/surface"
-            android:elevation="2dp"
-            android:padding="16dp"
-            android:layout_marginTop="24dp">
+            android:paddingTop="12dp"
+            android:paddingBottom="8dp">
 
-            <!-- User Name -->
+            <!-- Inline Top Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- Greeting (Left) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvWelcomeGreeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome back,"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/poppins"
+                        android:includeFontPadding="false" />
+
+                    <TextView
+                        android:id="@+id/tvUserDisplayName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ruther"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/poppins"
+                        android:includeFontPadding="false"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <!-- Actions (Right) -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Notification Bell -->
+                    <ImageView
+                        android:id="@+id/btnNotifications"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_back_button_circle"
+                        android:backgroundTint="#20FFFFFF"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_bell_outline"
+                        app:tint="@color/white"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:contentDescription="Notifications"
+                        android:layout_marginEnd="10dp" />
+
+                    <!-- Profile Avatar -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        app:cardCornerRadius="19dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <TextView
+                            android:id="@+id/btnOpenProfile"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="PT"
+                            android:textColor="@color/navy"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/poppins"
+                            android:clickable="true"
+                            android:focusable="true" />
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Tagline -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Profile"
-                android:textColor="@color/text_secondary"
+                android:text="Access world-class medical professionals in just a few clicks"
+                android:textColor="#B3FFFFFF"
                 android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
-
-            <TextView
-                android:id="@+id/tvUserName"
-                style="@style/TextHeading3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"
+                android:fontFamily="@font/poppins"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Email -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Email"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
-
-            <TextView
-                android:id="@+id/tvUserEmail"
-                style="@style/TextBody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Role -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Account Type"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true" />
-
-            <TextView
-                android:id="@+id/tvUserRole"
-                style="@style/TextBody"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
+                android:includeFontPadding="false" />
         </LinearLayout>
+    </FrameLayout>
 
-    </LinearLayout>
-
-    <!-- Bottom Action -->
-    <LinearLayout
+    <!-- Scrollable main content -->
+    <ScrollView
+        android:id="@+id/scrollContent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:layout_gravity="bottom">
+        android:layout_height="match_parent"
+        android:layout_below="@id/topHeader"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
-        <Button
-            android:id="@+id/btnLogout"
-            style="@style/ButtonPrimary"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="24dp">
 
-</LinearLayout>
+            <!-- ── Search & Filter Area ───────────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp">
+
+                <!-- Search Input -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input_unified"
+                    android:backgroundTint="@color/white"
+                    android:elevation="1dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <ImageView
+                        android:id="@+id/searchIcon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_search"
+                        app:tint="#8D99AE" />
+
+                    <EditText
+                        android:id="@+id/etDoctorSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toEndOf="@id/searchIcon"
+                        android:layout_marginStart="12dp"
+                        android:background="@android:color/transparent"
+                        android:hint="Search by name, clinic, or hospital..."
+                        android:textColor="#2B2D42"
+                        android:textColorHint="#8D99AE"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif"
+                        android:inputType="text"
+                        android:importantForAutofill="no"
+                        android:singleLine="true" />
+                </RelativeLayout>
+
+                <!-- Segmented Control Buttons (ALL, ONLINE, IN-PERSON) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="12dp"
+                    android:background="#EDF2F4"
+                    android:orientation="horizontal"
+                    android:padding="2dp"
+                    android:weightSum="3">
+
+                    <!-- ALL Option -->
+                    <TextView
+                        android:id="@+id/btnFilterAll"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="ALL"
+                        android:textColor="@color/white"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:background="@drawable/bg_patient_pill_active"
+                        android:backgroundTint="#2B2D42"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <!-- ONLINE Option -->
+                    <TextView
+                        android:id="@+id/btnFilterOnline"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="ONLINE"
+                        android:textColor="#2B2D42"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <!-- IN-PERSON Option -->
+                    <TextView
+                        android:id="@+id/btnFilterInPerson"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="IN-PERSON"
+                        android:textColor="#2B2D42"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ── Specialties Horizontal Navigation ──────────────────── -->
+            <HorizontalScrollView
+                android:id="@+id/specialtyScroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:overScrollMode="never"
+                android:layout_marginTop="20dp"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/layoutSpecialties"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- ── Doctor List Section ────────────────────────────────── -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Available Doctors"
+                android:textColor="#2B2D42"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-black" />
+
+            <!-- Doctors RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDoctors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:layout_marginTop="12dp"
+                android:paddingBottom="24dp"
+                android:clipToPadding="false" />
+
+            <!-- Empty state -->
+            <LinearLayout
+                android:id="@+id/layoutDoctorsEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="48dp"
+                android:paddingBottom="48dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@mipmap/ic_launcher"
+                    android:layout_marginBottom="14dp"
+                    android:contentDescription="MediGo logo" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No doctors found"
+                    android:textColor="#2B2D42"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Try another filter or search term"
+                    android:textColor="#8D99AE"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- Loading ProgressBar -->
+            <ProgressBar
+                android:id="@+id/progressDoctors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:indeterminateTint="#EF233C"
+                android:visibility="gone" />
+
+            <!-- Bottom spacer for navbar overlay (inside scroll) -->
+            <View
+                android:id="@+id/bottomSpacerForNav"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="@android:color/transparent" />
+            </LinearLayout> <!-- Ends wrapper LinearLayout -->
+    </ScrollView>
+
+</RelativeLayout>

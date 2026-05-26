@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Custom Sign Out Confirmation Dialog Layout
+     ════════════════════════════════════════════════════════════════════════ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_surface_card_unified"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- Warning / Logout Icon -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#FFEBEB"
+        android:layout_marginBottom="20dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_user"
+            app:tint="@color/crimson"
+            android:contentDescription="Warning Icon" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Dialog Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Out Account"
+        android:textColor="@color/navy"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/poppins"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Dialog Message -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Are you sure you want to sign out of MediGo? You will need to re-authenticate to view your consultations and send messages."
+        android:textColor="@color/slate"
+        android:textSize="14sp"
+        android:fontFamily="@font/poppins"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_marginBottom="28dp" />
+
+    <!-- Horizontal Buttons Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <!-- Cancel button (Left) -->
+        <TextView
+            android:id="@+id/btnConfirmCancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_button_secondary"
+            android:gravity="center"
+            android:text="Cancel"
+            android:textColor="@color/navy"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Confirm Sign Out button (Right) -->
+        <TextView
+            android:id="@+id/btnConfirmSignOut"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@color/crimson"
+            android:gravity="center"
+            android:text="Sign Out"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>

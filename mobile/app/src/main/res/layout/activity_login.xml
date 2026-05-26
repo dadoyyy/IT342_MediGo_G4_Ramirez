@@ -1,97 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Sign In Bottom Sheet Dialog
+     ════════════════════════════════════════════════════════════════════════ -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/gray_100">
+    android:background="@android:color/transparent">
+
+    <!-- Semitransparent backdrop for modal feel -->
+    <View
+        android:id="@+id/backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#AA11131E" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp">
 
-        <!-- Header -->
+        <!-- Top pill indicator for bottom sheet gesture visual -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="32dp">
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="12dp">
 
-            <TextView
-                style="@style/TextHeading1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Welcome Back" />
-
-            <TextView
-                style="@style/TextCaption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_secondary"
-                android:text="Sign in to continue" />
+            <View
+                android:layout_width="48dp"
+                android:layout_height="4dp"
+                android:background="@drawable/bg_patient_pill_inactive" />
         </LinearLayout>
 
-        <!-- Email Field -->
-        <FrameLayout
+        <!-- Bottom Sheet Card -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/surface"
-            android:elevation="1dp">
-            <EditText
-                android:id="@+id/etEmail"
-                style="@style/EditTextInput"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardElevation="24dp"
+            app:cardUseCompatPadding="false">
+
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
-                android:inputType="textEmailAddress" />
-        </FrameLayout>
+                android:fillViewport="true"
+                android:overScrollMode="never">
 
-        <!-- Password Field -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@color/surface"
-            android:elevation="1dp">
-            <EditText
-                android:id="@+id/etPassword"
-                style="@style/EditTextInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textPassword" />
-        </FrameLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
 
-        <!-- Login Button -->
-        <Button
-            android:id="@+id/btnLogin"
-            style="@style/ButtonPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Login" />
+                    <!-- Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="24dp">
 
-        <!-- Register Link -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+                        <ImageView
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:src="@mipmap/ic_launcher"
+                            android:contentDescription="MediGo logo" />
 
-            <TextView
-                style="@style/TextCaption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No account yet? " />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="14dp">
 
-            <TextView
-                android:id="@+id/tvGoToRegister"
-                style="@style/TextLink"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Register" />
-        </LinearLayout>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Welcome back"
+                                android:textColor="@color/navy"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black"
+                                android:includeFontPadding="false" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Sign in to continue your care journey"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp"
+                                android:fontFamily="sans-serif" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Error card -->
+                    <TextView
+                        android:id="@+id/tvErrorCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_status_box_error"
+                        android:padding="14dp"
+                        android:textColor="@color/ruby"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:visibility="gone"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Google login -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="18dp">
+
+                        <LinearLayout
+                            android:id="@+id/btnGoogleSignIn"
+                            android:layout_width="0dp"
+                            android:layout_height="52dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_auth_secondary_button"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_google" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:text="Continue with Google"
+                                android:textColor="@color/navy"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium"
+                                android:includeFontPadding="false" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Divider OR -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_divider_subtle" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_marginEnd="14dp"
+                            android:text="OR CONNECT VIA EMAIL"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.08" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_divider_subtle" />
+                    </LinearLayout>
+
+                    <!-- Email Field -->
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="EMAIL ADDRESS"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        style="@style/InputField"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="john.doe@example.com"
+                        android:inputType="textEmailAddress"
+                        android:importantForAutofill="no"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Password Field -->
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="PASSWORD"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etPassword"
+                        style="@style/InputField"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="••••••••"
+                        android:inputType="textPassword"
+                        android:importantForAutofill="no"
+                        android:layout_marginBottom="24dp" />
+
+                    <!-- Submit Button -->
+                    <Button
+                        android:id="@+id/btnLogin"
+                        style="@style/ButtonPrimary"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="Access Portal" />
+
+                    <!-- Bottom navigation link -->
+                    <TextView
+                        android:id="@+id/tvGoToRegister"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="20dp"
+                        android:text="New to MediGo? Create an account"
+                        android:textColor="@color/crimson"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
-</ScrollView>
+</FrameLayout>

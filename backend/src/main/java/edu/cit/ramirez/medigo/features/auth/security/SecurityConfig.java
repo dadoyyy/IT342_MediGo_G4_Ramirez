@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login",
                                  "/api/v1/auth/logout", "/api/v1/auth/oauth2/complete",
-                                 "/api/v1/auth/verify-email").permitAll()
+                                 "/api/v1/auth/verify-email", "/api/v1/appointments/docs/view/**").permitAll()
                         .requestMatchers("/api/v1/doctors/search", "/api/v1/appointments").authenticated()
                         .requestMatchers("/api/v1/doctors/me/profile").hasRole("DOCTOR")
                         .requestMatchers("/api/v1/doctors/me/documents").hasRole("DOCTOR")
@@ -86,7 +86,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://localhost:3000"));
+                "http://localhost:3000",
+                "http://127.0.0.1:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

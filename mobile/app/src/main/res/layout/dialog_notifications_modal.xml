@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Notifications Bottom Sheet Modal
+     ════════════════════════════════════════════════════════════════════════ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dashboard_card"
+    android:backgroundTint="@color/white"
+    android:padding="24dp">
+
+    <!-- Bottom sheet drag handle indicator -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:background="#D1D5DB"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Title Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notifications"
+            android:textColor="@color/navy"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:layout_alignParentStart="true" />
+
+        <!-- Mark as read / Clear simulated -->
+        <TextView
+            android:id="@+id/btnDismissAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dismiss All"
+            android:textColor="@color/crimson"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border_light"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Notification Content Area -->
+    <LinearLayout
+        android:id="@+id/layoutNotificationItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Messages Notification Card (Dynamic) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardMessageNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F8FAFC"
+            android:layout_marginBottom="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_icon_circle_navy"
+                    android:backgroundTint="#FFE6E8"
+                    android:foreground="@drawable/ic_message_outline"
+                    android:foregroundGravity="center"
+                    android:foregroundTint="@color/crimson" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Unread Messages"
+                        android:textColor="@color/navy"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/poppins" />
+
+                    <TextView
+                        android:id="@+id/tvMessageNotificationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="You have unread messages waiting."
+                        android:textColor="@color/slate"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/poppins" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Appointments Notification Card (Dynamic) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardAppointmentNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F8FAFC"
+            android:layout_marginBottom="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_icon_circle_navy"
+                    android:backgroundTint="#E6F4EA"
+                    android:foreground="@drawable/ic_calendar_outline"
+                    android:foregroundGravity="center"
+                    android:foregroundTint="#137333" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Active Appointments"
+                        android:textColor="@color/navy"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/poppins" />
+
+                    <TextView
+                        android:id="@+id/tvAppointmentNotificationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="You have upcoming active sessions."
+                        android:textColor="@color/slate"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/poppins" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- No Notifications Empty state (Dynamic) -->
+        <LinearLayout
+            android:id="@+id/layoutNotificationsEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_bell_outline"
+                app:tint="#8D99AE"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All caught up!"
+                android:textColor="@color/navy"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No new updates at the moment"
+                android:textColor="@color/slate"
+                android:textSize="12sp"
+                android:fontFamily="@font/poppins" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Close button -->
+    <TextView
+        android:id="@+id/btnCloseNotifications"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_button_secondary"
+        android:gravity="center"
+        android:text="Close"
+        android:textColor="@color/navy"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/poppins"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>
