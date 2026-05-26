@@ -33,6 +33,11 @@ class RegisterActivity : AppCompatActivity() {
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
 
+        binding.ivBackToLogin.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
         binding.btnRegister.setOnClickListener {
             submitRegistration()
         }
@@ -231,6 +236,13 @@ class RegisterActivity : AppCompatActivity() {
         binding.etEmail.error = null
         binding.etPassword.error = null
         binding.tvErrorCard.visibility = View.GONE
+
+        if (!binding.cbPrivacyConsent.isChecked) {
+            binding.tvErrorCard.text = "You must agree to the privacy policy to continue."
+            binding.tvErrorCard.visibility = View.VISIBLE
+            binding.cbPrivacyConsent.requestFocus()
+            return false
+        }
 
         if (firstName.isBlank()) { binding.etFirstName.error = "First name is required"; binding.etFirstName.requestFocus(); return false }
         if (lastName.isBlank()) { binding.etLastName.error = "Last name is required"; binding.etLastName.requestFocus(); return false }

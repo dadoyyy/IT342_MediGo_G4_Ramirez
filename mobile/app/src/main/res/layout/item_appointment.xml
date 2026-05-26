@@ -1,75 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Card"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    android:orientation="vertical">
+    android:layout_marginBottom="14dp"
+    android:background="@drawable/bg_dashboard_card"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- Header Panel: Name & Status Capsule -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
 
-        <TextView
-            android:id="@+id/tvAppointmentHeader"
-            style="@style/TextHeading3"
+        <View
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_icon_circle_crimson"
+            android:foreground="@drawable/ic_stethoscope"
+            android:foregroundGravity="center" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Dr. Ruther Ramirez"
-            android:textColor="@color/primary_accent" />
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:id="@+id/tvAppointmentHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dr. Ruther Ramirez"
+                android:textColor="@color/navy"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false" />
+
+            <TextView
+                android:id="@+id/tvAppointmentType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Medium: In-Clinic Consultation"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvStatusBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
             android:background="@drawable/bg_status_box_success"
-            android:textColor="@color/success"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
             android:text="CONFIRMED"
-            android:textStyle="bold"
+            android:textColor="@color/success"
             android:textSize="9sp"
-            android:letterSpacing="0.02" />
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.04" />
     </LinearLayout>
 
-    <!-- Details Section -->
-    <TextView
-        android:id="@+id/tvAppointmentTime"
-        style="@style/TextBody"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:text="Monday, May 18, 2026 at 10:00 AM" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
 
-    <TextView
-        android:id="@+id/tvAppointmentType"
-        style="@style/TextCaption"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textSize="12sp"
-        android:text="Medium: In-Clinic Consultation" />
+        <View
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_icon_circle_navy"
+            android:foreground="@drawable/ic_calendar_outline"
+            android:foregroundGravity="center" />
+
+        <TextView
+            android:id="@+id/tvAppointmentTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Monday, May 18, 2026 at 10:00 AM"
+            android:textColor="@color/navy"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvAppointmentNotes"
-        style="@style/TextBody"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textSize="13sp"
+        android:background="@drawable/bg_auth_chip"
+        android:padding="12dp"
+        android:text="Notes: Regular cardiology checkup."
         android:textColor="@color/text_secondary"
-        android:text="Notes: Regular cardiology checkup." />
+        android:textSize="12sp"
+        android:fontFamily="sans-serif"
+        android:layout_marginBottom="12dp"
+        android:lineSpacingExtra="2dp" />
 
-    <!-- Action Divider & Bar -->
     <LinearLayout
         android:id="@+id/layoutActionArea"
         android:layout_width="match_parent"
@@ -80,9 +118,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/border"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="12dp" />
+            android:background="@color/navy_05"
+            android:layout_marginBottom="10dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -90,7 +127,6 @@
             android:orientation="horizontal"
             android:gravity="end">
 
-            <!-- Patient Action: Cancel -->
             <Button
                 android:id="@+id/btnPatientCancel"
                 style="@style/Widget.AppCompat.Button.Borderless"
@@ -98,12 +134,11 @@
                 android:layout_height="wrap_content"
                 android:minHeight="36dp"
                 android:text="Cancel Booking"
-                android:textColor="@color/error"
+                android:textColor="@color/crimson"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:visibility="gone" />
 
-            <!-- Doctor Action: Reject -->
             <Button
                 android:id="@+id/btnDoctorReject"
                 style="@style/Widget.AppCompat.Button.Borderless"
@@ -111,12 +146,11 @@
                 android:layout_height="wrap_content"
                 android:minHeight="36dp"
                 android:text="Reject"
-                android:textColor="@color/error"
+                android:textColor="@color/crimson"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:visibility="gone" />
 
-            <!-- Doctor Action: Confirm -->
             <Button
                 android:id="@+id/btnDoctorConfirm"
                 style="@style/ButtonPrimary"
@@ -127,7 +161,7 @@
                 android:paddingEnd="16dp"
                 android:layout_marginStart="8dp"
                 android:text="Confirm Slot"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

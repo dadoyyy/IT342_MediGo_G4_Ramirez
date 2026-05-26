@@ -39,6 +39,9 @@
             android:name=".features.patient.ConsultationSummaryActivity"
             android:exported="false" />
         <activity
+            android:name=".features.patient.PatientProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".features.patient.ChatListActivity"
             android:exported="false" />
         <activity

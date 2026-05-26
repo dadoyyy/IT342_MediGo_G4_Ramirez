@@ -1,94 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    android:orientation="vertical"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_selectable_card"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- Title and Specialization Badge -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvDoctorName"
-            style="@style/TextHeading3"
+        <FrameLayout
+            android:layout_width="52dp"
+            android:layout_height="52dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_status_box_error"
+                android:backgroundTint="@color/primary_light"
+                android:gravity="center"
+                android:text="DR"
+                android:textColor="@color/primary_accent"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="1dp"
+                android:background="@drawable/bg_status_box_success" />
+        </FrameLayout>
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Dr. Ruther Ramirez"
-            android:textColor="@color/primary_accent" />
+            android:layout_marginStart="14dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvSpecializationBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:background="@drawable/bg_status_box_error"
-            android:textColor="@color/primary"
-            android:text="CARDIOLOGY"
-            android:textStyle="bold"
-            android:textSize="10sp"
-            android:letterSpacing="0.02" />
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-    <!-- Clinic Details -->
-    <TextView
-        android:id="@+id/tvClinicDetails"
-        style="@style/TextCaption"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:textSize="13sp"
-        android:textColor="@color/text_secondary"
-        android:text="MediGo Specialist Clinic, Room 402" />
+                <TextView
+                    android:id="@+id/tvDoctorName"
+                    style="@style/TextHeading3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Dr. Ruther Ramirez"
+                    android:textColor="@color/primary_accent"
+                    android:textSize="15sp" />
 
-    <!-- Details Grid (Experience and Fee) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="12dp"
-        android:gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tvSpecializationBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="@drawable/bg_status_box_error"
+                    android:textColor="@color/primary"
+                    android:text="CARDIOLOGY"
+                    android:textStyle="bold"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.02" />
+            </LinearLayout>
 
-        <!-- Experience -->
-        <TextView
-            android:id="@+id/tvExperience"
-            style="@style/TextBody"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="13sp"
-            android:textColor="@color/text_tertiary"
-            android:text="Experience: 8 years" />
+            <TextView
+                android:id="@+id/tvClinicDetails"
+                style="@style/TextCaption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:text="MediGo Specialist Clinic, Room 402" />
 
-        <!-- Consultation Fee -->
-        <TextView
-            android:id="@+id/tvConsultationFee"
-            style="@style/TextHeading3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/success"
-            android:textSize="14sp"
-            android:text="₱500.00" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvExperience"
+                    style="@style/TextBody"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_tertiary"
+                    android:text="Experience: 8 years" />
+
+                <TextView
+                    android:id="@+id/tvConsultationFee"
+                    style="@style/TextHeading3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/success"
+                    android:textSize="14sp"
+                    android:text="₱500.00" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border"
         android:layout_marginTop="14dp"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="10dp"
+        android:background="@color/border" />
 
-    <!-- Footer Action -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

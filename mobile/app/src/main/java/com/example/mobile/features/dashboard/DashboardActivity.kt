@@ -9,6 +9,7 @@ import com.example.mobile.databinding.ActivityDashboardBinding
 import com.example.mobile.features.auth.LoginActivity
 import com.example.mobile.features.patient.AppointmentsListActivity
 import com.example.mobile.features.patient.ChatListActivity
+import com.example.mobile.features.patient.PatientProfileActivity
 import com.example.mobile.features.patient.SearchDoctorsActivity
 import com.example.mobile.shared.api.TokenHolder
 import com.example.mobile.shared.session.SessionManager
@@ -58,10 +59,17 @@ class DashboardActivity : AppCompatActivity() {
     private fun loadDashboardData() {
         val fullName = sessionManager.fullName().orEmpty()
         val email = sessionManager.email().orEmpty()
+        val initials = fullName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "ME" }
 
         binding.tvWelcomeGreeting.text = "Welcome back,"
         binding.tvUserDisplayName.text = fullName
         binding.tvUserEmailFooter.text = email
+        binding.btnOpenProfile.text = initials
     }
 
     private fun setupClickListeners() {
@@ -75,6 +83,16 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.cardPatientChats.setOnClickListener {
             startActivity(Intent(this, ChatListActivity::class.java))
+        }
+
+        binding.btnOpenProfile.setOnClickListener {
+            startActivity(Intent(this, PatientProfileActivity::class.java))
+        }
+
+        binding.btnNotifications.setOnClickListener {
+            startActivity(Intent(this, PatientProfileActivity::class.java).apply {
+                putExtra(PatientProfileActivity.EXTRA_OPEN_NOTIFICATIONS, true)
+            })
         }
 
         binding.btnHeaderLogout.setOnClickListener {
