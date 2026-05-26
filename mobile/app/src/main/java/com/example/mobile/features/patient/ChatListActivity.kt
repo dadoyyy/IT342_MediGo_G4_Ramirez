@@ -7,16 +7,27 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.databinding.ActivityChatListBinding
 import com.example.mobile.databinding.ItemChatContactBinding
+import com.example.mobile.databinding.DialogNotificationsModalBinding
+import com.example.mobile.databinding.DialogProfileModalBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.ChatContactDto
+import com.example.mobile.model.AppointmentDto
 import com.example.mobile.shared.api.ApiClient
+import com.example.mobile.shared.api.TokenHolder
+import com.example.mobile.shared.session.SessionManager
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
+import com.example.mobile.features.auth.LoginActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,6 +35,9 @@ import retrofit2.Response
 class ChatListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatListBinding
     private lateinit var contactsAdapter: ChatContactsAdapter
+    private lateinit var sessionManager: SessionManager
+    private var unreadMessageCount = 0L
+    private var activeAppointmentCount = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +46,9 @@ class ChatListActivity : AppCompatActivity() {
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+        attachPatientBottomNav(PatientBottomTab.MESSAGES)
+
+        sessionManager = SessionManager(this)
 
         setupToolbar()
         setupRecyclerView()
@@ -41,11 +58,25 @@ class ChatListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchContacts(binding.etSearchContacts.text.toString().trim())
+        loadNotificationCounts()
     }
 
     private fun setupToolbar() {
-        binding.btnBack.setOnClickListener {
-            finish()
+        val fullName = sessionManager.fullName().orEmpty()
+        val initials = fullName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "ME" }
+        binding.btnOpenProfile.text = initials
+
+        binding.btnNotifications.setOnClickListener {
+            showNotificationsModal()
+        }
+
+        binding.btnOpenProfile.setOnClickListener {
+            showProfileModal()
         }
     }
 
@@ -108,6 +139,155 @@ class ChatListActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun loadNotificationCounts() {
+        ApiClient.chatApi.getContacts(null).enqueue(object : Callback<ApiEnvelope<List<ChatContactDto>>> {
+            override fun onResponse(
+                call: Call<ApiEnvelope<List<ChatContactDto>>>,
+                response: Response<ApiEnvelope<List<ChatContactDto>>>
+            ) {
+                val contacts = response.body()?.data ?: emptyList()
+                unreadMessageCount = contacts.sumOf { it.unread }
+            }
+
+            override fun onFailure(call: Call<ApiEnvelope<List<ChatContactDto>>>, t: Throwable) {
+                unreadMessageCount = 0
+            }
+        })
+
+        ApiClient.appointmentApi.getMyAppointments().enqueue(object : Callback<ApiEnvelope<List<AppointmentDto>>> {
+            override fun onResponse(
+                call: Call<ApiEnvelope<List<AppointmentDto>>>,
+                response: Response<ApiEnvelope<List<AppointmentDto>>>
+            ) {
+                val appointments = response.body()?.data ?: emptyList()
+                activeAppointmentCount = appointments.count {
+                    val status = it.status.uppercase()
+                    status != "CANCELLED" && status != "REJECTED" && status != "COMPLETED"
+                }.toLong()
+            }
+
+            override fun onFailure(call: Call<ApiEnvelope<List<AppointmentDto>>>, t: Throwable) {
+                activeAppointmentCount = 0
+            }
+        })
+    }
+
+    private fun showNotificationsModal() {
+        val dialog = BottomSheetDialog(this)
+        val dialogBinding = DialogNotificationsModalBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        val hasMessages = unreadMessageCount > 0
+        val hasAppointments = activeAppointmentCount > 0
+
+        if (!hasMessages && !hasAppointments) {
+            dialogBinding.cardMessageNotification.visibility = View.GONE
+            dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            dialogBinding.layoutNotificationsEmpty.visibility = View.VISIBLE
+        } else {
+            dialogBinding.layoutNotificationsEmpty.visibility = View.GONE
+
+            if (hasMessages) {
+                dialogBinding.cardMessageNotification.visibility = View.VISIBLE
+                dialogBinding.tvMessageNotificationText.text = "You have $unreadMessageCount unread messages waiting in your inbox."
+                dialogBinding.cardMessageNotification.setOnClickListener {
+                    dialog.dismiss()
+                    // Already on ChatListActivity
+                }
+            } else {
+                dialogBinding.cardMessageNotification.visibility = View.GONE
+            }
+
+            if (hasAppointments) {
+                dialogBinding.cardAppointmentNotification.visibility = View.VISIBLE
+                dialogBinding.tvAppointmentNotificationText.text = "You have $activeAppointmentCount active appointments coming up."
+                dialogBinding.cardAppointmentNotification.setOnClickListener {
+                    dialog.dismiss()
+                    startActivity(Intent(this, AppointmentsListActivity::class.java))
+                }
+            } else {
+                dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            }
+        }
+
+        dialogBinding.btnDismissAll.setOnClickListener {
+            unreadMessageCount = 0
+            activeAppointmentCount = 0
+            dialogBinding.cardMessageNotification.visibility = View.GONE
+            dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            dialogBinding.layoutNotificationsEmpty.visibility = View.VISIBLE
+            Toast.makeText(this, "All notifications dismissed", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogBinding.btnCloseNotifications.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showProfileModal() {
+        val dialog = BottomSheetDialog(this)
+        val dialogBinding = DialogProfileModalBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        val fullName = sessionManager.fullName().orEmpty()
+        val email = sessionManager.email().orEmpty()
+        val initials = fullName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "ME" }
+
+        dialogBinding.tvModalFullName.text = fullName
+        dialogBinding.tvModalEmail.text = email
+        dialogBinding.tvModalAvatar.text = initials
+
+        dialogBinding.btnModalSignOut.setOnClickListener {
+            dialog.dismiss()
+            showSignOutConfirmation()
+        }
+
+        dialog.show()
+    }
+
+    private fun showSignOutConfirmation() {
+        val dialog = AlertDialog.Builder(this)
+            .setView(layoutInflater.inflate(R.layout.dialog_signout_confirmation, null))
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        val btnCancel = dialog.findViewById<TextView>(R.id.btnConfirmCancel)
+        val btnSignOut = dialog.findViewById<TextView>(R.id.btnConfirmSignOut)
+
+        btnCancel?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSignOut?.setOnClickListener {
+            dialog.dismiss()
+            performSignOut()
+        }
+    }
+
+    private fun performSignOut() {
+        sessionManager.clearSession()
+        TokenHolder.clearToken()
+        Toast.makeText(this, "You have been signed out successfully.", Toast.LENGTH_SHORT).show()
+        redirectToLogin()
+    }
+
+    private fun redirectToLogin() {
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
+    }
 }
 
 class ChatContactsAdapter(
@@ -152,10 +332,15 @@ class ChatContactsAdapter(
             binding.tvAvatarInitials.text = initials
 
             val lastMsgText = if (!contact.lastMsg.isNullOrBlank()) {
-                if (contact.lastMsg.startsWith("[APPT_COMPLETED]")) {
-                    "Consultation completed & signed."
-                } else {
-                    contact.lastMsg
+                val rawMsg = contact.lastMsg
+                when {
+                    rawMsg.startsWith("[APPT_COMPLETED]") -> "Consultation completed & signed."
+                    rawMsg.startsWith("[APPT_CONFIRMED]") -> "Consultation slot confirmed."
+                    rawMsg.startsWith("[APPT_CANCELLED]") -> {
+                        val isDeclined = rawMsg.contains("Status=Declined")
+                        if (isDeclined) "Consultation declined by doctor." else "Consultation cancelled."
+                    }
+                    else -> rawMsg
                 }
             } else {
                 "No messages yet."

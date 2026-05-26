@@ -29,12 +29,19 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setFinishOnTouchOutside(true)
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
 
+        binding.backdrop.setOnClickListener {
+            finish()
+            overridePendingTransition(0, R.anim.slide_down_fade_out)
+        }
+
         binding.ivBackToLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
+            overridePendingTransition(R.anim.slide_up_fade_in, R.anim.fade_out)
             finish()
         }
 
@@ -49,6 +56,7 @@ class RegisterActivity : AppCompatActivity() {
 
         binding.tvGoToLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
+            overridePendingTransition(R.anim.slide_up_fade_in, R.anim.fade_out)
             finish()
         }
     }
@@ -105,7 +113,9 @@ class RegisterActivity : AppCompatActivity() {
                         TokenHolder.setToken(auth.token.orEmpty())
 
                         Toast.makeText(this@RegisterActivity, "Registration successful!", Toast.LENGTH_LONG).show()
-                        startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
+                        startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
                         finish()
                     }
                 } else {
@@ -210,7 +220,9 @@ class RegisterActivity : AppCompatActivity() {
                         )
                         TokenHolder.setToken(auth.token.orEmpty())
                         Toast.makeText(this@RegisterActivity, "Account created successfully!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java))
+                        startActivity(Intent(this@RegisterActivity, DashboardActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
                         finish()
                     } else {
                         val message = ApiErrorParser.parseMessage(response.errorBody(), "Registration failed.")

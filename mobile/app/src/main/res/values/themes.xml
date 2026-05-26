@@ -3,17 +3,32 @@
         <item name="colorPrimary">@color/crimson</item>
         <item name="colorPrimaryDark">@color/ruby</item>
         <item name="colorAccent">@color/crimson</item>
-        <item name="android:statusBarColor">@color/navy</item>
+        <item name="android:statusBarColor">@color/crimson</item>
         <item name="android:navigationBarColor">@color/navy</item>
-        <item name="android:windowBackground">@color/mist</item>
-        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:windowBackground">@color/navy_dark</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
     </style>
 
     <style name="Theme.Mobile" parent="Base.Theme.Mobile" />
 
+    <style name="Theme.Mobile.AuthModal" parent="Base.Theme.Mobile">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:statusBarColor">@color/crimson</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Theme.Mobile.AuthModal.Animation</item>
+    </style>
+
+    <style name="Theme.Mobile.AuthModal.Animation">
+        <item name="android:windowEnterAnimation">@anim/slide_up_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/slide_down_fade_out</item>
+    </style>
+
     <!-- Splash / Landing theme with navy status bar -->
     <style name="Theme.Mobile.Splash" parent="Base.Theme.Mobile">
-        <item name="android:statusBarColor">@color/navy_dark</item>
+        <item name="android:statusBarColor">@color/crimson</item>
         <item name="android:windowBackground">@color/mist</item>
     </style>
 </resources>

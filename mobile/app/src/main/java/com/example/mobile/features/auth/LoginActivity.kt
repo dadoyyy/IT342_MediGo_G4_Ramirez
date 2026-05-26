@@ -28,9 +28,15 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setFinishOnTouchOutside(true)
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+
+        binding.backdrop.setOnClickListener {
+            finish()
+            overridePendingTransition(0, R.anim.slide_down_fade_out)
+        }
 
         sessionManager = SessionManager(this)
         intent.getStringExtra("prefill_email")?.let { binding.etEmail.setText(it) }
@@ -46,6 +52,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvGoToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+            overridePendingTransition(R.anim.slide_up_fade_in, R.anim.fade_out)
             finish()
         }
     }
@@ -85,7 +92,9 @@ class LoginActivity : AppCompatActivity() {
                                     role = user.role
                                 )
                                 Toast.makeText(this@LoginActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
-                                startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                                startActivity(Intent(this@LoginActivity, DashboardActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                })
                                 finish()
                             } else {
                                 TokenHolder.clearToken()
@@ -151,7 +160,9 @@ class LoginActivity : AppCompatActivity() {
                         TokenHolder.setToken(auth.token.orEmpty())
 
                         Toast.makeText(this@LoginActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                        startActivity(Intent(this@LoginActivity, DashboardActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
                         finish()
                     } else {
                         val apiMessage = body?.error?.message

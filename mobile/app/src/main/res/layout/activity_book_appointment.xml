@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Book Appointment
+     ════════════════════════════════════════════════════════════════════════ -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,11 +15,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- ── Hero Header ─────────────────────────────────────── -->
         <FrameLayout
+            style="@style/PageHero"
             android:layout_width="match_parent"
-            android:layout_height="280dp"
-            android:background="@drawable/bg_auth_hero"
-            android:padding="20dp">
+            android:layout_height="240dp">
 
             <View
                 android:layout_width="180dp"
@@ -49,13 +52,12 @@
                         android:id="@+id/btnBack"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_back_button_circle"
                         android:clickable="true"
                         android:contentDescription="Back"
                         android:focusable="true"
-                        android:padding="8dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="@color/white" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_arrow_back" />
 
                     <View
                         android:layout_width="0dp"
@@ -63,42 +65,29 @@
                         android:layout_weight="1" />
 
                     <TextView
+                        style="@style/PageHeroPill"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_patient_header_pill"
-                        android:paddingStart="12dp"
-                        android:paddingTop="6dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="6dp"
-                        android:text="BOOKING"
-                        android:textColor="@color/text_on_dark"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="BOOKING" />
                 </LinearLayout>
 
                 <TextView
+                    style="@style/PageHeroTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Schedule Booking"
-                    android:textColor="@color/text_on_dark"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03" />
+                    android:layout_marginTop="22dp"
+                    android:text="Schedule Booking" />
 
                 <TextView
+                    style="@style/PageHeroSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Choose a date, time, and consultation style that fits your visit."
-                    android:textColor="@color/slate"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="2dp" />
+                    android:text="Choose a date, time, and consultation style that fits your visit." />
             </LinearLayout>
         </FrameLayout>
 
+        <!-- ── Content ─────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,6 +97,7 @@
             android:paddingEnd="16dp"
             android:paddingBottom="24dp">
 
+            <!-- Error card -->
             <TextView
                 android:id="@+id/tvErrorCard"
                 style="@style/ErrorMessage"
@@ -116,65 +106,63 @@
                 android:layout_marginBottom="14dp"
                 android:visibility="gone" />
 
+            <!-- Booking summary -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="10dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Booking summary"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="BOOKING SUMMARY" />
 
                     <TextView
                         android:id="@+id/tvSummaryDoctorName"
-                        style="@style/TextHeading3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:textColor="@color/primary_accent"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
                         android:text="Dr. Ruther Ramirez" />
 
                     <TextView
                         android:id="@+id/tvSummaryDetails"
-                        style="@style/TextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:textSize="13sp"
                         android:textColor="@color/text_secondary"
+                        android:fontFamily="sans-serif"
                         android:text="Cardiology • Consultation Fee: ₱500.00" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Scheduling form -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
+                    <!-- Date picker -->
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="SELECT APPOINTMENT DATE" />
@@ -183,36 +171,40 @@
                         android:id="@+id/btnSelectDate"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="20dp"
-                        android:background="@drawable/bg_input"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="22dp"
+                        android:background="@drawable/bg_input_unified"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
                         android:clickable="true"
                         android:focusable="true">
 
                         <TextView
                             android:id="@+id/tvSelectedDate"
-                            style="@style/TextHeading3"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:textSize="15sp"
+                            android:textColor="@color/navy"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
                             android:text="Monday, May 18, 2026" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Change"
-                            android:textColor="@color/primary"
+                            android:textColor="@color/crimson"
                             android:textStyle="bold"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium" />
                     </LinearLayout>
 
+                    <!-- Time slots -->
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="CHOOSE AVAILABLE HOUR SLOT" />
@@ -220,8 +212,8 @@
                     <GridLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="20dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="22dp"
                         android:columnCount="3"
                         android:rowCount="3"
                         android:alignmentMode="alignBounds">
@@ -232,12 +224,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="09:00 AM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -247,12 +241,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="10:00 AM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -262,12 +258,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="11:00 AM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -277,12 +275,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="01:00 PM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -292,12 +292,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="02:00 PM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -307,12 +309,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="03:00 PM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -322,12 +326,14 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="04:00 PM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
@@ -337,18 +343,21 @@
                             android:layout_height="wrap_content"
                             android:layout_columnWeight="1"
                             android:layout_margin="4dp"
-                            android:padding="12dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:padding="14dp"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="05:00 PM"
                             android:textSize="13sp"
                             android:textStyle="bold"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
                     </GridLayout>
 
+                    <!-- Consultation medium -->
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="CONSULTATION MEDIUM" />
@@ -357,40 +366,45 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="22dp">
 
                         <TextView
                             android:id="@+id/btnTypeInClinic"
                             android:layout_width="0dp"
-                            android:layout_height="50dp"
+                            android:layout_height="52dp"
                             android:layout_weight="1"
                             android:layout_marginEnd="6dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="In-Clinic Visit"
                             android:textStyle="bold"
                             android:textSize="13sp"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
 
                         <TextView
                             android:id="@+id/btnTypeVirtual"
                             android:layout_width="0dp"
-                            android:layout_height="50dp"
+                            android:layout_height="52dp"
                             android:layout_weight="1"
                             android:layout_marginStart="6dp"
-                            android:background="@drawable/bg_selectable_card"
+                            android:background="@drawable/bg_time_slot_default"
                             android:gravity="center"
                             android:text="Virtual Chat"
                             android:textStyle="bold"
                             android:textSize="13sp"
+                            android:textColor="@color/navy"
+                            android:fontFamily="sans-serif-medium"
                             android:clickable="true"
                             android:focusable="true" />
                     </LinearLayout>
 
+                    <!-- Notes -->
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="CONSULTATION NOTES / SYMPTOMS" />
@@ -400,9 +414,9 @@
                         style="@style/InputField"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="100dp"
+                        android:minHeight="110dp"
                         android:gravity="top|start"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:layout_marginBottom="24dp"
                         android:padding="16dp"
                         android:hint="Describe your symptoms or medical concern..."
@@ -410,13 +424,13 @@
                         android:scrollbars="vertical"
                         android:importantForAutofill="no" />
 
+                    <!-- CTA -->
                     <Button
                         android:id="@+id/btnConfirmBooking"
                         style="@style/ButtonPrimary"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Confirm Scheduling Request" />
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>

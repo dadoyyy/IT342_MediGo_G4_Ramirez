@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Doctor Detail Profile
+     ════════════════════════════════════════════════════════════════════════ -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,11 +15,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- ── Hero Header ─────────────────────────────────────── -->
         <FrameLayout
+            style="@style/PageHero"
             android:layout_width="match_parent"
-            android:layout_height="280dp"
-            android:background="@drawable/bg_auth_hero"
-            android:padding="20dp">
+            android:layout_height="240dp">
 
             <View
                 android:layout_width="180dp"
@@ -49,13 +52,12 @@
                         android:id="@+id/btnBack"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_back_button_circle"
                         android:clickable="true"
                         android:contentDescription="Back"
                         android:focusable="true"
-                        android:padding="8dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="@color/white" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_arrow_back" />
 
                     <View
                         android:layout_width="0dp"
@@ -63,42 +65,29 @@
                         android:layout_weight="1" />
 
                     <TextView
+                        style="@style/PageHeroPill"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_patient_header_pill"
-                        android:paddingStart="12dp"
-                        android:paddingTop="6dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="6dp"
-                        android:text="DOCTOR PROFILE"
-                        android:textColor="@color/text_on_dark"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="DOCTOR PROFILE" />
                 </LinearLayout>
 
                 <TextView
+                    style="@style/PageHeroTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Doctor Profile"
-                    android:textColor="@color/text_on_dark"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03" />
+                    android:layout_marginTop="22dp"
+                    android:text="Doctor Profile" />
 
                 <TextView
+                    style="@style/PageHeroSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Review credentials, clinic details, and experience before booking a consultation."
-                    android:textColor="@color/slate"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="2dp" />
+                    android:text="Review credentials, clinic details, and experience before booking." />
             </LinearLayout>
         </FrameLayout>
 
+        <!-- ── Content ─────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,46 +97,75 @@
             android:paddingEnd="16dp"
             android:paddingBottom="24dp">
 
+            <!-- Doctor identity card -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="10dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
-
-                    <TextView
-                        android:id="@+id/tvDoctorName"
-                        style="@style/TextHeading2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Dr. Ruther Ramirez"
-                        android:textColor="@color/primary_accent" />
-
-                    <TextView
-                        android:id="@+id/tvSpecialization"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp"
-                        android:background="@drawable/bg_status_box_error"
-                        android:textColor="@color/primary"
-                        android:textStyle="bold"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.05" />
+                    android:padding="20dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <!-- Rounded Card for Doctor Avatar -->
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            app:cardCornerRadius="36dp"
+                            app:cardElevation="0dp"
+                            android:layout_marginEnd="16dp"
+                            app:cardBackgroundColor="@color/mist">
+
+                            <ImageView
+                                android:id="@+id/ivDoctorAvatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_stethoscope"
+                                app:tint="@color/crimson"
+                                android:scaleType="centerInside" />
+                        </androidx.cardview.widget.CardView>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvDoctorName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Dr. Ruther Ramirez"
+                                android:textColor="@color/primary_accent"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium"
+                                android:letterSpacing="-0.01" />
+
+                            <TextView
+                                android:id="@+id/tvSpecialization"
+                                style="@style/ChipActive"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:textSize="10sp"
+                                android:letterSpacing="0.04" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Stats row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -158,20 +176,20 @@
                             android:paddingEnd="10dp">
 
                             <TextView
-                                style="@style/TextCaption"
+                                style="@style/SectionLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="EXPERIENCE" />
 
                             <TextView
                                 android:id="@+id/tvExperience"
-                                style="@style/TextBody"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="6dp"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="13sp"
-                                android:text="Practice Experience: 8 Years" />
+                                android:textSize="14sp"
+                                android:fontFamily="sans-serif"
+                                android:text="8 Years Practice" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -182,153 +200,158 @@
                             android:paddingStart="10dp">
 
                             <TextView
-                                style="@style/TextCaption"
+                                style="@style/SectionLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="CONSULTATION FEE" />
 
                             <TextView
                                 android:id="@+id/tvConsultationFee"
-                                style="@style/TextHeading3"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:textSize="16sp"
+                                android:layout_marginTop="6dp"
                                 android:textColor="@color/success"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium"
                                 android:text="₱500.00" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Clinic Location -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
-                        style="@style/TextHeading3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Clinic Location"
-                        android:textSize="15sp"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/primary_accent"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="12dp" />
 
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="CLINIC NAME" />
 
                     <TextView
                         android:id="@+id/tvClinicName"
-                        style="@style/TextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
+                        android:layout_marginTop="4dp"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
                         android:text="MediGo Clinic"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="12dp" />
 
                     <TextView
-                        style="@style/TextCaption"
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="CLINIC ADDRESS" />
 
                     <TextView
                         android:id="@+id/tvClinicAddress"
-                        style="@style/TextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:text="Cebu City"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginTop="4dp"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:text="Cebu City" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- About Doctor -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
-                        style="@style/TextHeading3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="About Doctor"
-                        android:textSize="15sp"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/primary_accent"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="10dp" />
 
                     <TextView
                         android:id="@+id/tvBio"
-                        style="@style/TextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textColor="@color/text_secondary"
+                        android:lineSpacingExtra="3dp"
                         android:text="No biography provided." />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Medical Education -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
-                        style="@style/TextHeading3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Medical Education"
-                        android:textSize="15sp"
-                        android:layout_marginBottom="8dp" />
+                        android:textColor="@color/primary_accent"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="10dp" />
 
                     <TextView
                         android:id="@+id/tvEducation"
-                        style="@style/TextBody"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textColor="@color/text_secondary"
+                        android:lineSpacingExtra="3dp"
                         android:text="No educational background provided." />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- CTA -->
             <Button
                 android:id="@+id/btnBookAppointment"
                 style="@style/ButtonPrimary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:text="Book Consultation Slot" />
-
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

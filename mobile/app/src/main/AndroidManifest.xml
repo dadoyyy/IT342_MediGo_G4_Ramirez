@@ -52,10 +52,12 @@
         <!-- Auth Activities -->
         <activity
             android:name=".features.auth.RegisterActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Mobile.AuthModal" />
         <activity
             android:name=".features.auth.LoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Mobile.AuthModal" />
         <activity
             android:name=".features.auth.OAuthActivity"
             android:exported="false" />

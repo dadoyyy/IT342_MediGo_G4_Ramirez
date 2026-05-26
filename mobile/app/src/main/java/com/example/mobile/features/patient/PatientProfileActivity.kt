@@ -14,6 +14,8 @@ import com.example.mobile.features.auth.LoginActivity
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.api.TokenHolder
 import com.example.mobile.shared.session.SessionManager
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -38,6 +40,7 @@ class PatientProfileActivity : AppCompatActivity() {
         }
 
         binding.root.startAnimation(android.view.animation.AnimationUtils.loadAnimation(this, com.example.mobile.R.anim.fade_in_up))
+        attachPatientBottomNav(null)
 
         setupActions()
         loadProfile()

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Search Doctors
+     ════════════════════════════════════════════════════════════════════════ -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/mist"
@@ -11,11 +15,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- ── Hero Header ─────────────────────────────────────── -->
         <FrameLayout
+            style="@style/PageHero"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
-            android:background="@drawable/bg_auth_hero"
-            android:padding="20dp">
+            android:layout_height="240dp">
 
             <View
                 android:layout_width="180dp"
@@ -48,13 +52,12 @@
                         android:id="@+id/btnBack"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_back_button_circle"
                         android:clickable="true"
                         android:contentDescription="Back"
                         android:focusable="true"
-                        android:padding="8dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="@color/white" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_arrow_back" />
 
                     <View
                         android:layout_width="0dp"
@@ -62,42 +65,29 @@
                         android:layout_weight="1" />
 
                     <TextView
+                        style="@style/PageHeroPill"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_patient_header_pill"
-                        android:paddingStart="12dp"
-                        android:paddingTop="6dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="6dp"
-                        android:text="PATIENT SEARCH"
-                        android:textColor="@color/text_on_dark"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="PATIENT SEARCH" />
                 </LinearLayout>
 
                 <TextView
+                    style="@style/PageHeroTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Find a Specialist"
-                    android:textColor="@color/text_on_dark"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03" />
+                    android:layout_marginTop="22dp"
+                    android:text="Find a Specialist" />
 
                 <TextView
+                    style="@style/PageHeroSubtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Search verified doctors by name or specialization and open their profile in one tap."
-                    android:textColor="@color/slate"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="2dp" />
+                    android:text="Search verified doctors by name or specialization and open their profile in one tap." />
             </LinearLayout>
         </FrameLayout>
 
+        <!-- ── Content ─────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -107,12 +97,11 @@
             android:paddingEnd="16dp"
             android:paddingBottom="24dp">
 
+            <!-- Search card -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="10dp"
-                app:cardBackgroundColor="@color/white">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -121,18 +110,15 @@
                     android:padding="18dp">
 
                     <TextView
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Search doctors"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="SEARCH DOCTORS" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="12dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
@@ -156,6 +142,7 @@
                             android:text="Search" />
                     </LinearLayout>
 
+                    <!-- Filter chips -->
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -168,69 +155,49 @@
                             android:orientation="horizontal">
 
                             <TextView
+                                style="@style/ChipActive"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/bg_patient_pill_active"
-                                android:paddingStart="14dp"
-                                android:paddingTop="8dp"
-                                android:paddingEnd="14dp"
-                                android:paddingBottom="8dp"
-                                android:text="All specializations"
-                                android:textColor="@color/white"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:text="All specializations" />
 
                             <TextView
+                                style="@style/ChipDefault"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
-                                android:background="@drawable/bg_patient_pill_inactive"
-                                android:paddingStart="14dp"
-                                android:paddingTop="8dp"
-                                android:paddingEnd="14dp"
-                                android:paddingBottom="8dp"
-                                android:text="Verified"
-                                android:textColor="@color/navy"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:text="Verified" />
 
                             <TextView
+                                style="@style/ChipDefault"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
-                                android:background="@drawable/bg_patient_pill_inactive"
-                                android:paddingStart="14dp"
-                                android:paddingTop="8dp"
-                                android:paddingEnd="14dp"
-                                android:paddingBottom="8dp"
-                                android:text="Affordable"
-                                android:textColor="@color/navy"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:text="Affordable" />
                         </LinearLayout>
                     </HorizontalScrollView>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Results area -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="560dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                android:background="@color/white">
+                android:minHeight="400dp">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvDoctors"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="14dp"
-                    android:clipToPadding="false"
-                    android:scrollbars="vertical" />
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false" />
 
                 <ProgressBar
                     android:id="@+id/progressBar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:indeterminateTint="@color/crimson"
                     android:visibility="gone" />
 
                 <LinearLayout
@@ -243,22 +210,30 @@
                     android:padding="32dp"
                     android:visibility="gone">
 
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@mipmap/ic_launcher"
+                        android:layout_marginBottom="16dp" />
+
                     <TextView
-                        style="@style/TextHeading3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="No Doctors Found"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/navy"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
 
                     <TextView
-                        style="@style/TextBody"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Try expanding your search query or looking for other specializations."
                         android:gravity="center"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="13sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif" />
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>

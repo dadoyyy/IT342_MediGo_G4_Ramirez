@@ -16,6 +16,8 @@ import com.example.mobile.model.AppointmentDto
 import com.example.mobile.model.DoctorProfileDto
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.api.ApiErrorParser
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -46,6 +48,7 @@ class BookAppointmentActivity : AppCompatActivity() {
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+        attachPatientBottomNav(PatientBottomTab.APPOINTMENTS)
 
         doctorProfile = intent.getSerializableExtra("doctor_profile") as? DoctorProfileDto
         if (doctorProfile == null) {

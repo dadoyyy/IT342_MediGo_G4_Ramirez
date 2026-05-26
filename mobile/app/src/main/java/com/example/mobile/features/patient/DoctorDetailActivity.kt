@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.R
 import com.example.mobile.databinding.ActivityDoctorDetailBinding
 import com.example.mobile.model.DoctorProfileDto
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
+import com.bumptech.glide.Glide
+import com.example.mobile.BuildConfig
 
 class DoctorDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDoctorDetailBinding
@@ -18,6 +22,7 @@ class DoctorDetailActivity : AppCompatActivity() {
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+        attachPatientBottomNav(PatientBottomTab.HOME)
 
         val profile = intent.getSerializableExtra("doctor_profile") as? DoctorProfileDto
         if (profile == null) {
@@ -34,6 +39,28 @@ class DoctorDetailActivity : AppCompatActivity() {
         binding.tvDoctorName.text = profile.doctorName
         binding.tvSpecialization.text = profile.specialization?.uppercase() ?: "GENERAL MEDICINE"
         binding.tvExperience.text = "Practice Experience: ${profile.yearsOfExperience ?: 0} Years"
+
+        val picUrl = profile.profilePictureUrl
+        if (!picUrl.isNullOrBlank()) {
+            val fullUrl = if (picUrl.startsWith("http")) {
+                picUrl
+            } else {
+                "${BuildConfig.BASE_URL.removeSuffix("/")}/${picUrl.removePrefix("/")}"
+            }
+            binding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+            binding.ivDoctorAvatar.imageTintList = null
+            Glide.with(binding.ivDoctorAvatar.context)
+                .load(fullUrl)
+                .placeholder(R.drawable.bg_premium_header_gradient)
+                .error(R.drawable.bg_premium_header_gradient)
+                .into(binding.ivDoctorAvatar)
+        } else {
+            binding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            binding.ivDoctorAvatar.setImageResource(R.drawable.ic_stethoscope)
+            binding.ivDoctorAvatar.imageTintList = android.content.res.ColorStateList.valueOf(
+                androidx.core.content.ContextCompat.getColor(binding.ivDoctorAvatar.context, R.color.crimson)
+            )
+        }
 
         binding.tvClinicName.text = if (!profile.clinicName.isNullOrBlank()) {
             profile.clinicName

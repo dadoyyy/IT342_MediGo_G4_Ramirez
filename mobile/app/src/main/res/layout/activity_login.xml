@@ -1,525 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Sign In Bottom Sheet Dialog
+     ════════════════════════════════════════════════════════════════════════ -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/navy_dark"
-    android:overScrollMode="never">
+    android:background="@android:color/transparent">
+
+    <!-- Semitransparent backdrop for modal feel -->
+    <View
+        android:id="@+id/backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#AA11131E" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <FrameLayout
+        <!-- Top pill indicator for bottom sheet gesture visual -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="340dp"
-            android:background="@drawable/bg_premium_header_gradient"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:paddingStart="20dp"
-            android:paddingTop="28dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="28dp">
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="12dp">
 
             <View
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:layout_gravity="top|start"
-                android:layout_marginStart="-100dp"
-                android:layout_marginTop="-70dp"
-                android:background="@drawable/bg_auth_orb_crimson" />
+                android:layout_width="48dp"
+                android:layout_height="4dp"
+                android:background="@drawable/bg_patient_pill_inactive" />
+        </LinearLayout>
 
-            <View
-                android:layout_width="220dp"
-                android:layout_height="220dp"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="-110dp"
-                android:layout_marginEnd="-120dp"
-                android:background="@drawable/bg_auth_orb_slate" />
-
-            <View
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="bottom|end"
-                android:layout_marginEnd="-36dp"
-                android:layout_marginBottom="70dp"
-                android:background="@drawable/bg_auth_orb_ruby" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="bottom"
-                android:paddingBottom="18dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="24dp">
-
-                    <View
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:background="@drawable/bg_logo"
-                        android:foreground="@drawable/ic_stethoscope_white"
-                        android:foregroundGravity="center" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="MediGo"
-                            android:textColor="@color/white"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-black"
-                            android:includeFontPadding="false"
-                            android:letterSpacing="-0.02" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="NEXT-GEN HEALTHCARE"
-                            android:textColor="@color/slate"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.18" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Healthcare,"
-                    android:textColor="@color/white"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-black"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="evolved."
-                    android:textColor="@color/crimson"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-black"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03"
-                    android:layout_marginBottom="10dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Seamlessly connect with top-tier specialists and manage your medical history."
-                    android:textColor="@color/slate"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="3dp"
-                    android:fontFamily="sans-serif"
-                    android:layout_marginBottom="20dp" />
-
-                <GridLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:columnCount="2"
-                    android:rowCount="2"
-                    android:useDefaultMargins="false"
-                    android:alignmentMode="alignMargins">
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="76dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginEnd="6dp"
-                        android:layout_marginBottom="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardBackgroundColor="#141729"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center_vertical"
-                            android:padding="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2M+"
-                                android:textColor="@color/white"
-                                android:textSize="17sp"
-                                android:textStyle="bold"
-                                android:fontFamily="sans-serif-black"
-                                android:includeFontPadding="false" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Active Patients"
-                                android:textColor="@color/slate"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-medium" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="76dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginBottom="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardBackgroundColor="#141729"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center_vertical"
-                            android:padding="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="5,000+"
-                                android:textColor="@color/white"
-                                android:textSize="17sp"
-                                android:textStyle="bold"
-                                android:fontFamily="sans-serif-black"
-                                android:includeFontPadding="false" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Verified Doctors"
-                                android:textColor="@color/slate"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-medium" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="76dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginEnd="6dp"
-                        android:layout_marginTop="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardBackgroundColor="#141729"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center_vertical"
-                            android:padding="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="98%"
-                                android:textColor="@color/crimson"
-                                android:textSize="17sp"
-                                android:textStyle="bold"
-                                android:fontFamily="sans-serif-black"
-                                android:includeFontPadding="false" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Booking Success"
-                                android:textColor="@color/slate"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-medium" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="0dp"
-                        android:layout_height="76dp"
-                        android:layout_columnWeight="1"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginTop="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardBackgroundColor="#141729"
-                        app:cardElevation="0dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center_vertical"
-                            android:padding="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="99.9%"
-                                android:textColor="@color/crimson"
-                                android:textSize="17sp"
-                                android:textStyle="bold"
-                                android:fontFamily="sans-serif-black"
-                                android:includeFontPadding="false" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="System Uptime"
-                                android:textColor="@color/slate"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-medium" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-                </GridLayout>
-            </LinearLayout>
-        </FrameLayout>
-
+        <!-- Bottom Sheet Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="-26dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="24dp"
             app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="12dp">
+            app:cardElevation="24dp"
+            app:cardUseCompatPadding="false">
 
-            <LinearLayout
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
+                android:fillViewport="true"
+                android:overScrollMode="never">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:orientation="vertical"
+                    android:padding="24dp">
 
-                    <View
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/bg_logo"
-                        android:foreground="@drawable/ic_stethoscope_white"
-                        android:foregroundGravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="MediGo"
-                        android:textColor="@color/navy"
-                        android:textSize="19sp"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-black"
-                        android:includeFontPadding="false" />
-                </LinearLayout>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="24dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Welcome back"
-                    android:textColor="@color/navy"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-black"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.02"
-                    android:layout_marginBottom="4dp" />
+                        <ImageView
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:src="@mipmap/ic_launcher"
+                            android:contentDescription="MediGo logo" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Enter your credentials to access your portal"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif"
-                    android:layout_marginBottom="18dp" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="14dp">
 
-                <LinearLayout
-                    android:id="@+id/btnGoogleSignIn"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_auth_secondary_button"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:layout_marginBottom="14dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Welcome back"
+                                android:textColor="@color/navy"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black"
+                                android:includeFontPadding="false" />
 
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:src="@drawable/ic_google" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Sign in to continue your care journey"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp"
+                                android:fontFamily="sans-serif" />
+                        </LinearLayout>
+                    </LinearLayout>
 
+                    <!-- Error card -->
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tvErrorCard"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="Continue with Google"
-                        android:textColor="@color/navy"
-                        android:textSize="14sp"
+                        android:background="@drawable/bg_status_box_error"
+                        android:padding="14dp"
+                        android:textColor="@color/ruby"
+                        android:textSize="12sp"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-medium"
-                        android:includeFontPadding="false" />
-                </LinearLayout>
+                        android:visibility="gone"
+                        android:layout_marginBottom="16dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="14dp">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/navy_05" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Google login -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="12dp"
-                        android:text="OR SIGN IN WITH EMAIL"
-                        android:textColor="@color/slate"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.08" />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="18dp">
 
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/navy_05" />
-                </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/btnGoogleSignIn"
+                            android:layout_width="0dp"
+                            android:layout_height="52dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_auth_secondary_button"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?android:attr/selectableItemBackground">
 
-                <TextView
-                    android:id="@+id/tvErrorCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_status_box_error"
-                    android:padding="12dp"
-                    android:text="Invalid credentials."
-                    android:textColor="@color/ruby"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:visibility="gone"
-                    android:layout_marginBottom="12dp" />
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_google" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Email Address"
-                    android:textColor="@color/navy"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:layout_marginBottom="6dp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:text="Continue with Google"
+                                android:textColor="@color/navy"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium"
+                                android:includeFontPadding="false" />
+                        </LinearLayout>
+                    </LinearLayout>
 
-                <EditText
-                    android:id="@+id/etEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_auth_input"
-                    android:hint="john.doe@example.com"
-                    android:textColor="@color/navy"
-                    android:textColorHint="@color/text_tertiary"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif"
-                    android:inputType="textEmailAddress"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:drawableStart="@drawable/ic_mail"
-                    android:drawablePadding="12dp"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Password"
-                    android:textColor="@color/navy"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:layout_marginBottom="6dp" />
-
-                <EditText
-                    android:id="@+id/etPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_auth_input"
-                    android:hint="Min 8 chars, 1 uppercase, 1 symbol"
-                    android:textColor="@color/navy"
-                    android:textColorHint="@color/text_tertiary"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif"
-                    android:inputType="textPassword"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:drawableStart="@drawable/ic_lock"
-                    android:drawablePadding="12dp"
-                    android:layout_marginBottom="18dp" />
-
-                <Button
-                    android:id="@+id/btnLogin"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@drawable/bg_button_primary"
-                    app:backgroundTint="@null"
-                    android:text="Access Portal"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium"
-                    android:layout_marginBottom="16dp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Divider OR -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="New to MediGo? "
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
 
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_divider_subtle" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_marginEnd="14dp"
+                            android:text="OR CONNECT VIA EMAIL"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.08" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_divider_subtle" />
+                    </LinearLayout>
+
+                    <!-- Email Field -->
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="EMAIL ADDRESS"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        style="@style/InputField"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="john.doe@example.com"
+                        android:inputType="textEmailAddress"
+                        android:importantForAutofill="no"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Password Field -->
+                    <TextView
+                        style="@style/SectionLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="PASSWORD"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/etPassword"
+                        style="@style/InputField"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:hint="••••••••"
+                        android:inputType="textPassword"
+                        android:importantForAutofill="no"
+                        android:layout_marginBottom="24dp" />
+
+                    <!-- Submit Button -->
+                    <Button
+                        android:id="@+id/btnLogin"
+                        style="@style/ButtonPrimary"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="Access Portal" />
+
+                    <!-- Bottom navigation link -->
                     <TextView
                         android:id="@+id/tvGoToRegister"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Create an account"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="20dp"
+                        android:text="New to MediGo? Create an account"
                         android:textColor="@color/crimson"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:textStyle="bold"
-                        android:fontFamily="sans-serif-medium" />
+                        android:fontFamily="sans-serif-medium"
+                        android:clickable="true"
+                        android:focusable="true" />
                 </LinearLayout>
-            </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
         </androidx.cardview.widget.CardView>
     </LinearLayout>
-</ScrollView>
+</FrameLayout>

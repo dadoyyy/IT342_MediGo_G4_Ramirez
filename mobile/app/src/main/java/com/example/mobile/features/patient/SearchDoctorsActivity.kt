@@ -18,6 +18,12 @@ import com.example.mobile.databinding.ItemDoctorProfileBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.DoctorProfileDto
 import com.example.mobile.shared.api.ApiClient
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
+import com.bumptech.glide.Glide
+import com.example.mobile.BuildConfig
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.example.mobile.databinding.DialogDoctorDetailBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,21 +42,92 @@ class SearchDoctorsActivity : AppCompatActivity() {
 
         setupRecyclerView()
         setupListeners()
+        attachPatientBottomNav(PatientBottomTab.HOME)
         fetchDoctors("")
     }
 
     private fun setupRecyclerView() {
         doctorsAdapter = DoctorsAdapter { doctor ->
-            val intent = Intent(this, DoctorDetailActivity::class.java).apply {
-                putExtra("doctor_profile", doctor)
-            }
-            startActivity(intent)
+            showDoctorDetailModal(doctor)
         }
 
         binding.rvDoctors.apply {
             layoutManager = LinearLayoutManager(this@SearchDoctorsActivity)
             adapter = doctorsAdapter
         }
+    }
+
+    private fun showDoctorDetailModal(doctor: DoctorProfileDto) {
+        val dialog = BottomSheetDialog(this)
+        val dialogBinding = DialogDoctorDetailBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        dialogBinding.tvDoctorName.text = doctor.doctorName
+        dialogBinding.tvSpecialization.text = doctor.specialization?.uppercase() ?: "GENERAL MEDICINE"
+        dialogBinding.tvExperience.text = "Practice Experience: ${doctor.yearsOfExperience ?: 0} Years"
+
+        val picUrl = doctor.profilePictureUrl
+        if (!picUrl.isNullOrBlank()) {
+            val fullUrl = if (picUrl.startsWith("http")) {
+                picUrl
+            } else {
+                "${BuildConfig.BASE_URL.removeSuffix("/")}/${picUrl.removePrefix("/")}"
+            }
+            dialogBinding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+            dialogBinding.ivDoctorAvatar.imageTintList = null
+            Glide.with(dialogBinding.ivDoctorAvatar.context)
+                .load(fullUrl)
+                .placeholder(R.drawable.bg_premium_header_gradient)
+                .error(R.drawable.bg_premium_header_gradient)
+                .into(dialogBinding.ivDoctorAvatar)
+        } else {
+            dialogBinding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            dialogBinding.ivDoctorAvatar.setImageResource(R.drawable.ic_stethoscope)
+            dialogBinding.ivDoctorAvatar.imageTintList = android.content.res.ColorStateList.valueOf(
+                androidx.core.content.ContextCompat.getColor(dialogBinding.ivDoctorAvatar.context, R.color.crimson)
+            )
+        }
+
+        dialogBinding.tvClinicName.text = if (!doctor.clinicName.isNullOrBlank()) {
+            doctor.clinicName
+        } else {
+            "No Clinic Configured"
+        }
+
+        dialogBinding.tvClinicAddress.text = if (!doctor.clinicAddress.isNullOrBlank()) {
+            doctor.clinicAddress
+        } else {
+            "No Address Configured"
+        }
+
+        val fee = doctor.consultationFee ?: 0.0
+        dialogBinding.tvConsultationFee.text = String.format("₱%,.2f", fee)
+
+        dialogBinding.tvBio.text = if (!doctor.bio.isNullOrBlank()) {
+            doctor.bio
+        } else {
+            "No biography provided."
+        }
+
+        dialogBinding.tvEducation.text = if (!doctor.education.isNullOrBlank()) {
+            doctor.education
+        } else {
+            "No educational background provided."
+        }
+
+        dialogBinding.btnDismissModal.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogBinding.btnBookAppointment.setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(this, BookAppointmentActivity::class.java).apply {
+                putExtra("doctor_profile", doctor)
+            }
+            startActivity(intent)
+        }
+
+        dialog.show()
     }
 
     private fun setupListeners() {
@@ -159,7 +236,35 @@ class DoctorsAdapter(
             val fee = doctor.consultationFee ?: 0.0
             binding.tvConsultationFee.text = String.format("₱%,.2f", fee)
 
+            binding.tvVerifiedBadge.visibility = if (doctor.verified) View.VISIBLE else View.GONE
+
+            // Render profile picture
+            val picUrl = doctor.profilePictureUrl
+            if (!picUrl.isNullOrBlank()) {
+                val fullUrl = if (picUrl.startsWith("http")) {
+                    picUrl
+                } else {
+                    "${BuildConfig.BASE_URL.removeSuffix("/")}/${picUrl.removePrefix("/")}"
+                }
+                binding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                binding.ivDoctorAvatar.imageTintList = null
+                Glide.with(binding.ivDoctorAvatar.context)
+                    .load(fullUrl)
+                    .placeholder(R.drawable.bg_premium_header_gradient)
+                    .error(R.drawable.bg_premium_header_gradient)
+                    .into(binding.ivDoctorAvatar)
+            } else {
+                binding.ivDoctorAvatar.scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+                binding.ivDoctorAvatar.setImageResource(R.drawable.ic_stethoscope)
+                binding.ivDoctorAvatar.imageTintList = android.content.res.ColorStateList.valueOf(
+                    androidx.core.content.ContextCompat.getColor(binding.ivDoctorAvatar.context, R.color.crimson)
+                )
+            }
+
             binding.root.setOnClickListener {
+                onItemClick(doctor)
+            }
+            binding.btnViewProfile.setOnClickListener {
                 onItemClick(doctor)
             }
         }

@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Patient Profile
+     Unified hero header + surface cards, no bottom nav
+     ════════════════════════════════════════════════════════════════════════ -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/mist"
     android:fillViewport="true"
-    android:overScrollMode="never">
+    android:overScrollMode="never"
+    android:clipToPadding="false"
+    android:paddingBottom="96dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- ── Hero Header ─────────────────────────────────────────── -->
         <FrameLayout
+            style="@style/PageHero"
             android:layout_width="match_parent"
-            android:layout_height="270dp"
-            android:background="@drawable/bg_auth_hero"
-            android:paddingStart="18dp"
-            android:paddingTop="18dp"
-            android:paddingEnd="18dp"
-            android:paddingBottom="24dp">
+            android:layout_height="260dp">
 
             <View
                 android:layout_width="180dp"
@@ -42,6 +45,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+                <!-- Top bar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -52,13 +56,12 @@
                         android:id="@+id/btnBack"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_back_button_circle"
                         android:clickable="true"
                         android:contentDescription="Back"
                         android:focusable="true"
-                        android:padding="8dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="@color/white" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_arrow_back" />
 
                     <View
                         android:layout_width="0dp"
@@ -69,48 +72,42 @@
                         android:id="@+id/btnRefreshNotifications"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/bg_patient_header_icon"
+                        android:background="@drawable/bg_back_button_circle"
                         android:clickable="true"
                         android:contentDescription="Refresh notifications"
                         android:focusable="true"
-                        android:padding="8dp"
-                        android:src="@android:drawable/ic_popup_sync"
-                        android:tint="@color/white" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_bell_outline" />
                 </LinearLayout>
 
+                <!-- Title area -->
                 <TextView
+                    style="@style/SectionLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Patient Profile"
-                    android:textColor="@color/text_on_dark"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08" />
+                    android:layout_marginTop="22dp"
+                    android:text="PATIENT PROFILE"
+                    android:textColor="@color/slate" />
 
                 <TextView
                     android:id="@+id/tvFullName"
+                    style="@style/PageHeroTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Patient Name"
-                    android:textColor="@color/text_on_dark"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="-0.03" />
+                    android:text="Patient Name" />
 
                 <TextView
                     android:id="@+id/tvEmail"
+                    style="@style/PageHeroSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="patient@email.com"
-                    android:textColor="@color/slate"
-                    android:textSize="13sp" />
+                    android:text="patient@email.com" />
             </LinearLayout>
         </FrameLayout>
 
+        <!-- ── Content Cards ───────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -120,51 +117,44 @@
             android:paddingEnd="16dp"
             android:paddingBottom="24dp">
 
+            <!-- Profile Identity Card -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="10dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/tvAvatar"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
-                        android:background="@drawable/bg_status_box_error"
-                        android:backgroundTint="@color/primary_light"
+                        android:background="@drawable/bg_avatar_circle"
                         android:gravity="center"
                         android:text="RO"
-                        android:textColor="@color/primary_accent"
+                        android:textColor="@color/crimson"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="14dp"
+                        android:layout_marginStart="16dp"
                         android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tvRole"
+                            style="@style/ChipActive"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_patient_pill_active"
-                            android:paddingStart="10dp"
-                            android:paddingTop="4dp"
-                            android:paddingEnd="10dp"
-                            android:paddingBottom="4dp"
                             android:text="PATIENT"
-                            android:textColor="@color/white"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
+                            android:textSize="10sp" />
 
                         <TextView
                             android:id="@+id/tvProfileHint"
@@ -174,33 +164,30 @@
                             android:text="Tap the notification cards below to jump straight to your latest updates."
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp"
-                            android:lineSpacingExtra="2dp" />
+                            android:lineSpacingExtra="2dp"
+                            android:fontFamily="sans-serif" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Notifications Card -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Notifications"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="NOTIFICATIONS" />
 
                     <TextView
                         android:id="@+id/tvNotificationSummary"
@@ -210,12 +197,13 @@
                         android:text="Loading your latest updates..."
                         android:textColor="@color/text_primary"
                         android:textSize="15sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -223,20 +211,17 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_selectable_card"
+                            android:background="@drawable/bg_surface_card_unified"
                             android:clickable="true"
                             android:focusable="true"
                             android:orientation="vertical"
-                            android:padding="14dp">
+                            android:padding="16dp">
 
                             <TextView
+                                style="@style/SectionLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Appointments"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.08" />
+                                android:text="APPOINTMENTS" />
 
                             <TextView
                                 android:id="@+id/tvAppointmentCount"
@@ -245,8 +230,9 @@
                                 android:layout_marginTop="8dp"
                                 android:text="0"
                                 android:textColor="@color/primary_accent"
-                                android:textSize="24sp"
-                                android:textStyle="bold" />
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
                         </LinearLayout>
 
                         <View
@@ -258,20 +244,17 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_selectable_card"
+                            android:background="@drawable/bg_surface_card_unified"
                             android:clickable="true"
                             android:focusable="true"
                             android:orientation="vertical"
-                            android:padding="14dp">
+                            android:padding="16dp">
 
                             <TextView
+                                style="@style/SectionLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Messages"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.08" />
+                                android:text="MESSAGES" />
 
                             <TextView
                                 android:id="@+id/tvUnreadMessageCount"
@@ -280,40 +263,37 @@
                                 android:layout_marginTop="8dp"
                                 android:text="0"
                                 android:textColor="@color/primary_accent"
-                                android:textSize="24sp"
-                                android:textStyle="bold" />
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Quick Actions Card -->
             <androidx.cardview.widget.CardView
+                style="@style/SurfaceCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="8dp">
+                android:layout_marginTop="14dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
+                        style="@style/SectionLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Quick Actions"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
+                        android:text="QUICK ACTIONS" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -321,59 +301,58 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_patient_pill_inactive"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_chip_default"
                             android:clickable="true"
                             android:focusable="true"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingTop="14dp"
-                            android:paddingBottom="14dp">
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Open appointments"
+                                android:text="Appointments"
                                 android:textColor="@color/navy"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
                         </LinearLayout>
-
-                        <View
-                            android:layout_width="12dp"
-                            android:layout_height="0dp" />
 
                         <LinearLayout
                             android:id="@+id/btnOpenMessages"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_patient_pill_active"
+                            android:layout_marginStart="6dp"
+                            android:background="@drawable/bg_chip_selected"
                             android:clickable="true"
                             android:focusable="true"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingTop="14dp"
-                            android:paddingBottom="14dp">
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Open messages"
+                                android:text="Messages"
                                 android:textColor="@color/white"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
                         </LinearLayout>
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/btnSignOut"
+                        style="@style/ButtonSecondary"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:layout_marginTop="14dp"
-                        android:background="@drawable/bg_auth_secondary_button"
+                        android:layout_marginTop="16dp"
                         android:text="Sign Out"
-                        android:textColor="@color/ruby"
-                        android:textStyle="bold" />
+                        android:textColor="@color/ruby" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>

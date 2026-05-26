@@ -1,6 +1,8 @@
 package com.example.mobile.features.patient
 
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -22,6 +24,8 @@ import com.example.mobile.model.ChatMessageDto
 import com.example.mobile.model.ChatSendRequest
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.session.SessionManager
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -84,6 +88,13 @@ class ChatActivity : AppCompatActivity() {
         }
         binding.tvHeaderPartnerName.text = partnerName
         binding.tvHeaderPartnerRole.text = "ONLINE • ${partnerRole.uppercase()}"
+        val initials = partnerName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "DR" }
+        binding.tvAvatarInitials.text = initials
     }
 
     private fun setupRecyclerView() {
@@ -93,9 +104,10 @@ class ChatActivity : AppCompatActivity() {
             partnerId = partnerId,
             partnerName = partnerName,
             sessionManager = sessionManager,
-            onSystemSummaryClick = { apptDto ->
+            onSystemSummaryClick = { apptDto, rawContent ->
                 val intent = Intent(this, ConsultationSummaryActivity::class.java).apply {
                     putExtra("appointment_extra", apptDto)
+                    putExtra("completed_content_extra", rawContent)
                 }
                 startActivity(intent)
             }
@@ -180,7 +192,7 @@ class ChatMessagesAdapter(
     private val partnerId: Long,
     private val partnerName: String,
     private val sessionManager: SessionManager,
-    private val onSystemSummaryClick: (AppointmentDto) -> Unit
+    private val onSystemSummaryClick: (AppointmentDto, String) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var items = listOf<ChatMessageDto>()
@@ -201,8 +213,8 @@ class ChatMessagesAdapter(
     override fun getItemViewType(position: Int): Int {
         val msg = items[position]
         return when {
+            msg.content.startsWith("[APPT_") -> TYPE_SYSTEM
             msg.senderId == currentUserId -> TYPE_SENT
-            msg.content.startsWith("[APPT_COMPLETED]") -> TYPE_SYSTEM
             else -> TYPE_RECEIVED
         }
     }
@@ -252,31 +264,84 @@ class ChatMessagesAdapter(
 
     inner class SystemViewHolder(private val systemBinding: ItemChatMessageSystemBinding) : RecyclerView.ViewHolder(systemBinding.root) {
         fun bind(message: ChatMessageDto) {
+            val context = systemBinding.root.context
             val parsed = parseSummaryContent(message.content)
-
             val doctor = parsed["Doctor"] ?: "Practitioner"
-            systemBinding.tvSystemMessageHeader.text = "Doctor: $doctor"
-
-            val notes = parsed["Medical Notes"] ?: "Consultation completed."
-            systemBinding.tvSystemMessageDetails.text = notes
             systemBinding.tvMessageTime.text = formatTime(message.sentAt)
 
-            systemBinding.btnViewSystemSummary.setOnClickListener {
-                val apptDto = AppointmentDto(
-                    id = message.appointmentId ?: 0L,
-                    patientId = currentUserId,
-                    patientName = sessionManager.fullName().orEmpty(),
-                    patientAge = null,
-                    patientGender = null,
-                    doctorId = partnerId,
-                    doctorName = partnerName,
-                    appointmentAt = message.sentAt,
-                    appointmentType = "Consultation",
-                    notes = "",
-                    status = "COMPLETED",
-                    createdAt = message.sentAt
-                )
-                onSystemSummaryClick(apptDto)
+            when {
+                message.content.startsWith("[APPT_COMPLETED]") -> {
+                    // Green Completed Card
+                    systemBinding.cardSystemMessage.setCardBackgroundColor(Color.parseColor("#F0FDF4"))
+                    systemBinding.tvSystemStatusTitle.text = "Consultation Completed"
+                    systemBinding.tvSystemStatusTitle.setTextColor(Color.parseColor("#15803D"))
+                    systemBinding.tvSystemStatusPill.text = "SIGNED REPORT"
+                    systemBinding.tvSystemStatusPill.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#15803D"))
+                    systemBinding.tvSystemMessageHeader.text = "Doctor: Dr. $doctor"
+                    systemBinding.tvSystemMessageDetails.text = parsed["Medical Notes"] ?: "Prescription report and laboratory requests are signed and available."
+                    systemBinding.btnViewSystemSummary.visibility = View.VISIBLE
+
+                    systemBinding.btnViewSystemSummary.setOnClickListener {
+                        val apptDto = AppointmentDto(
+                            id = message.appointmentId ?: 0L,
+                            patientId = currentUserId,
+                            patientName = sessionManager.fullName().orEmpty(),
+                            patientAge = null,
+                            patientGender = null,
+                            doctorId = partnerId,
+                            doctorName = partnerName,
+                            appointmentAt = message.sentAt,
+                            appointmentType = "Consultation",
+                            notes = "",
+                            status = "COMPLETED",
+                            createdAt = message.sentAt
+                        )
+                        onSystemSummaryClick(apptDto, message.content)
+                    }
+                }
+                message.content.startsWith("[APPT_CONFIRMED]") -> {
+                    // Blue/Slate Confirmed Card
+                    systemBinding.cardSystemMessage.setCardBackgroundColor(Color.parseColor("#F0F9FF"))
+                    systemBinding.tvSystemStatusTitle.text = "Consultation Confirmed"
+                    systemBinding.tvSystemStatusTitle.setTextColor(Color.parseColor("#0369A1"))
+                    systemBinding.tvSystemStatusPill.text = "CONFIRMED"
+                    systemBinding.tvSystemStatusPill.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#0369A1"))
+                    systemBinding.tvSystemMessageHeader.text = "Doctor: Dr. $doctor"
+                    
+                    val whenVal = parsed["When"] ?: ""
+                    val locVal = parsed["Location"] ?: ""
+                    val typeVal = parsed["Type"] ?: "Consultation"
+                    val instVal = parsed["Instructions"] ?: ""
+                    systemBinding.tvSystemMessageDetails.text = "Scheduled: $whenVal\nType: $typeVal\nLocation: $locVal\nInstructions: $instVal"
+                    systemBinding.btnViewSystemSummary.visibility = View.GONE
+                }
+                message.content.startsWith("[APPT_CANCELLED]") -> {
+                    // Red/Pink Cancelled/Declined Card
+                    systemBinding.cardSystemMessage.setCardBackgroundColor(Color.parseColor("#FEF2F2"))
+                    
+                    val statusLabel = parsed["Status"] ?: "Cancelled"
+                    systemBinding.tvSystemStatusTitle.text = "Consultation $statusLabel"
+                    systemBinding.tvSystemStatusTitle.setTextColor(Color.parseColor("#B91C1C"))
+                    systemBinding.tvSystemStatusPill.text = statusLabel.uppercase()
+                    systemBinding.tvSystemStatusPill.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#B91C1C"))
+                    systemBinding.tvSystemMessageHeader.text = "Doctor: Dr. $doctor"
+                    
+                    val whenVal = parsed["When"] ?: ""
+                    val reasonVal = parsed["Reason"] ?: "No reason provided by the doctor."
+                    systemBinding.tvSystemMessageDetails.text = "Scheduled: $whenVal\nReason: $reasonVal"
+                    systemBinding.btnViewSystemSummary.visibility = View.GONE
+                }
+                else -> {
+                    // Fallback
+                    systemBinding.cardSystemMessage.setCardBackgroundColor(Color.parseColor("#F8FAFC"))
+                    systemBinding.tvSystemStatusTitle.text = "System Message"
+                    systemBinding.tvSystemStatusTitle.setTextColor(Color.parseColor("#475569"))
+                    systemBinding.tvSystemStatusPill.text = "SYSTEM"
+                    systemBinding.tvSystemStatusPill.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#475569"))
+                    systemBinding.tvSystemMessageHeader.text = "Info"
+                    systemBinding.tvSystemMessageDetails.text = message.content
+                    systemBinding.btnViewSystemSummary.visibility = View.GONE
+                }
             }
         }
 

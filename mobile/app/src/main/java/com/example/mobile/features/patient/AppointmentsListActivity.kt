@@ -14,10 +14,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.databinding.ActivityAppointmentsListBinding
 import com.example.mobile.databinding.ItemAppointmentBinding
+import com.example.mobile.databinding.DialogNotificationsModalBinding
+import com.example.mobile.databinding.DialogProfileModalBinding
 import com.example.mobile.model.ApiEnvelope
 import com.example.mobile.model.AppointmentDto
+import com.example.mobile.model.ChatContactDto
 import com.example.mobile.shared.api.ApiClient
+import com.example.mobile.shared.api.TokenHolder
 import com.example.mobile.shared.session.SessionManager
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
+import com.example.mobile.features.auth.LoginActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,6 +38,8 @@ class AppointmentsListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAppointmentsListBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var appointmentsAdapter: AppointmentsAdapter
+    private var allAppointments = listOf<AppointmentDto>()
+    private var currentFilter = "ALL"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,21 +48,45 @@ class AppointmentsListActivity : AppCompatActivity() {
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+        attachPatientBottomNav(PatientBottomTab.APPOINTMENTS)
 
         sessionManager = SessionManager(this)
 
         setupHeader()
         setupRecyclerView()
+        setupFilterPills()
+    }
+
+    private var unreadMessageCount = 0L
+    private var activeAppointmentCount = 0L
+
+    override fun onResume() {
+        super.onResume()
         fetchAppointments()
+        loadNotificationCounts()
     }
 
     private fun setupHeader() {
-        binding.btnBack.setOnClickListener {
-            finish()
-        }
-        binding.tvHeaderTitle.text = "My Appointments"
         binding.tvEmptyTitle.text = "No Appointments Scheduled"
         binding.tvEmptyDetails.text = "You haven't scheduled any consultations yet."
+
+        // Render profile initials
+        val fullName = sessionManager.fullName().orEmpty()
+        val initials = fullName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "ME" }
+        binding.btnOpenProfile.text = initials
+
+        binding.btnNotifications.setOnClickListener {
+            showNotificationsModal()
+        }
+
+        binding.btnOpenProfile.setOnClickListener {
+            showProfileModal()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -70,6 +106,61 @@ class AppointmentsListActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupFilterPills() {
+        val pills = listOf(
+            binding.filterAll to "ALL",
+            binding.filterPending to "PENDING",
+            binding.filterConfirmed to "CONFIRMED",
+            binding.filterCompleted to "COMPLETED",
+            binding.filterCancelled to "CANCELLED"
+        )
+
+        for ((pill, filter) in pills) {
+            pill.setOnClickListener {
+                currentFilter = filter
+                applyFilter()
+                updatePillStyles(pills)
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun updatePillStyles(pills: List<Pair<android.widget.TextView, String>>) {
+        for ((pill, filter) in pills) {
+            if (filter == currentFilter) {
+                pill.setBackgroundResource(R.drawable.bg_patient_pill_active)
+                pill.setTextColor(ContextCompat.getColor(this, R.color.white))
+            } else {
+                pill.setBackgroundResource(R.drawable.bg_patient_pill_inactive)
+                pill.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        val filtered = if (currentFilter == "ALL") {
+            allAppointments
+        } else {
+            allAppointments.filter { appt ->
+                val status = appt.status.uppercase()
+                when (currentFilter) {
+                    "PENDING" -> status == "PENDING" || status == "PENDING_DOCTOR_APPROVAL"
+                    "CANCELLED" -> status == "CANCELLED" || status == "REJECTED"
+                    else -> status == currentFilter
+                }
+            }
+        }
+
+        if (filtered.isEmpty()) {
+            binding.layoutEmptyState.visibility = View.VISIBLE
+            binding.rvAppointments.visibility = View.GONE
+        } else {
+            binding.layoutEmptyState.visibility = View.GONE
+            binding.rvAppointments.visibility = View.VISIBLE
+            appointmentsAdapter.submitList(filtered)
+        }
+    }
+
     private fun fetchAppointments() {
         binding.progressBar.visibility = View.VISIBLE
         binding.layoutEmptyState.visibility = View.GONE
@@ -83,12 +174,21 @@ class AppointmentsListActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.GONE
                 val body = response.body()
                 if (response.isSuccessful && body?.success == true && body.data != null) {
-                    val list = body.data
-                    if (list.isEmpty()) {
+                    allAppointments = body.data
+                    if (allAppointments.isEmpty()) {
                         binding.layoutEmptyState.visibility = View.VISIBLE
+                        binding.tvStatUpcomingCount.text = "0"
+                        binding.tvStatCompletedCount.text = "0"
                     } else {
-                        appointmentsAdapter.submitList(list)
-                        binding.rvAppointments.visibility = View.VISIBLE
+                        val upcomingCount = allAppointments.count {
+                            val status = it.status.uppercase()
+                            status == "CONFIRMED" || status == "PENDING" || status == "PENDING_DOCTOR_APPROVAL"
+                        }
+                        val completedCount = allAppointments.count { it.status.uppercase() == "COMPLETED" }
+                        binding.tvStatUpcomingCount.text = upcomingCount.toString()
+                        binding.tvStatCompletedCount.text = completedCount.toString()
+
+                        applyFilter()
                     }
                 } else {
                     binding.layoutEmptyState.visibility = View.VISIBLE
@@ -102,6 +202,158 @@ class AppointmentsListActivity : AppCompatActivity() {
                 Toast.makeText(this@AppointmentsListActivity, "Network connection offline.", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun loadNotificationCounts() {
+        ApiClient.chatApi.getContacts(null).enqueue(object : Callback<ApiEnvelope<List<ChatContactDto>>> {
+            override fun onResponse(
+                call: Call<ApiEnvelope<List<ChatContactDto>>>,
+                response: Response<ApiEnvelope<List<ChatContactDto>>>
+            ) {
+                val contacts = response.body()?.data ?: emptyList()
+                unreadMessageCount = contacts.sumOf { it.unread }
+            }
+
+            override fun onFailure(call: Call<ApiEnvelope<List<ChatContactDto>>>, t: Throwable) {
+                unreadMessageCount = 0
+            }
+        })
+
+        ApiClient.appointmentApi.getMyAppointments().enqueue(object : Callback<ApiEnvelope<List<AppointmentDto>>> {
+            override fun onResponse(
+                call: Call<ApiEnvelope<List<AppointmentDto>>>,
+                response: Response<ApiEnvelope<List<AppointmentDto>>>
+            ) {
+                val appointments = response.body()?.data ?: emptyList()
+                activeAppointmentCount = appointments.count {
+                    val status = it.status.uppercase()
+                    status != "CANCELLED" && status != "REJECTED" && status != "COMPLETED"
+                }.toLong()
+                val completedCount = appointments.count { it.status.uppercase() == "COMPLETED" }
+                binding.tvStatUpcomingCount.text = activeAppointmentCount.toString()
+                binding.tvStatCompletedCount.text = completedCount.toString()
+            }
+
+            override fun onFailure(call: Call<ApiEnvelope<List<AppointmentDto>>>, t: Throwable) {
+                activeAppointmentCount = 0
+            }
+        })
+    }
+
+    private fun showNotificationsModal() {
+        val dialog = BottomSheetDialog(this)
+        val dialogBinding = DialogNotificationsModalBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        val hasMessages = unreadMessageCount > 0
+        val hasAppointments = activeAppointmentCount > 0
+
+        if (!hasMessages && !hasAppointments) {
+            dialogBinding.cardMessageNotification.visibility = View.GONE
+            dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            dialogBinding.layoutNotificationsEmpty.visibility = View.VISIBLE
+        } else {
+            dialogBinding.layoutNotificationsEmpty.visibility = View.GONE
+
+            if (hasMessages) {
+                dialogBinding.cardMessageNotification.visibility = View.VISIBLE
+                dialogBinding.tvMessageNotificationText.text = "You have $unreadMessageCount unread messages waiting in your inbox."
+                dialogBinding.cardMessageNotification.setOnClickListener {
+                    dialog.dismiss()
+                    startActivity(Intent(this, ChatListActivity::class.java))
+                }
+            } else {
+                dialogBinding.cardMessageNotification.visibility = View.GONE
+            }
+
+            if (hasAppointments) {
+                dialogBinding.cardAppointmentNotification.visibility = View.VISIBLE
+                dialogBinding.tvAppointmentNotificationText.text = "You have $activeAppointmentCount active appointments coming up."
+                dialogBinding.cardAppointmentNotification.setOnClickListener {
+                    dialog.dismiss()
+                    // Already on AppointmentsListActivity
+                }
+            } else {
+                dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            }
+        }
+
+        dialogBinding.btnDismissAll.setOnClickListener {
+            unreadMessageCount = 0
+            activeAppointmentCount = 0
+            dialogBinding.cardMessageNotification.visibility = View.GONE
+            dialogBinding.cardAppointmentNotification.visibility = View.GONE
+            dialogBinding.layoutNotificationsEmpty.visibility = View.VISIBLE
+            Toast.makeText(this, "All notifications dismissed", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogBinding.btnCloseNotifications.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showProfileModal() {
+        val dialog = BottomSheetDialog(this)
+        val dialogBinding = DialogProfileModalBinding.inflate(LayoutInflater.from(this))
+        dialog.setContentView(dialogBinding.root)
+
+        val fullName = sessionManager.fullName().orEmpty()
+        val email = sessionManager.email().orEmpty()
+        val initials = fullName.split(' ')
+            .filter { it.isNotBlank() }
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "ME" }
+
+        dialogBinding.tvModalFullName.text = fullName
+        dialogBinding.tvModalEmail.text = email
+        dialogBinding.tvModalAvatar.text = initials
+
+        dialogBinding.btnModalSignOut.setOnClickListener {
+            dialog.dismiss()
+            showSignOutConfirmation()
+        }
+
+        dialog.show()
+    }
+
+    private fun showSignOutConfirmation() {
+        val dialog = AlertDialog.Builder(this)
+            .setView(layoutInflater.inflate(R.layout.dialog_signout_confirmation, null))
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        val btnCancel = dialog.findViewById<TextView>(R.id.btnConfirmCancel)
+        val btnSignOut = dialog.findViewById<TextView>(R.id.btnConfirmSignOut)
+
+        btnCancel?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSignOut?.setOnClickListener {
+            dialog.dismiss()
+            performSignOut()
+        }
+    }
+
+    private fun performSignOut() {
+        sessionManager.clearSession()
+        TokenHolder.clearToken()
+        Toast.makeText(this, "You have been signed out successfully.", Toast.LENGTH_SHORT).show()
+        redirectToLogin()
+    }
+
+    private fun redirectToLogin() {
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun cancelAppointment(id: Long) {

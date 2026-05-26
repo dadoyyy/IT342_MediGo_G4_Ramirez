@@ -1,135 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Redesigned Doctor Profile Card (Spec Compliant)
+     ════════════════════════════════════════════════════════════════════════ -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:background="@drawable/bg_selectable_card"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/white"
+    android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="52dp"
-            android:layout_height="52dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_status_box_error"
-                android:backgroundTint="@color/primary_light"
-                android:gravity="center"
-                android:text="DR"
-                android:textColor="@color/primary_accent"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="1dp"
-                android:background="@drawable/bg_status_box_success" />
-        </FrameLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Top content area -->
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="14dp"
-            android:orientation="vertical">
+            android:padding="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tvDoctorName"
-                    style="@style/TextHeading3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Dr. Ruther Ramirez"
-                    android:textColor="@color/primary_accent"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:id="@+id/tvSpecializationBadge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:background="@drawable/bg_status_box_error"
-                    android:textColor="@color/primary"
-                    android:text="CARDIOLOGY"
-                    android:textStyle="bold"
-                    android:textSize="10sp"
-                    android:letterSpacing="0.02" />
-            </LinearLayout>
-
+            <!-- Verified Tag (Top-right) -->
             <TextView
-                android:id="@+id/tvClinicDetails"
-                style="@style/TextCaption"
-                android:layout_width="match_parent"
+                android:id="@+id/tvVerifiedBadge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary"
-                android:text="MediGo Specialist Clinic, Room 402" />
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:text="VERIFIED"
+                android:textColor="#137333"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins"
+                android:background="@drawable/bg_status_box_success"
+                android:backgroundTint="#E6F4EA"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
 
+            <!-- Layout for Left Image + Right Details -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
 
-                <TextView
-                    android:id="@+id/tvExperience"
-                    style="@style/TextBody"
+                <!-- Left side: Doctor profile image/placeholder -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/primary_light">
+
+                    <ImageView
+                        android:id="@+id/ivDoctorAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_stethoscope"
+                        app:tint="@color/crimson"
+                        android:contentDescription="Doctor image" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Right side: Doctor Details -->
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="13sp"
-                    android:textColor="@color/text_tertiary"
-                    android:text="Experience: 8 years" />
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvConsultationFee"
-                    style="@style/TextHeading3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/success"
-                    android:textSize="14sp"
-                    android:text="₱500.00" />
+                    <!-- Doctor Name -->
+                    <TextView
+                        android:id="@+id/tvDoctorName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dr. Jenny Wilson"
+                        android:textColor="@color/navy"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/poppins"
+                        android:includeFontPadding="false" />
+
+                    <!-- Specialties -->
+                    <TextView
+                        android:id="@+id/tvSpecializationBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Neurologist"
+                        android:textColor="@color/slate"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/poppins" />
+
+                    <!-- Clinic Name (with a small map pin icon) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="4dp">
+
+                        <ImageView
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:src="@drawable/ic_check_circle"
+                            app:tint="@color/slate"
+                            android:contentDescription="Pin" />
+
+                        <TextView
+                            android:id="@+id/tvClinicDetails"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="Vcare Clinic"
+                            android:textColor="@color/slate"
+                            android:textSize="11sp"
+                            android:fontFamily="@font/poppins"
+                            android:singleLine="true"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+
+                    <!-- Experience (hidden/small if needed, or bound) -->
+                    <TextView
+                        android:id="@+id/tvExperience"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Experience: 8 years"
+                        android:textColor="@color/slate"
+                        android:textSize="11sp"
+                        android:fontFamily="@font/poppins"
+                        android:visibility="gone" />
+
+                    <!-- Price -->
+                    <TextView
+                        android:id="@+id/tvConsultationFee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="₱ 1,200"
+                        android:textColor="@color/navy"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/poppins" />
+
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border_light" />
+
+        <!-- Bottom of card: Full-width VIEW PROFILE -> button -->
+        <TextView
+            android:id="@+id/btnViewProfile"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:text="VIEW PROFILE →"
+            android:textColor="@color/crimson"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="10dp"
-        android:background="@color/border" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:text="View Consultation Profile →"
-        android:textColor="@color/primary"
-        android:textSize="13sp"
-        android:textStyle="bold" />
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>

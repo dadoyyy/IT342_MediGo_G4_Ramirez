@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ════════════════════════════════════════════════════════════════════════
+     MediGo — Email Verification
+     ════════════════════════════════════════════════════════════════════════ -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/gray_50">
+    android:background="@color/mist"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,7 +16,7 @@
         android:padding="28dp"
         android:gravity="center_vertical">
 
-        <!-- Animated/Premium Check Email Shield Header -->
+        <!-- Header icon + title -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -20,69 +24,81 @@
             android:gravity="center_horizontal"
             android:layout_marginBottom="36dp">
 
-            <!-- Beautiful circle container representing envelope/verification -->
             <View
                 android:layout_width="88dp"
                 android:layout_height="88dp"
-                android:background="@drawable/bg_status_box_success"
+                android:background="@drawable/bg_status_completed"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                style="@style/TextHeading1"
                 android:text="Verify Your Email"
+                android:textColor="@color/navy"
+                android:textSize="28sp"
                 android:textStyle="bold"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="-0.02"
                 android:gravity="center" />
         </LinearLayout>
 
-        <!-- Message Body Card -->
-        <LinearLayout
-            style="@style/Card"
+        <!-- Message card -->
+        <androidx.cardview.widget.CardView
+            style="@style/SurfaceCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginBottom="32dp">
 
-            <TextView
-                style="@style/TextBody"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="We have sent an activation link to your registered email address. Please open the email and click the link to verify your identity." />
+                android:orientation="vertical"
+                android:padding="24dp">
 
-            <!-- Registered Email Highlight Box -->
-            <TextView
-                android:id="@+id/tvTargetEmail"
-                style="@style/SuccessMessage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center"
-                android:textColor="@color/primary"
-                android:background="@drawable/bg_status_box_success"
-                android:text="your.email@example.com"
-                android:textStyle="bold" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="We have sent an activation link to your registered email address. Please open the email and click the link to verify your identity."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif"
+                    android:lineSpacingExtra="4dp" />
 
-        <!-- Instruction Tip -->
+                <TextView
+                    android:id="@+id/tvTargetEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:textColor="@color/success"
+                    android:background="@drawable/bg_status_completed"
+                    android:text="your.email@example.com"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Instruction -->
         <TextView
-            style="@style/TextCaption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_marginBottom="36dp"
             android:textColor="@color/text_secondary"
-            android:text="Once verified, you will be able to access your patient dashboard or start managing your practice as a doctor." />
+            android:textSize="13sp"
+            android:fontFamily="sans-serif"
+            android:text="Once verified, you will be able to access your patient dashboard." />
 
-        <!-- Return to Login Button -->
+        <!-- CTA -->
         <Button
             android:id="@+id/btnBackToLogin"
             style="@style/ButtonPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Continue to Sign In" />
-
     </LinearLayout>
 </ScrollView>

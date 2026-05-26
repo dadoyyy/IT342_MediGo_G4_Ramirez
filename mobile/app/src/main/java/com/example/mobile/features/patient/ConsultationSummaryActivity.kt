@@ -14,6 +14,8 @@ import com.example.mobile.model.AppointmentDto
 import com.example.mobile.model.ChatMessageDto
 import com.example.mobile.shared.api.ApiClient
 import com.example.mobile.shared.session.SessionManager
+import com.example.mobile.shared.ui.PatientBottomTab
+import com.example.mobile.shared.ui.attachPatientBottomNav
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,6 +32,7 @@ class ConsultationSummaryActivity : AppCompatActivity() {
 
         val fadeInUp = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.fade_in_up)
         binding.root.startAnimation(fadeInUp)
+        attachPatientBottomNav(PatientBottomTab.APPOINTMENTS)
 
         appointment = intent.getSerializableExtra("appointment_extra") as? AppointmentDto
         if (appointment == null) {
@@ -40,14 +43,20 @@ class ConsultationSummaryActivity : AppCompatActivity() {
 
         setupMetadata()
         setupListeners()
-        fetchConsultationSummary()
+
+        val directContent = intent.getStringExtra("completed_content_extra")
+        if (!directContent.isNullOrBlank()) {
+            bindParsedSummary(directContent)
+        } else {
+            fetchConsultationSummary()
+        }
     }
 
     private fun setupMetadata() {
         val app = appointment ?: return
         // Patient view: always show doctor name
         binding.tvHeaderName.text = "Dr. ${app.doctorName}"
-        binding.tvConsultationDetails.text = "Medium: ${app.appointmentType} • Medical Report Summary"
+        binding.tvConsultationDetails.text = "Medium: ${app.appointmentType} • Report Summary"
         otherUserId = app.doctorId
     }
 
@@ -71,8 +80,15 @@ class ConsultationSummaryActivity : AppCompatActivity() {
                 if (response.isSuccessful && body?.success == true && body.data != null) {
                     val messages = body.data
                     val completedMsg = messages.firstOrNull {
-                        it.appointmentId == appointment?.id && it.content.startsWith("[APPT_COMPLETED]")
-                    }
+                        val isCompleted = it.content.startsWith("[APPT_COMPLETED]")
+                        val matchesAppt = it.appointmentId == appointment?.id || 
+                                          appointment?.id == null || 
+                                          appointment?.id == 0L || 
+                                          it.appointmentId == null || 
+                                          it.appointmentId == 0L
+                        isCompleted && matchesAppt
+                    } ?: messages.firstOrNull { it.content.startsWith("[APPT_COMPLETED]") }
+
                     if (completedMsg != null) {
                         bindParsedSummary(completedMsg.content)
                     } else {
@@ -111,7 +127,17 @@ class ConsultationSummaryActivity : AppCompatActivity() {
         if (!digitalRecords.isNullOrBlank() && digitalRecords.contains(":")) {
             val path = digitalRecords.substring(digitalRecords.indexOf(":") + 1).trim()
             if (path.isNotBlank()) {
-                val fullUrl = BuildConfig.BASE_URL + if (path.startsWith("/")) path.substring(1) else path
+                val baseUrl = BuildConfig.BASE_URL
+                val rootUrl = if (baseUrl.contains("/api/v1/")) {
+                    baseUrl.substringBefore("/api/v1/")
+                } else if (baseUrl.contains("/api/")) {
+                    baseUrl.substringBefore("/api/")
+                } else {
+                    baseUrl.removeSuffix("/")
+                }
+                val cleanPath = if (path.startsWith("/")) path else "/$path"
+                val fullUrl = rootUrl + cleanPath
+
                 binding.layoutAttachmentCard.visibility = View.VISIBLE
                 binding.btnDownloadPdf.setOnClickListener {
                     try {
